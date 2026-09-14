@@ -4,9 +4,16 @@
 
 ## 2. The shape
 
+```
 in
 out
 in between
+
+in
+out
+on screen
+```
+
 
 ## 3. The size
 
