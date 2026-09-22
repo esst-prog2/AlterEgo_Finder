@@ -4,7 +4,13 @@
 
 Whenever we decide something about this project — a requirement, a number,
 a name, a tool — append one line to PLANNING_LOG.md: the date, what was
-decided, and whether I decided it or you did. Never rewrite an earlier line.
+decided, and who's responsible for it:
+- "Decided by user" — I originated the decision myself.
+- "Proposed by agent, accepted by user" — you proposed it and I accepted it.
+- "Decided by agent" — you decided it unilaterally (e.g. an implementation
+  detail), without asking me first.
+
+Never rewrite an earlier line.
 
 ## Project
 
