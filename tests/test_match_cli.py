@@ -26,6 +26,12 @@ def test_help_documents_image_and_dataset_flags():
     assert "--dataset" in result.stdout
 
 
+def _parse_output_line(line: str):
+    person, rest = line.split(":", 1)
+    score_str, label = rest.strip().split()
+    return person, float(score_str), label
+
+
 def test_ranks_correct_identity_above_other(tmp_path):
     dataset_dir = tmp_path / "dataset"
     shutil.copytree(FIXTURES / "dataset", dataset_dir)
@@ -33,11 +39,14 @@ def test_ranks_correct_identity_above_other(tmp_path):
     result = run_match(
         "--image", str(FIXTURES / "obama_query.jpg"),
         "--dataset", str(dataset_dir),
+        "--threshold-low", "0.0",
+        "--threshold-high", "1.0",
     )
 
     assert result.returncode == 0
     lines = [line for line in result.stdout.strip().splitlines() if line]
-    ranked_people = [line.split(":")[0] for line in lines]
+    parsed = [_parse_output_line(line) for line in lines]
+    ranked_people = [person for person, _, _ in parsed]
 
     assert ranked_people[0] == "Barack_Obama"
     assert "Joe_Biden" in ranked_people
@@ -47,9 +56,8 @@ def test_ranks_correct_identity_above_other(tmp_path):
     # twice; take each person's best (first, since output is sorted
     # descending) score rather than letting a later, weaker line win.
     best_scores: dict[str, float] = {}
-    for line in lines:
-        person, score = line.split(":")
-        best_scores.setdefault(person, float(score))
+    for person, score, _ in parsed:
+        best_scores.setdefault(person, score)
     assert best_scores["Barack_Obama"] > best_scores["Joe_Biden"]
 
 
@@ -61,7 +69,12 @@ def test_exits_1_with_message_when_query_has_no_face(tmp_path):
     blank = np.full((300, 300, 3), 255, dtype=np.uint8)
     cv2.imwrite(str(blank_path), blank)
 
-    result = run_match("--image", str(blank_path), "--dataset", str(dataset_dir))
+    result = run_match(
+        "--image", str(blank_path),
+        "--dataset", str(dataset_dir),
+        "--threshold-low", "0.0",
+        "--threshold-high", "1.0",
+    )
 
     assert result.returncode == 1
     assert "Error: No face detected in input image" in result.stderr
