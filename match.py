@@ -18,6 +18,7 @@ import cv2
 
 from face_pipeline.embedder import NoFaceDetectedError, extract_embedding
 from face_pipeline.index import get_or_build_index, rank_matches
+from face_pipeline.report import render_report
 
 HIGH_CONFIDENCE = "HIGH_CONFIDENCE"
 LOW_CONFIDENCE = "LOW_CONFIDENCE"
@@ -51,6 +52,13 @@ def build_arg_parser() -> argparse.ArgumentParser:
         type=float,
         default=None,
         help="Override the LOW_CONFIDENCE / HIGH_CONFIDENCE boundary from config.json.",
+    )
+    parser.add_argument(
+        "--report-out",
+        default="data/results/summary.html",
+        help="Where to write the self-contained HTML match report "
+        "(default: data/results/summary.html). Not written if the query "
+        "image has no detectable face.",
     )
     return parser
 
@@ -113,9 +121,15 @@ def main(argv: list[str] | None = None) -> int:
     index = get_or_build_index(dataset_path)
     results = rank_matches(index, query_embedding)
 
-    for entry, score in results:
-        label = classify(score, threshold_low, threshold_high)
+    labeled_results = [
+        (entry, score, classify(score, threshold_low, threshold_high))
+        for entry, score in results
+    ]
+
+    for entry, score, label in labeled_results:
         print(f"{entry.person}: {score:.4f} {label}")
+
+    render_report(image_path, labeled_results, Path(args.report_out))
 
     return 0
 

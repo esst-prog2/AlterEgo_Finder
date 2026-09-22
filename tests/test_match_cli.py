@@ -41,6 +41,7 @@ def test_ranks_correct_identity_above_other(tmp_path):
         "--dataset", str(dataset_dir),
         "--threshold-low", "0.0",
         "--threshold-high", "1.0",
+        "--report-out", str(tmp_path / "report.html"),
     )
 
     assert result.returncode == 0

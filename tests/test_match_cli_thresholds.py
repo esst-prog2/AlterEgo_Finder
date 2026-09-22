@@ -56,6 +56,7 @@ def test_thresholds_loaded_from_config_file(tmp_path):
         "--image", str(FIXTURES / "obama_query.jpg"),
         "--dataset", str(dataset_dir),
         "--config", str(config_path),
+        "--report-out", str(tmp_path / "report.html"),
     )
     assert result.returncode == 0
     # threshold_high=1.0 means nothing can exceed it -> everything LOW_CONFIDENCE or NO_MATCH.
@@ -76,6 +77,7 @@ def test_cli_override_takes_precedence_over_config_file(tmp_path):
         "--dataset", str(dataset_dir),
         "--config", str(config_path),
         "--threshold-high", "1.0",
+        "--report-out", str(tmp_path / "report.html"),
     )
     assert result.returncode == 0
     lines = [line for line in result.stdout.strip().splitlines() if line]
@@ -91,6 +93,7 @@ def test_classification_labels_reflect_thresholds(tmp_path):
         "--dataset", str(dataset_dir),
         "--threshold-low", "0.65",
         "--threshold-high", "0.73",
+        "--report-out", str(tmp_path / "report.html"),
     )
     assert result.returncode == 0
     lines = [line for line in result.stdout.strip().splitlines() if line]
