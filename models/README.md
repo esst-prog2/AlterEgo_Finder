@@ -1,23 +1,26 @@
 # Vendored model weights
 
 These files are vendored directly in the repo (see
-`openspec/changes/add-face-matching-cli/design.md`) rather than downloaded
-on first run, to keep `match.py` runnable offline.
+`openspec/changes/switch-to-arcface-embedding/design.md`) rather than
+downloaded on first run, to keep `match.py` runnable offline. (Asset
+delivery — vendored vs. fetched-with-checksum — is being revisited
+separately in `fetch-model-weights-checksum`.)
 
-## Face detector — OpenCV DNN (Caffe SSD, res10_300x300)
+## Face detector + landmarks — YuNet
 
-- `deploy.prototxt`
-  Source: https://raw.githubusercontent.com/opencv/opencv/4.x/samples/dnn/face_detector/deploy.prototxt
-- `res10_300x300_ssd_iter_140000.caffemodel`
-  Source: https://github.com/opencv/opencv_3rdparty/raw/dnn_samples_face_detector_20170830/res10_300x300_ssd_iter_140000.caffemodel
-  SHA1: `15aa726b4d46d9f023526d85537db81cbc8dd566`
+- `face_detection_yunet_2023mar.onnx`
+  Source: https://github.com/opencv/opencv_zoo/raw/main/models/face_detection_yunet/face_detection_yunet_2023mar.onnx
+  Size: 232,589 bytes
+  SHA-256: `8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4`
 
-## Face embedding — OpenFace nn4.small2.v1 (128-d)
+## Face embedding — ArcFace ResNet100, INT8 (512-d)
 
-- `nn4.small2.v1.t7`
-  Source: https://storage.cmusatyalab.org/openface-models/nn4.small2.v1.t7
-  Size: 31,510,785 bytes
-  MD5: `c95bfd8cc1adf05210e979ff623013b6`
+- `arcfaceresnet100-11-int8.onnx`
+  Source: https://huggingface.co/onnxmodelzoo/arcfaceresnet100-11-int8/resolve/main/arcfaceresnet100-11-int8.onnx
+  Size: 65,764,892 bytes
+  SHA-256: `c625ca68a422418c48aa84f73341337e0a92b111f327909005d1eec07c95f936`
+  (No checksum is published upstream for this file; the value above was
+  computed from the download and is what this project treats as canonical.)
 
 To re-vendor, re-download from the source URLs above and verify against the
 listed checksum.

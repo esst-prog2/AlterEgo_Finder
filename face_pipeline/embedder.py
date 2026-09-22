@@ -1,20 +1,32 @@
-"""128-d face embedding extraction using OpenFace (nn4.small2.v1)."""
+"""512-d face embedding extraction using ArcFace ResNet100 (INT8)."""
 
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
 import cv2
 import numpy as np
 
+from face_pipeline.alignment import ALIGNED_SIZE, align_face
 from face_pipeline.detector import detect_face
 
 MODELS_DIR = Path(__file__).resolve().parent.parent / "models"
-EMBEDDER_MODEL_PATH = MODELS_DIR / "nn4.small2.v1.t7"
+EMBEDDER_MODEL_PATH = MODELS_DIR / "arcfaceresnet100-11-int8.onnx"
 
-EMBEDDING_SIZE = 128
-INPUT_SIZE = (96, 96)
+EMBEDDING_SIZE = 512
+
+# Preprocessing for this specific ONNX Model Zoo export (LResNet100E-IR /
+# ArcFace@ms1m-refine-v2): RGB, 112x112, raw pixel values with NO mean
+# subtraction or scaling. This was verified empirically, not from docs --
+# several sources describe a (pixel - 127.5) / 128.0 normalization (the
+# convention for newer insightface models), but applying that here collapses
+# same-person and different-person similarity into the same ~0.95-0.97
+# band with no separation. Raw 0-255 values give a clean, well-separated
+# distribution (same-person ~0.7, different-person ~-0.07 on this
+# project's fixtures) -- see design.md.
+_PIXEL_MEAN = (0.0, 0.0, 0.0)
+_PIXEL_SCALE = 1.0
 
 _net: Optional[cv2.dnn.Net] = None
 
@@ -22,21 +34,18 @@ _net: Optional[cv2.dnn.Net] = None
 def _get_net() -> cv2.dnn.Net:
     global _net
     if _net is None:
-        _net = cv2.dnn.readNetFromTorch(str(EMBEDDER_MODEL_PATH))
+        _net = cv2.dnn.readNetFromONNX(str(EMBEDDER_MODEL_PATH))
     return _net
 
 
-def embed_face(image: np.ndarray, box: Tuple[int, int, int, int]) -> np.ndarray:
-    """Extract a 128-d embedding for the face at ``box`` within ``image``."""
-    x1, y1, x2, y2 = box
-    face = image[y1:y2, x1:x2]
-
+def embed_face(aligned_face: np.ndarray) -> np.ndarray:
+    """Extract a 512-d embedding from an already-aligned 112x112 face crop."""
     net = _get_net()
     blob = cv2.dnn.blobFromImage(
-        face,
-        scalefactor=1.0 / 255,
-        size=INPUT_SIZE,
-        mean=(0, 0, 0),
+        aligned_face,
+        scalefactor=_PIXEL_SCALE,
+        size=(ALIGNED_SIZE, ALIGNED_SIZE),
+        mean=_PIXEL_MEAN,
         swapRB=True,
         crop=False,
     )
@@ -50,11 +59,12 @@ class NoFaceDetectedError(Exception):
 
 
 def extract_embedding(image: np.ndarray) -> np.ndarray:
-    """Detect the face in ``image`` and return its 128-d embedding.
+    """Detect, align, and embed the face in ``image``, returning a 512-d vector.
 
     Raises ``NoFaceDetectedError`` if no face is detected.
     """
-    box = detect_face(image)
-    if box is None:
+    detected = detect_face(image)
+    if detected is None:
         raise NoFaceDetectedError()
-    return embed_face(image, box)
+    aligned = align_face(image, detected)
+    return embed_face(aligned)

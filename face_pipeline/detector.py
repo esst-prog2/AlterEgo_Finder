@@ -1,7 +1,8 @@
-"""Face localization using OpenCV's DNN face detector (Caffe SSD, res10_300x300)."""
+"""Face localization using YuNet (bbox + 5 landmarks in one pass)."""
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Tuple
 
@@ -9,55 +10,56 @@ import cv2
 import numpy as np
 
 MODELS_DIR = Path(__file__).resolve().parent.parent / "models"
-PROTOTXT_PATH = MODELS_DIR / "deploy.prototxt"
-CAFFEMODEL_PATH = MODELS_DIR / "res10_300x300_ssd_iter_140000.caffemodel"
+YUNET_MODEL_PATH = MODELS_DIR / "face_detection_yunet_2023mar.onnx"
 
-CONFIDENCE_THRESHOLD = 0.5
+SCORE_THRESHOLD = 0.9
+NMS_THRESHOLD = 0.3
+TOP_K = 5000
 
-_net: Optional[cv2.dnn.Net] = None
+# YuNet's native landmark order.
+LANDMARK_ORDER = ("right_eye", "left_eye", "nose", "right_mouth", "left_mouth")
 
-
-def _get_net() -> cv2.dnn.Net:
-    global _net
-    if _net is None:
-        _net = cv2.dnn.readNetFromCaffe(str(PROTOTXT_PATH), str(CAFFEMODEL_PATH))
-    return _net
+_detector: Optional[cv2.FaceDetectorYN] = None
 
 
-def detect_face(image: np.ndarray) -> Optional[Tuple[int, int, int, int]]:
+def _get_detector() -> cv2.FaceDetectorYN:
+    global _detector
+    if _detector is None:
+        _detector = cv2.FaceDetectorYN.create(
+            str(YUNET_MODEL_PATH), "", (320, 320), SCORE_THRESHOLD, NMS_THRESHOLD, TOP_K
+        )
+    return _detector
+
+
+@dataclass
+class DetectedFace:
+    box: Tuple[int, int, int, int]  # (x1, y1, x2, y2)
+    # (5, 2) array of (x, y), in YuNet's native order: right_eye, left_eye,
+    # nose, right_mouth, left_mouth. See LANDMARK_ORDER.
+    landmarks: np.ndarray
+
+
+def detect_face(image: np.ndarray) -> Optional[DetectedFace]:
     """Detect the most confident face in ``image``.
 
-    Returns the bounding box as ``(x1, y1, x2, y2)`` pixel coordinates, or
-    ``None`` if no face is detected above ``CONFIDENCE_THRESHOLD``.
+    Returns a ``DetectedFace`` (bounding box + 5 landmarks), or ``None`` if
+    no face is detected above ``SCORE_THRESHOLD``.
     """
-    net = _get_net()
+    detector = _get_detector()
     h, w = image.shape[:2]
+    detector.setInputSize((w, h))
 
-    blob = cv2.dnn.blobFromImage(
-        cv2.resize(image, (300, 300)),
-        scalefactor=1.0,
-        size=(300, 300),
-        mean=(104.0, 177.0, 123.0),
-    )
-    net.setInput(blob)
-    detections = net.forward()
+    _, faces = detector.detect(image)
+    if faces is None or len(faces) == 0:
+        return None
 
-    best_confidence = 0.0
-    best_box: Optional[Tuple[int, int, int, int]] = None
+    # detect() returns faces sorted by descending score; take the top one.
+    best = faces[0]
+    x, y, box_w, box_h = best[0:4]
+    x1, y1 = max(0, int(round(x))), max(0, int(round(y)))
+    x2, y2 = min(w, int(round(x + box_w))), min(h, int(round(y + box_h)))
+    if x2 <= x1 or y2 <= y1:
+        return None
 
-    for i in range(detections.shape[2]):
-        confidence = float(detections[0, 0, i, 2])
-        if confidence < CONFIDENCE_THRESHOLD or confidence <= best_confidence:
-            continue
-
-        box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
-        x1, y1, x2, y2 = box.astype(int)
-        x1, y1 = max(0, x1), max(0, y1)
-        x2, y2 = min(w, x2), min(h, y2)
-        if x2 <= x1 or y2 <= y1:
-            continue
-
-        best_confidence = confidence
-        best_box = (x1, y1, x2, y2)
-
-    return best_box
+    landmarks = best[4:14].reshape(5, 2)
+    return DetectedFace(box=(x1, y1, x2, y2), landmarks=landmarks)

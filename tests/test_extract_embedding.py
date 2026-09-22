@@ -9,7 +9,7 @@ from face_pipeline.embedder import EMBEDDING_SIZE, NoFaceDetectedError, extract_
 FIXTURES = Path(__file__).parent / "fixtures"
 
 
-def test_extract_embedding_returns_128d_vector_for_face_present():
+def test_extract_embedding_returns_correct_size_vector_for_face_present():
     image = cv2.imread(str(FIXTURES / "obama_1.jpg"))
     vec = extract_embedding(image)
     assert vec.shape == (EMBEDDING_SIZE,)
