@@ -1,26 +1,30 @@
-# Vendored model weights
+# Model weights
 
-These files are vendored directly in the repo (see
-`openspec/changes/switch-to-arcface-embedding/design.md`) rather than
-downloaded on first run, to keep `match.py` runnable offline. (Asset
-delivery — vendored vs. fetched-with-checksum — is being revisited
-separately in `fetch-model-weights-checksum`.)
+These `.onnx` files are **not** tracked in git (see `.gitignore`) — they're
+downloaded automatically on first use by `face_pipeline/weights.py`, which
+also re-verifies each file's SHA-256 checksum on every use (not just right
+after downloading), and fails clearly rather than silently loading a bad
+or missing file. See
+`openspec/changes/fetch-model-weights-checksum/design.md` for the
+reasoning (the ArcFace weights alone are 63MB — over GitHub's recommended
+50MB file-size limit).
+
+`models/manifest.json` is the single source of truth for each file's
+source URL and expected checksum; this file just describes what each one
+is for.
 
 ## Face detector + landmarks — YuNet
 
-- `face_detection_yunet_2023mar.onnx`
-  Source: https://github.com/opencv/opencv_zoo/raw/main/models/face_detection_yunet/face_detection_yunet_2023mar.onnx
-  Size: 232,589 bytes
-  SHA-256: `8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4`
+`face_detection_yunet_2023mar.onnx` (~227KB) — OpenCV's own officially
+bundled/documented face detector, giving both a bounding box and 5
+landmarks in one pass.
 
 ## Face embedding — ArcFace ResNet100, INT8 (512-d)
 
-- `arcfaceresnet100-11-int8.onnx`
-  Source: https://huggingface.co/onnxmodelzoo/arcfaceresnet100-11-int8/resolve/main/arcfaceresnet100-11-int8.onnx
-  Size: 65,764,892 bytes
-  SHA-256: `c625ca68a422418c48aa84f73341337e0a92b111f327909005d1eec07c95f936`
-  (No checksum is published upstream for this file; the value above was
-  computed from the download and is what this project treats as canonical.)
+`arcfaceresnet100-11-int8.onnx` (~63MB) — INT8-quantized ArcFace,
+expecting a 112×112, RGB, unnormalized-pixel input (see
+`face_pipeline/embedder.py`'s docstring for why "unnormalized" specifically
+matters here).
 
-To re-vendor, re-download from the source URLs above and verify against the
-listed checksum.
+To fetch either file manually (outside the normal on-demand flow), run
+`python -c "from face_pipeline.weights import ensure_weight; ensure_weight('<filename>')"`.

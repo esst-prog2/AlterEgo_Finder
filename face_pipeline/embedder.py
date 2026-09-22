@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Optional
 
 import cv2
@@ -10,9 +9,9 @@ import numpy as np
 
 from face_pipeline.alignment import ALIGNED_SIZE, align_face
 from face_pipeline.detector import detect_face
+from face_pipeline.weights import ensure_weight
 
-MODELS_DIR = Path(__file__).resolve().parent.parent / "models"
-EMBEDDER_MODEL_PATH = MODELS_DIR / "arcfaceresnet100-11-int8.onnx"
+EMBEDDER_MODEL_FILENAME = "arcfaceresnet100-11-int8.onnx"
 
 EMBEDDING_SIZE = 512
 
@@ -34,7 +33,8 @@ _net: Optional[cv2.dnn.Net] = None
 def _get_net() -> cv2.dnn.Net:
     global _net
     if _net is None:
-        _net = cv2.dnn.readNetFromONNX(str(EMBEDDER_MODEL_PATH))
+        model_path = ensure_weight(EMBEDDER_MODEL_FILENAME)
+        _net = cv2.dnn.readNetFromONNX(str(model_path))
     return _net
 
 

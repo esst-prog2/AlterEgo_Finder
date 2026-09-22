@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Optional, Tuple
 
 import cv2
 import numpy as np
 
-MODELS_DIR = Path(__file__).resolve().parent.parent / "models"
-YUNET_MODEL_PATH = MODELS_DIR / "face_detection_yunet_2023mar.onnx"
+from face_pipeline.weights import ensure_weight
+
+YUNET_MODEL_FILENAME = "face_detection_yunet_2023mar.onnx"
 
 SCORE_THRESHOLD = 0.9
 NMS_THRESHOLD = 0.3
@@ -25,8 +25,9 @@ _detector: Optional[cv2.FaceDetectorYN] = None
 def _get_detector() -> cv2.FaceDetectorYN:
     global _detector
     if _detector is None:
+        model_path = ensure_weight(YUNET_MODEL_FILENAME)
         _detector = cv2.FaceDetectorYN.create(
-            str(YUNET_MODEL_PATH), "", (320, 320), SCORE_THRESHOLD, NMS_THRESHOLD, TOP_K
+            str(model_path), "", (320, 320), SCORE_THRESHOLD, NMS_THRESHOLD, TOP_K
         )
     return _detector
 

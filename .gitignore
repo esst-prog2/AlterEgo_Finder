@@ -3,3 +3,8 @@ __pycache__/
 .pytest_cache/
 .matchcache/
 data/results/
+
+# Model weights are fetched on demand and checksum-verified via
+# face_pipeline/weights.py (see models/manifest.json), not vendored.
+models/*.onnx
+models/*.onnx.part
