@@ -1,6 +1,7 @@
 __pycache__/
 *.pyc
 .pytest_cache/
+.venv/
 .matchcache/
 data/results/
 
@@ -8,3 +9,6 @@ data/results/
 # face_pipeline/weights.py (see models/manifest.json), not vendored.
 models/*.onnx
 models/*.onnx.part
+
+# HW4 spike: LFW download, extraction and embedding cache (spike_eval.py).
+data/lfw/
