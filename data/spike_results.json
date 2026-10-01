@@ -1,0 +1,48 @@
+{
+  "lfw_url": "https://ndownloader.figshare.com/files/5976018",
+  "lfw_sha256": "055f7d9c632d7370e6fb4afc7468d40f970c34a80d4c6f50ffec63f5a8d536c0",
+  "seed": 0,
+  "calibration": {
+    "identities": 200,
+    "genuine_pairs": 670,
+    "impostor_pairs": 5000,
+    "threshold_low": 0.13482557237148285,
+    "threshold_high": 0.20169919729232788,
+    "pairwise_far_at_high": 0.01
+  },
+  "results": [
+    {
+      "index_size": 50,
+      "queries": 200,
+      "top1_at_or_above_threshold_high": 66,
+      "top1_at_or_above_threshold_low": 182,
+      "far_high": 0.33,
+      "far_low": 0.91,
+      "top1_score_mean": 0.1849645972251892,
+      "top1_score_p99": 0.2832416892051697,
+      "top1_score_max": 0.30599522590637207
+    },
+    {
+      "index_size": 500,
+      "queries": 200,
+      "top1_at_or_above_threshold_high": 198,
+      "top1_at_or_above_threshold_low": 200,
+      "far_high": 0.99,
+      "far_low": 1.0,
+      "top1_score_mean": 0.2510163486003876,
+      "top1_score_p99": 0.3506324887275696,
+      "top1_score_max": 0.36243200302124023
+    },
+    {
+      "index_size": 5000,
+      "queries": 200,
+      "top1_at_or_above_threshold_high": 200,
+      "top1_at_or_above_threshold_low": 200,
+      "far_high": 1.0,
+      "far_low": 1.0,
+      "top1_score_mean": 0.3231668770313263,
+      "top1_score_p99": 0.43981754779815674,
+      "top1_score_max": 0.8815557956695557
+    }
+  ]
+}
