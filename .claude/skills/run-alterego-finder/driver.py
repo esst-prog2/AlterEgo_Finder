@@ -42,6 +42,7 @@ def main() -> int:
         result = run([
             sys.executable, "calibrate.py",
             "--calibration-dir", "tests/fixtures/calibration",
+            "--dataset", "tests/fixtures/dataset",
             "--config-out", str(config_path),
         ])
         assert result.returncode == 0, "calibrate.py failed"

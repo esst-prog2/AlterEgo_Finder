@@ -20,6 +20,7 @@ def test_calibrate_exits_zero_on_fixture_calibration_dataset(tmp_path):
     config_out = tmp_path / "config.json"
     result = run_calibrate(
         "--calibration-dir", str(FIXTURES / "calibration"),
+        "--dataset", str(FIXTURES / "dataset"),
         "--config-out", str(config_out),
     )
     assert result.returncode == 0, result.stderr
@@ -29,6 +30,7 @@ def test_calibrate_writes_config_with_both_thresholds(tmp_path):
     config_out = tmp_path / "config.json"
     run_calibrate(
         "--calibration-dir", str(FIXTURES / "calibration"),
+        "--dataset", str(FIXTURES / "dataset"),
         "--config-out", str(config_out),
     )
 

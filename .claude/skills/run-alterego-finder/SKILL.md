@@ -56,7 +56,7 @@ Direct invocation (what the driver wraps, if you want to run one step by
 hand):
 
 ```powershell
-python calibrate.py --calibration-dir tests\fixtures\calibration --config-out C:\path\to\config.json
+python calibrate.py --calibration-dir tests\fixtures\calibration --dataset tests\fixtures\dataset --config-out C:\path\to\config.json
 python match.py --image tests\fixtures\obama_query.jpg --dataset tests\fixtures\dataset --config C:\path\to\config.json
 ```
 
