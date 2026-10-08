@@ -12,7 +12,7 @@ from face_pipeline.weights import ensure_weight
 
 YUNET_MODEL_FILENAME = "face_detection_yunet_2023mar.onnx"
 
-SCORE_THRESHOLD = 0.9
+SCORE_THRESHOLD = 0.8
 NMS_THRESHOLD = 0.3
 TOP_K = 5000
 
@@ -40,8 +40,16 @@ class DetectedFace:
     landmarks: np.ndarray
 
 
+def pick_largest_face(faces: np.ndarray) -> np.ndarray:
+    """Return the YuNet row (x, y, w, h, landmarks..., score) with the largest
+    box area. In a query photo the subject is the largest face; a printed face
+    or a bystander can score higher but is smaller.
+    """
+    return faces[np.argmax(faces[:, 2] * faces[:, 3])]
+
+
 def detect_face(image: np.ndarray) -> Optional[DetectedFace]:
-    """Detect the most confident face in ``image``.
+    """Detect the largest face in ``image`` (see ``pick_largest_face``).
 
     Returns a ``DetectedFace`` (bounding box + 5 landmarks), or ``None`` if
     no face is detected above ``SCORE_THRESHOLD``.
@@ -54,8 +62,7 @@ def detect_face(image: np.ndarray) -> Optional[DetectedFace]:
     if faces is None or len(faces) == 0:
         return None
 
-    # detect() returns faces sorted by descending score; take the top one.
-    best = faces[0]
+    best = pick_largest_face(faces)
     x, y, box_w, box_h = best[0:4]
     x1, y1 = max(0, int(round(x))), max(0, int(round(y)))
     x2, y2 = min(w, int(round(x + box_w))), min(h, int(round(y + box_h)))
