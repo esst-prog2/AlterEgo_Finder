@@ -4,8 +4,11 @@ false-accept-rate (FAR) based threshold search.
 Two thresholds are derived from one calibration run:
   - the low threshold, at the equal-error-rate (EER) point
     (intra-class false-reject rate == inter-class false-accept rate);
-  - the high threshold, at a low false-accept-rate operating point on the
-    inter-class distribution (see HIGH_THRESHOLD_FAR).
+  - the high threshold, at a low false-accept-rate operating point (see
+    HIGH_THRESHOLD_FAR). compute_thresholds() takes it from the pairwise
+    inter-class distribution; compute_index_high_threshold() takes it from
+    the top-1 scores of absent strangers against the actual index, which is
+    what rank-1 matching needs (HW4 spike, data/spike_results.json).
 """
 
 from __future__ import annotations
@@ -125,6 +128,33 @@ def compute_far_threshold(
     index = int(np.ceil((1 - target_far) * inter.size))
     index = min(max(index, 0), inter.size - 1)
     return float(inter[index])
+
+
+def top1_scores(query_embeddings: np.ndarray, index_embeddings: np.ndarray) -> np.ndarray:
+    """Return each query's best (maximum) cosine similarity over the whole index."""
+    queries = np.asarray(query_embeddings, dtype=np.float64)
+    index = np.asarray(index_embeddings, dtype=np.float64)
+    queries = queries / np.linalg.norm(queries, axis=1, keepdims=True)
+    index = index / np.linalg.norm(index, axis=1, keepdims=True)
+    return (queries @ index.T).max(axis=1)
+
+
+def compute_index_high_threshold(
+    stranger_embeddings: np.ndarray,
+    index_embeddings: np.ndarray,
+    target_far: float = HIGH_THRESHOLD_FAR,
+) -> float:
+    """Return the high threshold fitted to rank-1 search, not to pairs.
+
+    ``stranger_embeddings`` are faces of people absent from the index. Each is
+    scored by its top-1 similarity against ``index_embeddings``, and the
+    threshold is the ``target_far`` operating point of those top-1 scores, so
+    it grows with the index size the way a stranger's best match does.
+    """
+    if len(stranger_embeddings) == 0 or len(index_embeddings) == 0:
+        return 1.0
+    scores = top1_scores(stranger_embeddings, index_embeddings)
+    return compute_far_threshold(scores.tolist(), target_far)
 
 
 def compute_thresholds(

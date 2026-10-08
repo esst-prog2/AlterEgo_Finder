@@ -2,7 +2,7 @@
 """Offline threshold calibration.
 
 Usage:
-    python calibrate.py --calibration-dir data/calibration/
+    python calibrate.py --calibration-dir data/calibration/ --dataset data/celebrities/
 """
 
 from __future__ import annotations
@@ -12,11 +12,15 @@ import json
 import sys
 from pathlib import Path
 
+import numpy as np
+
 from face_pipeline.calibration import (
+    compute_index_high_threshold,
     compute_thresholds,
     embed_calibration_dataset,
     sample_pairs,
 )
+from face_pipeline.index import get_or_build_index
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
@@ -30,6 +34,13 @@ def build_arg_parser() -> argparse.ArgumentParser:
         "--calibration-dir",
         default="data/calibration",
         help="Directory of LFW-style identities disjoint from the matching dataset.",
+    )
+    parser.add_argument(
+        "--dataset",
+        required=True,
+        help="The dataset match.py will search. The high threshold is fitted to "
+        "the top-1 scores calibration identities (absent from it) get against "
+        "an index of this dataset's size.",
     )
     parser.add_argument(
         "--config-out",
@@ -53,7 +64,13 @@ def main(argv: list[str] | None = None) -> int:
 
     by_person = embed_calibration_dataset(calibration_dir)
     intra_scores, inter_scores = sample_pairs(by_person)
-    threshold_low, threshold_high = compute_thresholds(intra_scores, inter_scores)
+    threshold_low, _pairwise_high = compute_thresholds(intra_scores, inter_scores)
+
+    index = get_or_build_index(Path(args.dataset))
+    strangers = np.array([e for embs in by_person.values() for e in embs])
+    threshold_high = max(
+        compute_index_high_threshold(strangers, index.embeddings), threshold_low
+    )
 
     config_out.parent.mkdir(parents=True, exist_ok=True)
     config_out.write_text(
@@ -63,7 +80,10 @@ def main(argv: list[str] | None = None) -> int:
         )
     )
 
-    print(f"threshold_low={threshold_low:.4f} threshold_high={threshold_high:.4f}")
+    print(
+        f"threshold_low={threshold_low:.4f} threshold_high={threshold_high:.4f} "
+        f"(fitted to a {index.embeddings.shape[0]}-face index)"
+    )
     print(f"Wrote {config_out}")
     return 0
 

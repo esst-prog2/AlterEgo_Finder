@@ -24,8 +24,9 @@ with N: ~0.28 at N=50, ~0.44 at N=5000.
   scores of queries whose identity is absent from an index of the dataset's
   actual size, instead of to pairwise impostor scores.
 - `threshold_low` stays at the pairwise EER point (out of scope here).
-- Implementation in `calibrate.py` is follow-up work; this change records the
-  requirement and the evidence for it.
+- `calibrate.py` gains a required `--dataset` argument and fits
+  `threshold_high` against that dataset's index, using the calibration
+  identities as absent strangers.
 
 ## Capabilities
 
@@ -38,9 +39,9 @@ with N: ~0.28 at N=50, ~0.44 at N=5000.
 
 ## Impact
 
-- `calibrate.py` / `face_pipeline/calibration.py`: must know the target index
-  size (or the dataset itself) and simulate rank-1 search with held-out
-  strangers.
+- `calibrate.py` / `face_pipeline/calibration.py`: take the dataset itself
+  (`--dataset`) and score each calibration image's top-1 match against its
+  index.
 - `data/config.json`: values change per dataset size; existing configs are
   stale for any index larger than a handful of faces.
 - README section 3 documents the new calibration rule.
