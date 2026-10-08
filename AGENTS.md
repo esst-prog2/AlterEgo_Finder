@@ -27,8 +27,13 @@ auto-indexing, calibrated two-threshold confidence classification
 (`calibrate.py`), model weights fetched on demand with SHA-256
 verification, and a self-contained `summary.html` report. 5 capabilities
 under `openspec/specs/`, all archived changes under
-`openspec/changes/archive/`, 43 tests passing. See PLANNING_LOG.md for
+`openspec/changes/archive/`, 47 tests passing. See PLANNING_LOG.md for
 the decision history.
+
+HW5 (branch `hw5-usable`): `calibrate.py --dataset` fits `threshold_high`
+to absent strangers' top-1 scores at the dataset's index size (HW4 spike),
+and face detection uses the largest face with a 0.8 cutoff. Known open
+issue: `match.py` prints every ranked candidate, not just the top few.
 
 ## Workflow
 
