@@ -16,3 +16,5 @@ data/lfw/
 # HW5 step 6: LFW-derived dataset and calibration folders (rebuilt from the spike split).
 data/celebrities/
 data/calibration/
+# calibrate.py output for that local dataset; regenerate it, don't share it.
+data/config.json
