@@ -18,3 +18,7 @@ data/celebrities/
 data/calibration/
 # calibrate.py output for that local dataset; regenerate it, don't share it.
 data/config.json
+# Self-match test: data/celebrities plus the user's second photo (rebuilt
+# from data/celebrities); the photo itself stays out of the repo.
+data/celebrities_plus_me/
+data/my_photo_test/
