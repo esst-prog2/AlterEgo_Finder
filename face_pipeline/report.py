@@ -7,6 +7,7 @@ straight from disk.
 from __future__ import annotations
 
 import base64
+import html
 from pathlib import Path
 from typing import List, Tuple
 
@@ -36,10 +37,13 @@ def _candidate_card(entry: IndexEntry, score: float, label: str) -> str:
     image = cv2.imread(str(entry.filepath))
     data_uri = _image_to_data_uri(image) if image is not None else ""
     color = _LABEL_COLORS.get(label, "#57606a")
+    # Person names are dataset folder names, i.e. untrusted input.
+    person = html.escape(entry.person)
+    label = html.escape(label)
     return f"""    <div class="candidate">
-      <img src="{data_uri}" alt="{entry.person}">
+      <img src="{data_uri}" alt="{person}">
       <div class="candidate-info">
-        <div class="candidate-name">{entry.person}</div>
+        <div class="candidate-name">{person}</div>
         <div class="candidate-score">{score:.4f}</div>
         <div class="candidate-label" style="color: {color}">{label}</div>
       </div>
@@ -65,7 +69,7 @@ def render_report(
         _candidate_card(entry, score, label) for entry, score, label in top_results
     )
 
-    html = f"""<!DOCTYPE html>
+    page = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -98,4 +102,4 @@ def render_report(
 """
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(html, encoding="utf-8")
+    output_path.write_text(page, encoding="utf-8")
