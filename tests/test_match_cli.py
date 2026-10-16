@@ -5,6 +5,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+import pytest
 
 REPO_ROOT = Path(__file__).parent.parent
 FIXTURES = REPO_ROOT / "tests" / "fixtures"
@@ -79,3 +80,65 @@ def test_exits_1_with_message_when_query_has_no_face(tmp_path):
 
     assert result.returncode == 1
     assert "Error: No face detected in input image" in result.stderr
+
+
+@pytest.fixture(scope="module")
+def twelve_face_dataset(tmp_path_factory):
+    # 12 indexed faces, more than the default cap of 10. The fixtures hold 9
+    # distinct images; mirrored copies of 3 of them make up the rest.
+    distinct = [
+        FIXTURES / "biden_1.jpg",
+        FIXTURES / "obama_1.jpg",
+        FIXTURES / "obama_2.jpg",
+        FIXTURES / "obama_query.jpg",
+        FIXTURES / "pk_sunglasses_shirt.jpg",
+        *sorted((FIXTURES / "calibration").glob("*/*.jpg")),
+    ]
+    images = [cv2.imread(str(p)) for p in distinct]
+    images += [cv2.flip(img, 1) for img in images[:3]]
+    assert len(images) == 12
+
+    dataset_dir = tmp_path_factory.mktemp("twelve") / "dataset"
+    for i, image in enumerate(images):
+        person_dir = dataset_dir / f"Person_{i:02d}"
+        person_dir.mkdir(parents=True)
+        cv2.imwrite(str(person_dir / "face.jpg"), image)
+    return dataset_dir
+
+
+def _match_lines(dataset_dir: Path, report_dir: Path, *extra: str) -> list[str]:
+    result = run_match(
+        "--image", str(FIXTURES / "obama_query.jpg"),
+        "--dataset", str(dataset_dir),
+        "--threshold-low", "0.0",
+        "--threshold-high", "1.0",
+        "--report-out", str(report_dir / "report.html"),
+        *extra,
+    )
+    assert result.returncode == 0, result.stderr
+    return [line for line in result.stdout.strip().splitlines() if line]
+
+
+def test_prints_top_10_by_default(twelve_face_dataset, tmp_path):
+    # Expected values (PLANNING_LOG.md, 2026-10-16): 10 lines, the first 10
+    # of a --top 12 run, in the same order.
+    all_lines = _match_lines(twelve_face_dataset, tmp_path, "--top", "12")
+    default_lines = _match_lines(twelve_face_dataset, tmp_path)
+    assert len(all_lines) == 12
+    assert default_lines == all_lines[:10]
+
+
+def test_top_n_sets_number_printed(twelve_face_dataset, tmp_path):
+    assert len(_match_lines(twelve_face_dataset, tmp_path, "--top", "3")) == 3
+
+
+def test_top_below_1_is_a_usage_error(tmp_path):
+    result = run_match(
+        "--image", str(FIXTURES / "obama_query.jpg"),
+        "--dataset", str(tmp_path),
+        "--threshold-low", "0.0",
+        "--threshold-high", "1.0",
+        "--top", "0",
+    )
+    assert result.returncode == 2
+    assert "--top must be at least 1" in result.stderr

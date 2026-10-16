@@ -142,3 +142,24 @@ def test_classify_boundaries_are_at_or_above():
     assert classify(0.3999, 0.2, 0.4) == "LOW_CONFIDENCE"
     assert classify(0.2, 0.2, 0.4) == "LOW_CONFIDENCE"
     assert classify(0.1999, 0.2, 0.4) == "NO_MATCH"
+
+
+def test_default_config_is_in_dataset_parent_directory(tmp_path):
+    # Spec: with no --config, thresholds come from config.json in the
+    # dataset directory's parent (data/config.json for data/celebrities/).
+    dataset_dir = tmp_path / "data" / "celebrities"
+    shutil.copytree(FIXTURES / "dataset", dataset_dir)
+    (tmp_path / "data" / "config.json").write_text(
+        json.dumps({"threshold_low": -1.0, "threshold_high": -1.0})
+    )
+
+    result = run_match(
+        "--image", str(FIXTURES / "obama_query.jpg"),
+        "--dataset", str(dataset_dir),
+        "--report-out", str(tmp_path / "report.html"),
+    )
+
+    assert result.returncode == 0, result.stderr
+    lines = [line for line in result.stdout.strip().splitlines() if line]
+    assert lines
+    assert {_parse_output_line(l)[2] for l in lines} == {"HIGH_CONFIDENCE"}

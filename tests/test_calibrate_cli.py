@@ -1,4 +1,5 @@
 import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -59,3 +60,19 @@ def test_calibrate_errors_without_two_calibration_identities(tmp_path):
     assert "Traceback" not in result.stderr
     assert "Error: need faces of at least 2 people" in result.stderr
     assert not config_out.exists()
+
+
+def test_calibrate_default_config_is_in_calibration_dir_parent(tmp_path):
+    # Spec: with no --config-out, config.json goes in the calibration
+    # directory's parent (data/config.json for data/calibration/).
+    calibration_dir = tmp_path / "data" / "calibration"
+    shutil.copytree(FIXTURES / "calibration", calibration_dir)
+
+    result = run_calibrate(
+        "--calibration-dir", str(calibration_dir),
+        "--dataset", str(FIXTURES / "dataset"),
+    )
+
+    assert result.returncode == 0, result.stderr
+    payload = json.loads((tmp_path / "data" / "config.json").read_text())
+    assert {"threshold_low", "threshold_high"} <= payload.keys()

@@ -37,7 +37,11 @@ issue: `match.py` prints every ranked candidate, not just the top few.
 
 HW6 (branch `hw6-review`): four specialised reviews (security,
 correctness, tests, docs/spec drift), one commit each; findings and what
-was left open are in PLANNING_LOG.md. 53 tests passing.
+was left open are in PLANNING_LOG.md. The two issues left open became
+OpenSpec changes on branch `hw6-open-issues`: `limit-match-output`
+(`match.py` prints the top 10 candidates, `--top N` for more) and
+`config-path-follows-dataset` (specs name the config.json the code uses).
+58 tests passing.
 
 ## Workflow
 

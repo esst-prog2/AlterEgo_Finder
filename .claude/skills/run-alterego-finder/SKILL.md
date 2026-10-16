@@ -67,11 +67,14 @@ python match.py --image tests\fixtures\obama_query.jpg --dataset tests\fixtures\
 Same commands as above, against your own dataset:
 
 ```powershell
-python match.py --image data\my_photo.jpg --dataset data\celebrities\ --config data\config.json
+python match.py --image data\my_photo\PK.jpg --dataset data\celebrities\
 ```
 
-Requires `data/config.json` (from running `calibrate.py` against your own
-`data/calibration/` first) or explicit `--threshold-low`/`--threshold-high`.
+Requires `data/config.json` (from running `calibrate.py --calibration-dir
+data\calibration --dataset data\celebrities` first; both CLIs default to the
+`config.json` in the parent of their directory argument) or explicit
+`--threshold-low`/`--threshold-high`. Prints the top 10 candidates; pass
+`--top N` for more.
 
 ## Test
 
@@ -79,7 +82,7 @@ Requires `data/config.json` (from running `calibrate.py` against your own
 python -m pytest tests/ -v
 ```
 
-30 tests pass as of the `add-threshold-calibration` change.
+58 tests pass as of the `config-path-follows-dataset` change.
 
 ---
 
@@ -109,6 +112,7 @@ python -m pytest tests/ -v
   pin) reintroduced `numpy<2`, which has no Python 3.13 Windows wheel.
   Use `numpy>=1.24` (unpinned upper bound) as in `requirements.txt`.
 - **`match.py` exits 1 with `Error: No calibrated thresholds available.`**:
-  expected when neither `--config`/`data/config.json` nor both
+  expected when neither `--config`, a `config.json` in `--dataset`'s parent
+  directory, nor both
   `--threshold-low`/`--threshold-high` are given — run `calibrate.py`
   first, or pass thresholds explicitly.
