@@ -62,11 +62,26 @@ def main(argv: list[str] | None = None) -> int:
         else calibration_dir.parent / "config.json"
     )
 
+    if not calibration_dir.is_dir():
+        print(f"Error: Calibration directory not found: {calibration_dir}", file=sys.stderr)
+        return 1
+    dataset_dir = Path(args.dataset)
+    if not dataset_dir.is_dir():
+        print(f"Error: Dataset directory not found: {dataset_dir}", file=sys.stderr)
+        return 1
     by_person = embed_calibration_dataset(calibration_dir)
+    if len(by_person) < 2:
+        print(
+            f"Error: need faces of at least 2 people under {calibration_dir} "
+            f"(found {len(by_person)}) to compare same-person and "
+            "different-person scores.",
+            file=sys.stderr,
+        )
+        return 1
     intra_scores, inter_scores = sample_pairs(by_person)
     threshold_low, _pairwise_high = compute_thresholds(intra_scores, inter_scores)
 
-    index = get_or_build_index(Path(args.dataset))
+    index = get_or_build_index(dataset_dir)
     strangers = np.array([e for embs in by_person.values() for e in embs])
     threshold_high = max(
         compute_index_high_threshold(strangers, index.embeddings), threshold_low

@@ -109,3 +109,25 @@ def test_classification_labels_reflect_thresholds(tmp_path):
                 assert label == "LOW_CONFIDENCE"
             else:
                 assert label == "NO_MATCH"
+
+
+def test_errors_on_missing_dataset_directory(tmp_path):
+    result = run_match(
+        "--image", str(FIXTURES / "obama_query.jpg"),
+        "--dataset", str(tmp_path / "no_such_dataset"),
+        "--threshold-low", "0.2", "--threshold-high", "0.4",
+    )
+    assert result.returncode == 1
+    assert "Traceback" not in result.stderr
+    assert "Error: Dataset directory not found" in result.stderr
+
+
+def test_errors_when_low_threshold_above_high(tmp_path):
+    dataset_dir = _make_dataset(tmp_path)
+    result = run_match(
+        "--image", str(FIXTURES / "obama_query.jpg"),
+        "--dataset", str(dataset_dir),
+        "--threshold-low", "0.5", "--threshold-high", "0.3",
+    )
+    assert result.returncode == 1
+    assert "Error: threshold_low (0.5) is above threshold_high (0.3)" in result.stderr

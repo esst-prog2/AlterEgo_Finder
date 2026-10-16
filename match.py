@@ -106,6 +106,17 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
         return 1
+    if threshold_low > threshold_high:
+        print(
+            f"Error: threshold_low ({threshold_low}) is above threshold_high "
+            f"({threshold_high}), so nothing could be LOW_CONFIDENCE.",
+            file=sys.stderr,
+        )
+        return 1
+
+    if not dataset_path.is_dir():
+        print(f"Error: Dataset directory not found: {dataset_path}", file=sys.stderr)
+        return 1
 
     query_image = cv2.imread(str(image_path))
     if query_image is None:
