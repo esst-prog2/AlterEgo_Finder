@@ -39,7 +39,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
         "--config",
         default=None,
         help="Path to the calibrated-thresholds config.json (default: "
-        "config.json next to --dataset's parent directory).",
+        "config.json in --dataset's parent directory, e.g. data/config.json).",
     )
     parser.add_argument(
         "--threshold-low",

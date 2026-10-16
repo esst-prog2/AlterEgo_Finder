@@ -45,8 +45,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--config-out",
         default=None,
-        help="Where to write the computed thresholds (default: config.json next "
-        "to --calibration-dir's parent, e.g. data/config.json).",
+        help="Where to write the computed thresholds (default: config.json in "
+        "--calibration-dir's parent directory, e.g. data/config.json).",
     )
     return parser
 
