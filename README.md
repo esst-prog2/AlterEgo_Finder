@@ -2,12 +2,12 @@
 
 ## 1. The demo
 
-I open the terminal and run `python match.py --image data/my_photo.jpg --dataset data/celebrities/`. Within 100 ms, it extracts the face embedding, queries a pre-computed vector index matrix, and evaluates the results against thresholds calibrated for this dataset (run once via `calibrate.py`, not a fixed number baked into the code). It prints the top matching records alongside a categorical match quality (`HIGH_CONFIDENCE`, `LOW_CONFIDENCE`, or `NO_MATCH`). I open `data/results/summary.html`, which renders my query image alongside the candidate matches, highlighting the top match's confidence level. If I pass an image file containing no detectable face (`data/blank.jpg`), the program exits with code 1, printing `Error: No face detected in input image`.
+I open the terminal and run `python match.py --image data/my_photo/PK.jpg --dataset data/celebrities/`. Within 100 ms, it extracts the face embedding, queries a pre-computed vector index matrix, and evaluates the results against thresholds calibrated for this dataset (run once via `calibrate.py`, not a fixed number baked into the code). It prints the top matching records alongside a categorical match quality (`HIGH_CONFIDENCE`, `LOW_CONFIDENCE`, or `NO_MATCH`). I open `data/results/summary.html`, which renders my query image alongside the candidate matches, highlighting the top match's confidence level. If I pass an image file containing no detectable face (e.g. a blank white image), the program exits with code 1, printing `Error: No face detected in input image`.
 
 ## 2. The shape
 
 ```
-in            data/my_photo.jpg (an image file) + data/celebrities/ (a directory of target face images,
+in            data/my_photo/PK.jpg (an image file) + data/celebrities/ (a directory of target face images,
               indexed automatically on first run into a cached .npy vector matrix)
 out           data/results/summary.html (visual match report with threshold status) +
               stdout top matches with categorized confidence
@@ -41,5 +41,5 @@ in between    detect + align face -> extract a fixed-length embedding vector ->
 
 ## 5. What could stop this
 
-- **Privacy & GDPR / legal risk:** storing or using sensitive real-world personal data without consent. Mitigation: the tool uses a publicly available, open-license dataset (LFW - Labeled Faces in the Wild), running entirely offline without uploading images anywhere.
+- **Privacy & GDPR / legal risk:** storing or using sensitive real-world personal data without consent. Mitigation: the tool uses a publicly available, open-license dataset (LFW - Labeled Faces in the Wild), running entirely offline without uploading images anywhere (the only network access is the one-time, checksum-verified download of the two model weight files).
 - **Performance bottleneck at scale:** pre-computing face embeddings into a single consolidated `.npy` vector matrix during initialization, reducing matching to one vectorized matrix product (BLAS-optimized) instead of a per-file Python loop.

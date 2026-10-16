@@ -66,3 +66,17 @@ def test_render_report_is_self_contained(tmp_path):
     img_srcs = re.findall(r'<img src="([^"]*)"', content)
     assert img_srcs, "expected at least one <img> tag"
     assert all(src.startswith("data:image/") for src in img_srcs)
+
+
+def test_render_report_escapes_person_names(tmp_path):
+    # Person names come from dataset folder names, which the user doesn't
+    # control (e.g. a downloaded dataset). They must not become markup.
+    output_path = tmp_path / "report.html"
+    hostile = '"><img src=x onerror=alert(1)>'
+    results = [(IndexEntry(person=hostile, filepath=FIXTURES / "obama_1.jpg"), 0.80, "HIGH_CONFIDENCE")]
+
+    render_report(QUERY_IMAGE, results, output_path)
+
+    content = output_path.read_text(encoding="utf-8")
+    assert "onerror=alert(1)>" not in content
+    assert "&quot;&gt;&lt;img src=x onerror=alert(1)&gt;" in content

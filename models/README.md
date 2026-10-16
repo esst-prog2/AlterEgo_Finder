@@ -5,7 +5,7 @@ downloaded automatically on first use by `face_pipeline/weights.py`, which
 also re-verifies each file's SHA-256 checksum on every use (not just right
 after downloading), and fails clearly rather than silently loading a bad
 or missing file. See
-`openspec/changes/fetch-model-weights-checksum/design.md` for the
+`openspec/changes/archive/2026-09-22-fetch-model-weights-checksum/design.md` for the
 reasoning (the ArcFace weights alone are 63MB — over GitHub's recommended
 50MB file-size limit).
 

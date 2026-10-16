@@ -39,7 +39,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
         "--config",
         default=None,
         help="Path to the calibrated-thresholds config.json (default: "
-        "config.json next to --dataset's parent directory).",
+        "config.json in --dataset's parent directory, e.g. data/config.json).",
     )
     parser.add_argument(
         "--threshold-low",
@@ -105,6 +105,17 @@ def main(argv: list[str] | None = None) -> int:
             "first, or pass --threshold-low/--threshold-high.",
             file=sys.stderr,
         )
+        return 1
+    if threshold_low > threshold_high:
+        print(
+            f"Error: threshold_low ({threshold_low}) is above threshold_high "
+            f"({threshold_high}), so nothing could be LOW_CONFIDENCE.",
+            file=sys.stderr,
+        )
+        return 1
+
+    if not dataset_path.is_dir():
+        print(f"Error: Dataset directory not found: {dataset_path}", file=sys.stderr)
         return 1
 
     query_image = cv2.imread(str(image_path))
