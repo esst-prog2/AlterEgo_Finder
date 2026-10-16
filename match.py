@@ -18,7 +18,7 @@ import cv2
 
 from face_pipeline.embedder import NoFaceDetectedError, extract_embedding
 from face_pipeline.index import get_or_build_index, rank_matches
-from face_pipeline.report import render_report
+from face_pipeline.report import REPORT_TOP_K, render_report
 
 HIGH_CONFIDENCE = "HIGH_CONFIDENCE"
 LOW_CONFIDENCE = "LOW_CONFIDENCE"
@@ -52,6 +52,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
         type=float,
         default=None,
         help="Override the LOW_CONFIDENCE / HIGH_CONFIDENCE boundary from config.json.",
+    )
+    parser.add_argument(
+        "--top",
+        type=int,
+        default=REPORT_TOP_K,
+        help=f"How many top-ranked candidates to print (default: {REPORT_TOP_K}).",
     )
     parser.add_argument(
         "--report-out",
@@ -94,6 +100,8 @@ def classify(score: float, threshold_low: float, threshold_high: float) -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = build_arg_parser()
     args = parser.parse_args(argv)
+    if args.top < 1:
+        parser.error("--top must be at least 1")
 
     image_path = Path(args.image)
     dataset_path = Path(args.dataset)
@@ -137,7 +145,7 @@ def main(argv: list[str] | None = None) -> int:
         for entry, score in results
     ]
 
-    for entry, score, label in labeled_results:
+    for entry, score, label in labeled_results[: args.top]:
         print(f"{entry.person}: {score:.4f} {label}")
 
     render_report(image_path, labeled_results, Path(args.report_out))
