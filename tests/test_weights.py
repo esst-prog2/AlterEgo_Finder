@@ -1,5 +1,6 @@
 import hashlib
 import json
+from pathlib import Path
 
 import pytest
 
@@ -95,3 +96,20 @@ def test_ensure_weight_raises_on_download_failure(isolated_models_dir, monkeypat
 
     with pytest.raises(ModelWeightError, match="fake.onnx"):
         ensure_weight("fake.onnx")
+
+
+def test_download_failure_leaves_no_file_behind(tmp_path, monkeypatch):
+    # _download's promise: an interrupted download never leaves a file at the
+    # destination (or a stray .part) for a later run to trust.
+    destination = tmp_path / "fake.onnx"
+
+    def interrupted(url, filename):
+        Path(filename).write_bytes(b"half a model")
+        raise OSError("connection reset")
+
+    monkeypatch.setattr(weights_module.urllib.request, "urlretrieve", interrupted)
+
+    with pytest.raises(ModelWeightError, match="connection reset"):
+        weights_module._download("https://example.invalid/fake.onnx", destination)
+
+    assert list(tmp_path.iterdir()) == []

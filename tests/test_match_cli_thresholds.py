@@ -44,7 +44,7 @@ def test_errors_without_config_or_threshold_flags(tmp_path):
         "--dataset", str(dataset_dir),
     )
     assert result.returncode == 1
-    assert result.stderr.strip() != ""
+    assert "Error: No calibrated thresholds available" in result.stderr
 
 
 def test_thresholds_loaded_from_config_file(tmp_path):
@@ -131,3 +131,14 @@ def test_errors_when_low_threshold_above_high(tmp_path):
     )
     assert result.returncode == 1
     assert "Error: threshold_low (0.5) is above threshold_high (0.3)" in result.stderr
+
+
+def test_classify_boundaries_are_at_or_above():
+    # Spec: "at or above the high threshold" -> HIGH_CONFIDENCE, "at or
+    # above the low threshold but below the high" -> LOW_CONFIDENCE.
+    from match import classify
+
+    assert classify(0.4, 0.2, 0.4) == "HIGH_CONFIDENCE"
+    assert classify(0.3999, 0.2, 0.4) == "LOW_CONFIDENCE"
+    assert classify(0.2, 0.2, 0.4) == "LOW_CONFIDENCE"
+    assert classify(0.1999, 0.2, 0.4) == "NO_MATCH"

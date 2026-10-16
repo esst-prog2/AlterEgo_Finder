@@ -39,8 +39,8 @@ def test_sample_pairs_scores_in_range_and_intra_higher_on_average():
 
 
 def test_sample_pairs_caps_inter_class_pairs():
-    # Three synthetic people with 2 embeddings each -> 3*C(2,1)*2 = ... just
-    # check the cap is respected with a small synthetic set.
+    # Three synthetic people with 2 embeddings each: C(3,2) = 3 person pairs
+    # x 2*2 embeddings = 12 different-person pairs before the cap.
     rng = np.random.default_rng(0)
     by_person = {
         "a": [rng.normal(size=128) for _ in range(2)],
@@ -50,6 +50,8 @@ def test_sample_pairs_caps_inter_class_pairs():
     intra, inter = sample_pairs(by_person, max_inter_class_pairs=3)
     assert len(intra) == 3  # one pair per person
     assert len(inter) == 3  # capped
+    _, uncapped = sample_pairs(by_person)
+    assert len(uncapped) == 12
 
 
 def test_compute_eer_threshold_on_synthetic_distributions():
@@ -67,14 +69,17 @@ def test_compute_eer_threshold_on_synthetic_distributions():
 
 
 def test_compute_eer_threshold_known_crossing_point():
-    # Symmetric distributions crossing at a known point.
-    intra_scores = [0.4, 0.5, 0.6, 0.7]  # 25% below 0.5 -> FRR(0.5) = 0.25
-    inter_scores = [0.3, 0.4, 0.5, 0.6]  # 50% >= 0.5 -> FAR(0.5) = 0.5
-    # FRR(0.6)=0.5 (2/4 below 0.6), FAR(0.6)=0.25 (1/4 >= 0.6) -> gap smaller at 0.6? check both
-    eer = compute_eer_threshold(intra_scores, inter_scores)
-    far = np.mean(np.array(inter_scores) >= eer)
-    frr = np.mean(np.array(intra_scores) < eer)
-    assert abs(far - frr) <= 0.26  # best achievable gap on this small discrete set
+    # Overlapping distributions, worked out by hand over the candidates:
+    #   t    FAR(inter >= t)  FRR(intra < t)  gap
+    #   0.3  1.00             0.00            1.00
+    #   0.4  0.75             0.00            0.75
+    #   0.5  0.50             0.25            0.25
+    #   0.6  0.25             0.50            0.25
+    #   0.7  0.00             0.75            0.75
+    # 0.5 and 0.6 tie on the smallest gap; the first (lowest) one is kept.
+    intra_scores = [0.4, 0.5, 0.6, 0.7]
+    inter_scores = [0.3, 0.4, 0.5, 0.6]
+    assert compute_eer_threshold(intra_scores, inter_scores) == 0.5
 
 
 def test_compute_far_threshold_known_percentile():
