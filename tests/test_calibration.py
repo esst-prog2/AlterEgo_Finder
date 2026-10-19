@@ -9,6 +9,7 @@ from face_pipeline.calibration import (
     compute_thresholds,
     embed_calibration_dataset,
     sample_pairs,
+    top1_scores,
 )
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -89,6 +90,24 @@ def test_compute_far_threshold_known_percentile():
     assert threshold == pytest.approx(0.99)
     far = np.mean(np.array(inter_scores) >= threshold)
     assert far == pytest.approx(0.01)
+
+
+def test_compute_far_threshold_rounds_index_up():
+    # 10 scores 0.0..0.9, 15% FAR: ceil(0.85 * 10) = 9 -> 0.9, so 10% of
+    # strangers pass. Rounding down would give 0.8 and let 20% through.
+    inter_scores = [i / 10 for i in range(10)]
+    assert compute_far_threshold(inter_scores, target_far=0.15) == pytest.approx(0.9)
+
+
+def test_top1_scores_normalises_non_unit_vectors():
+    # ArcFace vectors are not unit length. [0, 3] -> [0, 1] and [4, 3] ->
+    # [0.8, 0.6]; their best cosines against [1, 0] and [0.6, 0.8] are 0.8
+    # and 0.96. Without normalising, the first would come out as 2.4.
+    non_unit = [[0, 3], [4, 3]]
+    unit = [[1, 0], [0.6, 0.8]]
+    np.testing.assert_allclose(top1_scores(non_unit, unit), [0.8, 0.96])
+    # Same numbers with the non-unit vectors on the index side.
+    np.testing.assert_allclose(top1_scores(unit, non_unit), [0.8, 0.96])
 
 
 def test_compute_thresholds_high_at_least_as_strict_as_low_on_fixture_set():
