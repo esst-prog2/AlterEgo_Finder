@@ -22,3 +22,9 @@ data/config.json
 # from data/celebrities); the photo itself stays out of the repo.
 data/celebrities_plus_me/
 data/my_photo_test/
+# Two photos of people absent from data/celebrities, used as local query
+# photos for the "absent strangers get no HIGH_CONFIDENCE" check.
+data/other_photos_test/
+# data/celebrities_plus_me plus the two data/other_photos_test/ photos as
+# Other_01 and Other_02 (rebuilt the same way; photos stay out of the repo).
+data/celebrities_plus_me_plus_others/
