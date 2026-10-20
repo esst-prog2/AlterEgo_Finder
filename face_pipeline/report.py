@@ -9,7 +9,7 @@ from __future__ import annotations
 import base64
 import html
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import cv2
 import numpy as np
@@ -51,17 +51,21 @@ def _candidate_card(entry: IndexEntry, score: float, label: str) -> str:
 
 
 def render_report(
-    query_image_path: Path,
+    query_image: Union[Path, np.ndarray],
     results: List[Tuple[IndexEntry, float, str]],
     output_path: Path,
 ) -> None:
     """Render a self-contained HTML report to ``output_path``.
 
+    ``query_image`` is either a path to the query image file or the already
+    decoded image (BGR array), as the web UI has it.
+
     ``results`` is a list of ``(IndexEntry, score, confidence_label)``
     tuples, already ranked most-similar first. Only the top
     ``REPORT_TOP_K`` are included.
     """
-    query_image = cv2.imread(str(query_image_path))
+    if not isinstance(query_image, np.ndarray):
+        query_image = cv2.imread(str(query_image))
     query_data_uri = _image_to_data_uri(query_image) if query_image is not None else ""
 
     top_results = results[:REPORT_TOP_K]

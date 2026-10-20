@@ -53,6 +53,11 @@ in between    detect + align face -> extract a fixed-length embedding vector ->
 - Given an image with no recognizable face, the tool exits with status code 1 and prints `Error: No face detected in input image`.
 - Given two different photos of Person A and one photo of Person B, the top-ranked match for Person A's query photo is Person A's other photo, with a higher similarity score than Person B's photo.
 - Given a query face whose closest match in the dataset scores below the calibrated low threshold, the report explicitly flags the outcome as `NO_MATCH` rather than presenting a low-confidence candidate as a match.
+- Given the same photo, dataset and thresholds, the web UI shows the same top 10 candidates, scores and labels, in the same order, as `match.py` prints.
+- Given an image with no detectable face, the web UI shows "No face detected" and no candidates or report.
+- While the web UI runs, it listens on `127.0.0.1:8501` only (not reachable from other devices), with Streamlit's usage statistics turned off.
+
+To run the web UI: `pip install -r requirements-ui.txt`, then `streamlit run app.py` from the repository root.
 
 ## 5. What could stop this
 

@@ -43,6 +43,13 @@ OpenSpec changes on branch `hw6-open-issues`: `limit-match-output`
 `config-path-follows-dataset` (specs name the config.json the code uses).
 58 tests passing.
 
+Final demo: README section 1 is a three-beat story in a local web UI
+(`revise-demo-description`). Branch `streamlit-web-ui` builds it: `app.py`
+(Streamlit, localhost only, see `.streamlit/config.toml`) on the pipeline in
+`face_pipeline/matching.py`, which `match.py` now uses too; Streamlit is in
+`requirements-ui.txt` only. 80 tests passing (the 13 in `tests/test_app.py`
+are skipped without Streamlit). Next, as a stretch goal: `online-candidate-pool`.
+
 ## Workflow
 
 This repo uses OpenSpec for spec-driven changes (openspec/):

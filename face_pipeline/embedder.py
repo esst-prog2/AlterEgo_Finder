@@ -58,13 +58,21 @@ class NoFaceDetectedError(Exception):
     """Raised when no face can be detected in an image."""
 
 
-def extract_embedding(image: np.ndarray) -> np.ndarray:
-    """Detect, align, and embed the face in ``image``, returning a 512-d vector.
+def detect_and_align(image: np.ndarray) -> np.ndarray:
+    """Detect the face in ``image`` and return it aligned to 112x112, the
+    crop the embedding is computed from.
 
     Raises ``NoFaceDetectedError`` if no face is detected.
     """
     detected = detect_face(image)
     if detected is None:
         raise NoFaceDetectedError()
-    aligned = align_face(image, detected)
-    return embed_face(aligned)
+    return align_face(image, detected)
+
+
+def extract_embedding(image: np.ndarray) -> np.ndarray:
+    """Detect, align, and embed the face in ``image``, returning a 512-d vector.
+
+    Raises ``NoFaceDetectedError`` if no face is detected.
+    """
+    return embed_face(detect_and_align(image))

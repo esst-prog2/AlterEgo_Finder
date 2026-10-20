@@ -9,20 +9,24 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from pathlib import Path
 from typing import Optional, Tuple
 
 import cv2
 
-from face_pipeline.embedder import NoFaceDetectedError, extract_embedding
+from face_pipeline.embedder import NoFaceDetectedError
 from face_pipeline.index import get_or_build_index, rank_matches
+from face_pipeline.matching import (  # noqa: F401 (re-exported for callers of match.py)
+    HIGH_CONFIDENCE,
+    LOW_CONFIDENCE,
+    NO_MATCH,
+    classify,
+    embed_query,
+    label_results,
+    load_thresholds,
+)
 from face_pipeline.report import REPORT_TOP_K, render_report
-
-HIGH_CONFIDENCE = "HIGH_CONFIDENCE"
-LOW_CONFIDENCE = "LOW_CONFIDENCE"
-NO_MATCH = "NO_MATCH"
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
@@ -73,28 +77,11 @@ def _load_thresholds(
     args: argparse.Namespace, dataset_path: Path
 ) -> Tuple[Optional[float], Optional[float]]:
     config_path = Path(args.config) if args.config else dataset_path.parent / "config.json"
-
-    config_low: Optional[float] = None
-    config_high: Optional[float] = None
-    if config_path.exists():
-        try:
-            payload = json.loads(config_path.read_text())
-            config_low = payload.get("threshold_low")
-            config_high = payload.get("threshold_high")
-        except (json.JSONDecodeError, OSError):
-            pass
+    config_low, config_high = load_thresholds(config_path)
 
     threshold_low = args.threshold_low if args.threshold_low is not None else config_low
     threshold_high = args.threshold_high if args.threshold_high is not None else config_high
     return threshold_low, threshold_high
-
-
-def classify(score: float, threshold_low: float, threshold_high: float) -> str:
-    if score >= threshold_high:
-        return HIGH_CONFIDENCE
-    if score >= threshold_low:
-        return LOW_CONFIDENCE
-    return NO_MATCH
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -131,19 +118,18 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Error: Unable to read image file: {image_path}", file=sys.stderr)
         return 1
 
+    # Embed before indexing, so an image with no face fails fast instead of
+    # first building (and caching) the dataset's index.
     try:
-        query_embedding = extract_embedding(query_image)
+        query = embed_query(query_image)
     except NoFaceDetectedError:
         print("Error: No face detected in input image", file=sys.stderr)
         return 1
 
     index = get_or_build_index(dataset_path)
-    results = rank_matches(index, query_embedding)
-
-    labeled_results = [
-        (entry, score, classify(score, threshold_low, threshold_high))
-        for entry, score in results
-    ]
+    labeled_results = label_results(
+        rank_matches(index, query.embedding), threshold_low, threshold_high
+    )
 
     for entry, score, label in labeled_results[: args.top]:
         print(f"{entry.person}: {score:.4f} {label}")

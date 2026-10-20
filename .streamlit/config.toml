@@ -1,0 +1,8 @@
+# Serve the web UI on this machine only, and send nothing to Streamlit:
+# README section 5 promises the uploaded photo never leaves the machine.
+[server]
+address = "localhost"
+maxUploadSize = 10
+
+[browser]
+gatherUsageStats = false

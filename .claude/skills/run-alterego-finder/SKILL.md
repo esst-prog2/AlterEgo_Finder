@@ -76,13 +76,28 @@ data\calibration --dataset data\celebrities` first; both CLIs default to the
 `--threshold-low`/`--threshold-high`. Prints the top 10 candidates; pass
 `--top N` for more.
 
+## Run the web UI
+
+```powershell
+pip install -r requirements-ui.txt
+streamlit run app.py
+```
+
+Run it from the repository root, so `.streamlit/config.toml` applies (served
+on `localhost:8501` only, usage statistics off). The dataset dropdown lists
+only folders under `data/` that already have a `.matchcache/` index; index a
+new one with one `match.py` run first. To drive the page headless, use
+`streamlit.testing.v1.AppTest` as `tests/test_app.py` does
+(`file_uploader[0].upload(...)` works in Streamlit 1.66).
+
 ## Test
 
 ```powershell
 python -m pytest tests/ -v
 ```
 
-58 tests pass as of the `config-path-follows-dataset` change.
+80 tests pass as of the `streamlit-web-ui` change; without Streamlit
+installed, `tests/test_app.py` (13 tests) is skipped and 67 pass.
 
 ---
 
