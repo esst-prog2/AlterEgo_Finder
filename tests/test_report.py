@@ -80,3 +80,17 @@ def test_render_report_escapes_person_names(tmp_path):
     content = output_path.read_text(encoding="utf-8")
     assert "onerror=alert(1)>" not in content
     assert "&quot;&gt;&lt;img src=x onerror=alert(1)&gt;" in content
+
+
+def test_render_report_accepts_query_as_image_array(tmp_path):
+    # The web UI passes the decoded upload, never saving it as its own file.
+    import cv2
+
+    results = _fake_results(2)
+    from_path = tmp_path / "from_path.html"
+    from_array = tmp_path / "from_array.html"
+
+    render_report(QUERY_IMAGE, results, from_path)
+    render_report(cv2.imread(str(QUERY_IMAGE)), results, from_array)
+
+    assert from_array.read_text(encoding="utf-8") == from_path.read_text(encoding="utf-8")

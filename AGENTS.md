@@ -25,8 +25,8 @@ MVP complete, matching README section 3's "First useful version" scope:
 detection+alignment (YuNet), ArcFace (512-d) embedding, dataset
 auto-indexing, calibrated two-threshold confidence classification
 (`calibrate.py`), model weights fetched on demand with SHA-256
-verification, and a self-contained `summary.html` report. 5 capabilities
-under `openspec/specs/`, all archived changes under
+verification, and a self-contained `summary.html` report. 6 capabilities
+under `openspec/specs/` (`web-ui` added for the final demo), all archived changes under
 `openspec/changes/archive/`. See PLANNING_LOG.md for
 the decision history.
 
@@ -42,6 +42,13 @@ OpenSpec changes on branch `hw6-open-issues`: `limit-match-output`
 (`match.py` prints the top 10 candidates, `--top N` for more) and
 `config-path-follows-dataset` (specs name the config.json the code uses).
 58 tests passing.
+
+Final demo: README section 1 is a three-beat story in a local web UI
+(`revise-demo-description`). Branch `streamlit-web-ui` builds it: `app.py`
+(Streamlit, localhost only, see `.streamlit/config.toml`) on the pipeline in
+`face_pipeline/matching.py`, which `match.py` now uses too; Streamlit is in
+`requirements-ui.txt` only. 80 tests passing (the 13 in `tests/test_app.py`
+are skipped without Streamlit). Next, as a stretch goal: `online-candidate-pool`.
 
 ## Workflow
 
