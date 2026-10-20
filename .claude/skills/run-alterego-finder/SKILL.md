@@ -96,8 +96,12 @@ new one with one `match.py` run first. To drive the page headless, use
 python -m pytest tests/ -v
 ```
 
-80 tests pass as of the `streamlit-web-ui` change; without Streamlit
-installed, `tests/test_app.py` (13 tests) is skipped and 67 pass.
+97 tests pass as of the `similarity-target` change; without Streamlit
+installed, `tests/test_app.py` (22 tests) is skipped and 75 pass.
+
+Charts: give `st.vega_lite_chart` a spec whose layers carry their own inline
+data. A DataFrame or top-level `data` makes Streamlit load pyarrow, whose DLL
+Windows' application control blocks on this machine (`DLL load failed`).
 
 ---
 

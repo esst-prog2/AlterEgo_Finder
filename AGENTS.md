@@ -47,8 +47,12 @@ Final demo: README section 1 is a three-beat story in a local web UI
 (`revise-demo-description`). Branch `streamlit-web-ui` builds it: `app.py`
 (Streamlit, localhost only, see `.streamlit/config.toml`) on the pipeline in
 `face_pipeline/matching.py`, which `match.py` now uses too; Streamlit is in
-`requirements-ui.txt` only. 80 tests passing (the 13 in `tests/test_app.py`
-are skipped without Streamlit). Next, as a stretch goal: `online-candidate-pool`.
+`requirements-ui.txt` only. Branch `similarity-target` adds the
+similarity target (exact `1 - score` distances with threshold rings, layout in
+`face_pipeline/target.py`; the chart's data stays inline because Windows'
+application control blocks pyarrow here). 97 tests passing (the 22 in
+`tests/test_app.py` are skipped without Streamlit). Next, as a stretch goal:
+`online-candidate-pool`.
 
 ## Workflow
 
