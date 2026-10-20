@@ -25,8 +25,8 @@ MVP complete, matching README section 3's "First useful version" scope:
 detection+alignment (YuNet), ArcFace (512-d) embedding, dataset
 auto-indexing, calibrated two-threshold confidence classification
 (`calibrate.py`), model weights fetched on demand with SHA-256
-verification, and a self-contained `summary.html` report. 5 capabilities
-under `openspec/specs/`, all archived changes under
+verification, and a self-contained `summary.html` report. 6 capabilities
+under `openspec/specs/` (`web-ui` added for the final demo), all archived changes under
 `openspec/changes/archive/`. See PLANNING_LOG.md for
 the decision history.
 
