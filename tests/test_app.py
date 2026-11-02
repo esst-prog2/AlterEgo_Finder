@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 
 import cv2
+import numpy as np
 import pytest
 
 pytest.importorskip("streamlit")
@@ -379,10 +380,12 @@ def test_target_labels_do_not_sit_on_named_faces():
         assert row["y"] > max(reach, 1 - 0.2)
 
     # Names sit beside their dot, pointing outward: left-aligned on the right half.
+    # In this chart only #1, at 12 o'clock, has another face in the way.
     name_layers = [l for l in layers if l["mark"]["type"] == "text" and "dx" in l["mark"]]
     for l in name_layers:
         for row in l["data"]["values"]:
-            assert (row["x"] >= 0) == (l["mark"]["align"] == "left")
+            if not row["text"].startswith("#1 "):
+                assert (row["x"] >= 0) == (l["mark"]["align"] == "left")
     assert sum(len(l["data"]["values"]) for l in name_layers) == 10
 
 
@@ -539,3 +542,103 @@ def test_long_credits_are_shortened_on_cards_but_not_in_the_report(tmp_path, mon
         assert credit.endswith("CC BY-SA 2.0")  # the licence always survives
         assert "..." in credit
     assert long_author in (data_dir / "results" / "summary.html").read_text(encoding="utf-8")
+
+
+# --- names on the target stay readable (decided 2026-11-03) ----------------------
+
+# Beat 2 on wikidata_plus_me: #1 Me_PK's name ran across #2 Psy's dot (2026-11-02).
+BEAT_2 = [("Me_PK", 0.4322), ("Psy", 0.2702), ("Stoffel_Vandoorne", 0.2476), ("Roberto_Carlos", 0.2133),
+          ("Mariah_Carey", 0.2083), ("Noah_Wyle", 0.2072), ("Alia_Bhatt", 0.1886), ("Vitantonio_Liuzzi", 0.1877),
+          ("Nikita_Mazepin", 0.1770), ("Valery_Leontiev", 0.1759)]
+POOL_LOW, POOL_HIGH = 0.1864, 0.3706
+
+
+def _pool_chart(people_scores, top=10):
+    """A target whose scale is like the pool's: its faint cloud reaches score -0.23."""
+    sys.path.insert(0, str(REPO_ROOT))
+    from app import _target_spec
+    from face_pipeline.index import IndexEntry
+
+    cloud = [(f"Cloud{i}", 0.17 - i * 0.04) for i in range(11)]
+    labeled = [(IndexEntry(person=p, filepath="p.jpg"), s, "LOW_CONFIDENCE") for p, s in people_scores + cloud]
+    return _target_spec(labeled, top, POOL_LOW, POOL_HIGH, theme="dark")
+
+
+def _overlap(a, b):
+    return max(0, min(a[2], b[2]) - max(a[0], b[0])) * max(0, min(a[3], b[3]) - max(a[1], b[1]))
+
+
+def _chart_problems(spec):
+    """Name overlaps, read from the spec's own layers, as "what hit what" strings."""
+    from face_pipeline.target import CHAR_PX, DOT_PX, LINE_PX
+
+    def to_px(layer, row):
+        half_x = layer["encoding"]["x"]["scale"]["domain"][1]
+        half_y = layer["encoding"]["y"]["scale"]["domain"][1]
+        return (spec["width"] / 2 * (1 + row["x"] / half_x), spec["height"] / 2 * (1 - row["y"] / half_y))
+
+    def text_box(layer, row, text):
+        x, y = to_px(layer, row)
+        x, y = x + layer["mark"].get("dx", 0), y + layer["mark"].get("dy", 0)
+        width = len(text) * CHAR_PX
+        left = {"left": x, "right": x - width, "center": x - width / 2}[layer["mark"]["align"]]
+        return (left, y - LINE_PX / 2, left + width, y + LINE_PX / 2)
+
+    layers = spec["layer"]
+    names = [(row["text"], text_box(l, row, row["text"])) for l in layers
+             if l["mark"]["type"] == "text" and "dx" in l["mark"] for row in l["data"]["values"]]
+    legend = [text_box(l, l["data"]["values"][0], l["mark"]["text"]) for l in layers
+              if l["mark"]["type"] == "text" and "text" in l["mark"] and "dx" not in l["mark"]
+              and l["mark"].get("align") == "left"]
+    dots = []
+    for l in layers:
+        if l["mark"]["type"] == "circle" and l["mark"]["size"] > 100:
+            for row in l["data"]["values"]:
+                x, y = to_px(l, row)
+                dots.append((row["rank"], (x - DOT_PX, y - DOT_PX, x + DOT_PX, y + DOT_PX)))
+
+    problems = []
+    for i, (text, box) in enumerate(names):
+        rank = int(text[1:].split()[0])
+        problems += [f"{text} on the name {other}" for other, b in names[i + 1:] if _overlap(box, b)]
+        problems += [f"{text} on dot #{r}" for r, b in dots if r != rank and _overlap(box, b)]
+        problems += [f"{text} on the legend" for b in legend if _overlap(box, b)]
+        if box[0] < 0 or box[1] < 0 or box[2] > spec["width"] or box[3] > spec["height"]:
+            problems.append(f"{text} over the edge")
+    return names, problems
+
+
+def test_beat_2_names_do_not_overlap():
+    names, problems = _chart_problems(_pool_chart(BEAT_2))
+    assert problems == []
+    assert len(names) == 10
+
+
+def _varied_scores(rng):
+    """Ten scores like a real top 10; half the time #1 is far closer, as in a self-match."""
+    rest = sorted(rng.uniform(0.15, 0.35, 10), reverse=True)
+    if rng.random() < 0.5:
+        rest[0] = rng.uniform(0.4, 0.95)
+    # Name lengths like the pool's, the longest being Jean-Sebastien_Giguere's.
+    return [("N" * int(rng.integers(3, 23)) + str(i), float(s)) for i, s in enumerate(rest)]
+
+
+def test_ten_names_do_not_overlap_across_varied_scores():
+    rng = np.random.default_rng(20261103)
+    for _ in range(150):
+        names, problems = _chart_problems(_pool_chart(_varied_scores(rng)))
+        assert problems == []
+        assert len(names) == 10
+
+
+def test_moving_a_name_leaves_every_face_at_its_exact_distance():
+    spec = _pool_chart(BEAT_2)
+    dots = next(l for l in spec["layer"] if l["mark"]["type"] == "circle" and l["mark"]["size"] > 100)
+    for row in dots["data"]["values"]:
+        assert (row["x"] ** 2 + row["y"] ** 2) ** 0.5 == pytest.approx(1 - row["score"])
+
+
+def test_every_name_is_still_drawn_when_they_cannot_all_fit():
+    crowded = [(f"Quite_A_Long_Person_Name_{i}", 0.5 - i / 80) for i in range(20)]
+    names, _ = _chart_problems(_pool_chart(crowded, top=20))
+    assert len(names) == 20

@@ -33,7 +33,14 @@ from face_pipeline.matching import (
     load_thresholds,
 )
 from face_pipeline.report import REPORT_TOP_K, render_report
-from face_pipeline.target import ring, target_points
+from face_pipeline.target import (
+    CHAR_PX,
+    LINE_PX,
+    NAME_PLACES,
+    place_names,
+    ring,
+    target_points,
+)
 
 MAX_CANDIDATES = 20
 CARDS_PER_ROW = 5
@@ -264,17 +271,31 @@ def _target_spec(labeled, top: int, low: float, high: float, theme: Optional[str
     })
     # Names sit beside their dot, pointing outward (left-aligned on the right
     # half, right-aligned on the left), so neighbours do not run into each
-    # other. They go through Vega's SVG text, which does not interpret HTML.
-    for right_half, align, dx in ((True, "left", 9), (False, "right", -9)):
-        layers.append({
-            "data": {"values": [{"x": p.x, "y": p.y,
-                                 "text": f"#{p.rank} {p.person}"
-                                         + (f" ({p.score:.4f})" if p.rank == 1 else "")}
-                                for p in points if p.named and (p.x >= 0) == right_half]},
-            "mark": {"type": "text", "align": align, "dx": dx, "baseline": "middle",
-                     "fontSize": 12, "color": colors["ink"]},
-            "encoding": {**xy, "text": {"field": "text", "type": "nominal"}},
-        })
+    # other, and move to another side only if that place is taken. They go
+    # through Vega's SVG text, which does not interpret HTML.
+    def chart_x(x):
+        return TARGET_WIDTH / 2 * (1 + x / half_x)
+
+    def chart_y(y):
+        return TARGET_HEIGHT / 2 * (1 - y / half_y)
+
+    legend_left = chart_x(-0.97 * half_x)
+    legend_box = (legend_left, chart_y(0.95 * half_y) - LINE_PX / 2,
+                  legend_left + max(map(len, legend)) * CHAR_PX, chart_y(0.8 * half_y) + LINE_PX / 2)
+    named = sorted((p for p in points if p.named), key=lambda p: p.rank)
+    name_texts = [f"#{p.rank} {p.person}" + (f" ({p.score:.4f})" if p.rank == 1 else "") for p in named]
+    places = place_names([(chart_x(p.x), chart_y(p.y), text) for p, text in zip(named, name_texts)],
+                         TARGET_WIDTH, TARGET_HEIGHT, legend_box)
+    for place, (align, dx, dy) in NAME_PLACES.items():
+        rows = [{"x": p.x, "y": p.y, "text": text}
+                for p, text, chosen in zip(named, name_texts, places) if chosen == place]
+        if rows:
+            layers.append({
+                "data": {"values": rows},
+                "mark": {"type": "text", "align": align, "dx": dx, "dy": dy, "baseline": "middle",
+                         "fontSize": 12, "color": colors["ink"]},
+                "encoding": {**xy, "text": {"field": "text", "type": "nominal"}},
+            })
     layers.append({
         "data": {"values": [{"x": 0.0, "y": 0.0}]},
         "mark": {"type": "point", "shape": "cross", "filled": True, "size": 260, "color": colors["ink"]},
