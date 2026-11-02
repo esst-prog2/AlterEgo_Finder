@@ -276,8 +276,9 @@ def main() -> None:
     datasets = list_datasets(data_dir)
     if not datasets:
         st.info(
-            f"No indexed dataset under {data_dir}. Index one first with the CLI: "
-            "python match.py --image <photo> --dataset data/<folder>"
+            f"No indexed dataset under {data_dir}. To set up the standard one, run "
+            "`python setup_data.py`, then refresh this page. To use your own, index it once with "
+            "`python match.py --image <photo> --dataset data/<folder>`."
         )
         return
 

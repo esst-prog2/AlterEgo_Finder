@@ -109,7 +109,7 @@ def test_no_indexed_dataset_tells_user_to_index_one(tmp_path, monkeypatch):
     at = _app(data_dir, monkeypatch)
 
     assert not at.exception
-    assert any("match.py" in i.value for i in at.info)
+    assert any("setup_data.py" in i.value and "match.py" in i.value for i in at.info)
     assert len(at.file_uploader) == 0
 
 

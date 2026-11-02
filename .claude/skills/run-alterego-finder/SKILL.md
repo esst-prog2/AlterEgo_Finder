@@ -76,6 +76,12 @@ data\calibration --dataset data\celebrities` first; both CLIs default to the
 `--threshold-low`/`--threshold-high`. Prints the top 10 candidates; pass
 `--top N` for more.
 
+## Set up the data
+
+On a fresh clone, `python setup_data.py` downloads LFW, builds `data/celebrities`
+and `data/calibration` from `data/lfw_split.json`, and calibrates (about 3.5
+minutes). It is safe to run again.
+
 ## Run the web UI
 
 ```powershell
@@ -96,8 +102,8 @@ new one with one `match.py` run first. To drive the page headless, use
 python -m pytest tests/ -v
 ```
 
-97 tests pass as of the `similarity-target` change; without Streamlit
-installed, `tests/test_app.py` (22 tests) is skipped and 75 pass.
+110 tests pass as of the `getting-started` change; without Streamlit
+installed, `tests/test_app.py` (22 tests) is skipped and 88 pass.
 
 Charts: give `st.vega_lite_chart` a spec whose layers carry their own inline
 data. A DataFrame or top-level `data` makes Streamlit load pyarrow, whose DLL
