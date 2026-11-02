@@ -21,6 +21,29 @@ import numpy as np
 
 from face_pipeline.matching import LabeledResult
 
+Box = Tuple[float, float, float, float]  # left, top, right, bottom
+
+
+# Sizes on the chart, in pixels. Text is drawn in the browser, so its width is an
+# estimate: the pool's names at font size 12 measured 5.9 px per character in
+# Chromium, and 11 px tall. A dot's radius is 6.4.
+CHAR_PX = 6
+LINE_PX = 12
+DOT_PX = 6.5  # half the side of the box around a named face's dot
+_BESIDE, _ABOVE = 9, 14  # from a dot's centre to a name's near end, or its middle line
+
+# Where a name can go relative to its dot: (align, dx, dy), as Vega draws them.
+NAME_PLACES = {
+    "right": ("left", _BESIDE, 0),
+    "left": ("right", -_BESIDE, 0),
+    "above": ("center", 0, -_ABOVE),
+    "below": ("center", 0, _ABOVE),
+    "above right": ("left", 0, -_ABOVE),
+    "above left": ("right", 0, -_ABOVE),
+    "below right": ("left", 0, _ABOVE),
+    "below left": ("right", 0, _ABOVE),
+}
+
 
 @dataclass(frozen=True)
 class TargetPoint:
@@ -72,6 +95,49 @@ def target_points(labeled: List[LabeledResult], top: int) -> List[TargetPoint]:
     return _spread(ranked[:top], named=True, offset=0.0) + _spread(
         ranked[top:], named=False, offset=0.5
     )
+
+
+def _name_box(x: float, y: float, text: str, place: str) -> Box:
+    align, dx, dy = NAME_PLACES[place]
+    width = len(text) * CHAR_PX
+    left = x + dx - {"left": 0, "center": width / 2, "right": width}[align]
+    return left, y + dy - LINE_PX / 2, left + width, y + dy + LINE_PX / 2
+
+
+SHIFTED_PLACES = ("above right", "above left", "below right", "below left")
+
+
+def _overlap(a: Box, b: Box) -> float:
+    return max(0.0, min(a[2], b[2]) - max(a[0], b[0])) * max(0.0, min(a[3], b[3]) - max(a[1], b[1]))
+
+
+def place_names(names: List[Tuple[float, float, str]], width: float, height: float, legend: Box) -> List[str]:
+    """Where each name goes relative to its dot: a key of ``NAME_PLACES``.
+
+    ``names`` are (x, y, text) in chart pixels, in rank order, so the top faces get
+    first choice. A name points outward from the centre unless that collides with
+    another name, a named face's dot, ``legend`` or the chart's edge; then it takes
+    the first free place of above, below, inward and the four shifted sideways, or
+    the one overlapping least.
+    """
+    dots = [(x - DOT_PX, y - DOT_PX, x + DOT_PX, y + DOT_PX) for x, y, _ in names]
+    chart: Box = (0.0, 0.0, width, height)
+    placed: List[Box] = []
+    places = []
+    for i, (x, y, text) in enumerate(names):
+        outward, inward = ("right", "left") if x >= width / 2 else ("left", "right")
+
+        def collisions(place: str) -> float:
+            box = _name_box(x, y, text, place)
+            off_chart = (box[2] - box[0]) * (box[3] - box[1]) - _overlap(box, chart)
+            others = dots[:i] + dots[i + 1:] + placed + [legend]
+            return off_chart + sum(_overlap(box, other) for other in others)
+
+        # min keeps the first of equals, so the first free place wins.
+        place = min((outward, "above", "below", inward, *SHIFTED_PLACES), key=collisions)
+        places.append(place)
+        placed.append(_name_box(x, y, text, place))
+    return places
 
 
 def ring(threshold: float, steps: int = 180) -> Tuple[np.ndarray, np.ndarray]:
