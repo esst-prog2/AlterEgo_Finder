@@ -58,8 +58,8 @@ Changing the selection SHALL re-run the match on the photo already uploaded.
 
 #### Scenario: No indexed dataset
 - **WHEN** no folder under `data/` has an embedding index
-- **THEN** the page tells the user to index a dataset first with the CLI,
-  and offers no upload
+- **THEN** the page tells the user to run the setup command, or to index a
+  dataset of their own with the CLI, and offers no upload
 
 ### Requirement: Threshold control
 The web UI SHALL let the user set the low and high thresholds with a single
