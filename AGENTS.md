@@ -62,7 +62,9 @@ Branch `online-candidate-pool` adds an optional pool of 500 recognisable adults
 the committed `data/wikidata_people.json`, rate limited and resumable, with photo
 credits on cards and in the report, and its own thresholds (a dataset's
 `config.json` wins over its parent's). `cv2.imread` fails silently on non-ASCII
-paths on Windows, so dataset folder names stay ASCII. 208 tests passing (the 28 in
+paths on Windows, so dataset folder names stay ASCII. Branch `detect-large-faces`
+retries detection on smaller copies when full size finds nothing, since YuNet scores
+very large faces lower. 217 tests passing (the 28 in
 `tests/test_app.py` are skipped without Streamlit). Next: move Beat 1 onto the pool
 in README section 1, before the 2026-11-07 hand-in.
 
