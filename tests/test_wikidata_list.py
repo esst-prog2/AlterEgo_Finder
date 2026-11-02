@@ -142,3 +142,35 @@ def test_query_excludes_people_with_a_political_occupation_elsewhere():
 def test_adult_cutoff_allows_for_birthdays_still_to_come():
     # Born December 2008 is still 17 in November 2026.
     assert rw.adult_cutoff_year(2026) == 2007
+
+
+# --- the list curated by hand (decided 2026-11-02) ------------------------------
+
+
+def test_hand_picked_people_come_first_and_are_not_repeated():
+    fame = rw.select_people({"actor": [_row("Q315208", "Noah Wyle", 90), _row("Q1", "Someone", 80)]}, 2008, 10)
+
+    people = rw.with_hand_picked(fame, total=10)
+
+    assert [p["qid"] for p in people][:3] == [p["qid"] for p in rw.HAND_PICKED]
+    assert len({p["qid"] for p in people}) == len(people)
+    assert people[-1]["qid"] == "Q1"
+
+
+def test_hand_picked_people_count_towards_the_total():
+    fame = rw.select_people({"actor": [_row(f"Q{i}", f"N {i}", 50) for i in range(1, 9)]}, 2008, 8)
+    assert len(rw.with_hand_picked(fame, total=5)) == 5
+
+
+def test_hand_picked_entries_are_complete_and_safe():
+    for person in rw.HAND_PICKED:
+        assert set(person) == {"qid", "name", "folder", "file", "occupation", "sitelinks"}
+        assert person["folder"] == rw.folder_name(person["name"])
+        assert person["qid"] not in rw.EXCLUDED_QIDS
+
+
+def test_committed_list_reflects_the_curation():
+    people = json.loads((Path(__file__).parent.parent / "data" / "wikidata_people.json").read_text(encoding="utf-8"))
+    names = {p["name"] for p in people}
+    assert {"Noah Wyle", "Robert Kubica", "Ella Purnell", "Harry Kane", "Kirsten Dunst", "Julianne Moore"} <= names
+    assert not names & {"Roman Polanski", "G\u00e9rard Depardieu", "R. Kelly", "Robinho", "Elie Wiesel", "Megan Foxiana"}

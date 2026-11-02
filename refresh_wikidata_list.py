@@ -53,7 +53,26 @@ EXCLUDED_QIDS = frozenset({
     "Q11256",  # Fidel Castro
     "Q2866",  # Alexander Lukashenka
     "Q7747",  # Vladimir Putin
+    # Convicted of sexual offences.
+    "Q51552",  # Roman Polanski
+    "Q106508",  # Gerard Depardieu
+    "Q273055",  # R. Kelly
+    "Q58441",  # Robinho
+    # A Holocaust survivor, here only through a stray footballer tag.
+    "Q18391",  # Elie Wiesel
+    # A garbled Wikidata label; it would look like a bug on a card.
+    "Q80069",  # "Megan Foxiana"
 })
+# Added by hand, ahead of the selection by fame. Their images still have to pass
+# the build's licence, author and face checks.
+HAND_PICKED = [
+    {"qid": "Q315208", "name": "Noah Wyle", "folder": "Noah_Wyle",
+     "file": "Noah-Wyle-2010 (cropped).jpg", "occupation": "film actor", "sitelinks": 0},
+    {"qid": "Q160359", "name": "Robert Kubica", "folder": "Robert_Kubica",
+     "file": "Robert Kubica at Monza 2023.jpg", "occupation": "racing driver", "sitelinks": 0},
+    {"qid": "Q1331706", "name": "Ella Purnell", "folder": "Ella_Purnell",
+     "file": "Ella Purnell at MEGACON Orlando 2025.png", "occupation": "film actor", "sitelinks": 0},
+]
 MIN_SITELINKS = 40
 EARLIEST_BIRTH_YEAR = 1920  # fewer paintings: portraits of older figures rarely are photos
 ADULT_AGE = 18
@@ -169,6 +188,12 @@ def select_people(rows_by_occupation: Dict[str, List[dict]], cutoff_year: int, t
     return people
 
 
+def with_hand_picked(people: List[dict], total: int) -> List[dict]:
+    """``HAND_PICKED`` first, then ``people`` without repeats, ``total`` in all."""
+    picked = {p["qid"] for p in HAND_PICKED}
+    return (HAND_PICKED + [p for p in people if p["qid"] not in picked])[:total]
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Regenerate the public-figure pool's list of people.")
     parser.add_argument("--out", default=str(ROOT / "data" / "wikidata_people.json"))
@@ -184,7 +209,9 @@ def main(argv: Optional[List[str]] = None) -> int:
         print(f"Error: {e}. The existing list was left unchanged.", file=sys.stderr)
         return 1
 
-    people = select_people(rows, adult_cutoff_year(datetime.date.today().year), args.total)
+    people = with_hand_picked(
+        select_people(rows, adult_cutoff_year(datetime.date.today().year), args.total), args.total
+    )
     out = Path(args.out)
     part = out.with_name(out.name + ".part")
     part.write_text(json.dumps(people, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
