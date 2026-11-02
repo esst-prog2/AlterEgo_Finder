@@ -15,6 +15,7 @@ from typing import Optional, Tuple
 
 import cv2
 
+from face_pipeline.attribution import load_attribution
 from face_pipeline.embedder import NoFaceDetectedError
 from face_pipeline.index import get_or_build_index, rank_matches
 from face_pipeline.matching import (  # noqa: F401 (re-exported for callers of match.py)
@@ -22,6 +23,7 @@ from face_pipeline.matching import (  # noqa: F401 (re-exported for callers of m
     LOW_CONFIDENCE,
     NO_MATCH,
     classify,
+    config_path_for,
     embed_query,
     label_results,
     load_thresholds,
@@ -42,8 +44,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--config",
         default=None,
-        help="Path to the calibrated-thresholds config.json (default: "
-        "config.json in --dataset's parent directory, e.g. data/config.json).",
+        help="Path to the calibrated-thresholds config.json (default: the one "
+        "inside --dataset if present, otherwise the one in --dataset's parent "
+        "directory, e.g. data/config.json).",
     )
     parser.add_argument(
         "--threshold-low",
@@ -76,7 +79,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
 def _load_thresholds(
     args: argparse.Namespace, dataset_path: Path
 ) -> Tuple[Optional[float], Optional[float]]:
-    config_path = Path(args.config) if args.config else dataset_path.parent / "config.json"
+    config_path = Path(args.config) if args.config else config_path_for(dataset_path)
     config_low, config_high = load_thresholds(config_path)
 
     threshold_low = args.threshold_low if args.threshold_low is not None else config_low
@@ -134,7 +137,10 @@ def main(argv: list[str] | None = None) -> int:
     for entry, score, label in labeled_results[: args.top]:
         print(f"{entry.person}: {score:.4f} {label}")
 
-    render_report(image_path, labeled_results, Path(args.report_out))
+    render_report(
+        image_path, labeled_results, Path(args.report_out),
+        attribution=load_attribution(dataset_path),
+    )
 
     return 0
 

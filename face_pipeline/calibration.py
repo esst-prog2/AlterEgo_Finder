@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import itertools
 import random
+import unicodedata
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -137,6 +138,24 @@ def top1_scores(query_embeddings: np.ndarray, index_embeddings: np.ndarray) -> n
     queries = queries / np.linalg.norm(queries, axis=1, keepdims=True)
     index = index / np.linalg.norm(index, axis=1, keepdims=True)
     return (queries @ index.T).max(axis=1)
+
+
+def normalise_name(name: str) -> str:
+    """A person's name for comparing across datasets: letters and digits only."""
+    decomposed = unicodedata.normalize("NFKD", name)
+    return "".join(c for c in decomposed if c.isalnum()).casefold()
+
+
+def absent_strangers(by_person: Dict[str, List[np.ndarray]], entries) -> Tuple[np.ndarray, List[str]]:
+    """Calibration faces of people who are not in the index, and who was left out.
+
+    Someone in the index would find their own photo there, a true match that
+    would inflate a threshold meant to bound what strangers score.
+    """
+    present = {normalise_name(entry.person) for entry in entries}
+    removed = [person for person in by_person if normalise_name(person) in present]
+    strangers = [e for person, embs in by_person.items() if person not in removed for e in embs]
+    return np.array(strangers), removed
 
 
 def compute_index_high_threshold(

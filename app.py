@@ -19,6 +19,7 @@ import cv2
 import numpy as np
 import streamlit as st
 
+from face_pipeline.attribution import credit_for, load_attribution, safe_source_url
 from face_pipeline.embedder import NoFaceDetectedError
 from face_pipeline.index import CACHE_DIRNAME, EMBEDDINGS_FILENAME, get_or_build_index, rank_matches
 from face_pipeline.matching import (
@@ -26,6 +27,7 @@ from face_pipeline.matching import (
     LOW_CONFIDENCE,
     NO_MATCH,
     QueryFace,
+    config_path_for,
     embed_query,
     label_results,
     load_thresholds,
@@ -35,6 +37,7 @@ from face_pipeline.target import ring, target_points
 
 MAX_CANDIDATES = 20
 CARDS_PER_ROW = 5
+CARD_AUTHOR_CHARS = 60
 _LABEL_COLORS = {HIGH_CONFIDENCE: "green", LOW_CONFIDENCE: "orange"}  # NO_MATCH: gray
 # The page shows only these plain names. The technical labels are for the
 # developers: they stay in the CLI, the HTML report and the specs.
@@ -123,7 +126,13 @@ def _square_crop(image: np.ndarray) -> np.ndarray:
     return image[top: top + side, left: left + side]
 
 
-def _show_cards(labeled, top: int) -> None:
+def _short_author(credit: dict) -> str:
+    """The author for a narrow card; the source page and the report have it in full."""
+    author = credit.get("author", "")
+    return author if len(author) <= CARD_AUTHOR_CHARS else author[:CARD_AUTHOR_CHARS - 3].rstrip() + "..."
+
+
+def _show_cards(labeled, top: int, credits: Optional[dict] = None) -> None:
     shown = labeled[:top]
     for row_start in range(0, len(shown), CARDS_PER_ROW):
         columns = st.columns(CARDS_PER_ROW)
@@ -137,6 +146,14 @@ def _show_cards(labeled, top: int) -> None:
                 st.text(f"#{row_start + offset + 1} {entry.person}")
                 color = _LABEL_COLORS.get(label, "gray")
                 st.markdown(f"`{score:.4f}` :{color}[**{PLAIN_NAMES[label]}**]")
+                credit = credit_for(credits, entry.filepath)
+                if credit:
+                    # Credits are text from strangers: st.text shows them literally,
+                    # and only Commons pages become links.
+                    st.text(f"Photo: {_short_author(credit)}, {credit.get('license', '')}")
+                    source = safe_source_url(credit.get("source", ""))
+                    if source:
+                        st.markdown(f"[Source]({source})")
 
 
 @st.cache_data(show_spinner=False, max_entries=1024)
@@ -153,7 +170,8 @@ def _thumbnail(path: str) -> str:
     return "data:image/jpeg;base64," + base64.b64encode(buffer).decode("ascii") if ok else ""
 
 
-def _target_spec(labeled, top: int, low: float, high: float, theme: Optional[str] = None) -> dict:
+def _target_spec(labeled, top: int, low: float, high: float, theme: Optional[str] = None,
+                 credits: Optional[dict] = None) -> dict:
     """Vega-Lite spec of the similarity target (layout: face_pipeline/target.py).
 
     Every layer carries its own inline data. Streamlit sends DataFrames and
@@ -180,6 +198,8 @@ def _target_spec(labeled, top: int, low: float, high: float, theme: Optional[str
     # vega-tooltip shows a field titled "image" as a picture; only the named
     # faces carry one, so the chart stays small (all ~505 would add MBs).
     named_tooltip = tooltip + [{"field": "image", "title": "image"}]
+    if credits:
+        named_tooltip.append({"field": "photo", "type": "nominal", "title": "Photo"})
     # Rays run from (x0, y0) = the centre to the face, all as plain data fields.
     origin = {"x": {"field": "x0", "type": "quantitative", "scale": x_scale, "axis": None},
               "y": {"field": "y0", "type": "quantitative", "scale": y_scale, "axis": None},
@@ -195,6 +215,9 @@ def _target_spec(labeled, top: int, low: float, high: float, theme: Optional[str
                    "named": p.named, "rank": p.rank}
             if named and (thumbnail := _thumbnail(p.filepath)):
                 row["image"] = thumbnail
+            credit = credit_for(credits, p.filepath) if named else None
+            if credit:
+                row["photo"] = f"{_short_author(credit)}, {credit.get('license', '')}"
             rows.append(row)
         return rows
 
@@ -285,10 +308,11 @@ def main() -> None:
     dataset = st.sidebar.selectbox(
         "Dataset", datasets, format_func=lambda p: p.name, key="dataset"
     )
-    low, high = load_thresholds(dataset.parent / "config.json")
+    config_path = config_path_for(dataset)
+    low, high = load_thresholds(config_path)
     if low is None or high is None:
         st.error(
-            f"No calibrated thresholds in {dataset.parent / 'config.json'}. "
+            f"No calibrated thresholds in {config_path}. "
             f"Run calibrate.py first, e.g. python calibrate.py --dataset {dataset}"
         )
         return
@@ -318,6 +342,7 @@ def main() -> None:
     with st.spinner(f"Loading the {dataset.name} index..."):
         index = get_or_build_index(dataset)
     labeled = label_results(rank_matches(index, query.embedding), selected_low, selected_high)
+    credits = load_attribution(dataset)
 
     photo_col, crop_col, target_col = st.columns([1.6, 0.9, 3.5])
     photo_col.image(image, channels="BGR", caption="Your photo", width="stretch")
@@ -325,7 +350,7 @@ def main() -> None:
     with target_col:
         st.vega_lite_chart(
             spec=_target_spec(labeled, top, selected_low, selected_high,
-                              theme=st.context.theme.type),
+                              theme=st.context.theme.type, credits=credits),
             width="content",
         )
         st.caption(
@@ -334,10 +359,10 @@ def main() -> None:
         )
 
     st.subheader(f"Top {min(top, len(labeled))} of {len(labeled)} faces in {dataset.name}")
-    _show_cards(labeled, top)
+    _show_cards(labeled, top, credits)
 
     report_path = data_dir / "results" / "summary.html"
-    render_report(image, labeled, report_path)
+    render_report(image, labeled, report_path, attribution=credits)
     report_html = report_path.read_text(encoding="utf-8")
     st.download_button(
         "Download report (summary.html)", data=report_html,

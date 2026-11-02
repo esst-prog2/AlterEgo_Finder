@@ -34,6 +34,12 @@ class MatchResult:
     labeled: List[LabeledResult]  # most similar first
 
 
+def config_path_for(dataset_dir: Path) -> Path:
+    """The dataset's own config.json if it has one, otherwise its parent's."""
+    own = dataset_dir / "config.json"
+    return own if own.exists() else dataset_dir.parent / "config.json"
+
+
 def load_thresholds(config_path: Path) -> Tuple[Optional[float], Optional[float]]:
     """Return ``(threshold_low, threshold_high)`` from a calibrate.py config.json.
 

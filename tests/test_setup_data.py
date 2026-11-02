@@ -1,8 +1,10 @@
 """Tests for setup_data.py, using a tiny archive built from fixtures (no network, no LFW)."""
 
+import collections
 import hashlib
 import io
 import json
+import os
 import shutil
 import tarfile
 from pathlib import Path
@@ -220,3 +222,93 @@ class _Response(io.BytesIO):
     def __init__(self, body: bytes):
         super().__init__(body)
         self.headers = {"Content-Length": str(len(body))}
+
+
+# --- optional public-figure pool ------------------------------------------------
+
+
+@pytest.fixture
+def fake_build(tiny, monkeypatch):
+    """Stands in for wikidata_pool.build_pool: `limit` copies of fixture faces."""
+    people_file = tiny.split.parent / "people.json"
+    people_file.write_text(json.dumps([{"qid": "Q1", "folder": "P"}]))
+    calls = []
+
+    def build(people, pool_dir, limit):
+        calls.append((people, pool_dir, limit))
+        have = sorted(pool_dir.glob("*/*.jpg")) if pool_dir.exists() else []
+        sources = [FIXTURES / "obama_1.jpg", FIXTURES / "biden_1.jpg", FIXTURES / "obama_2.jpg"]
+        for i in range(len(have), min(limit, len(sources))):
+            (pool_dir / f"P{i}").mkdir(parents=True, exist_ok=True)
+            shutil.copy(sources[i], pool_dir / f"P{i}" / f"P{i}_0001.jpg")
+        saved = max(0, min(limit, len(sources)) - len(have))
+        if saved:  # like the real build, which writes this only when something changed
+            (pool_dir / "attribution.json").write_text("{}")
+        return collections.Counter(saved=saved)
+
+    monkeypatch.setattr(setup_data, "build_pool", build)
+    tiny.pool_args = [*tiny.args, "--tarball", str(tiny.archive), "--wikidata", "--people", str(people_file)]
+    tiny.build_calls = calls
+    return tiny
+
+
+def test_basic_setup_does_not_touch_the_pool(tiny, monkeypatch):
+    monkeypatch.setattr(setup_data, "build_pool", lambda *a, **k: pytest.fail("must not build the pool"))
+    assert setup_data.main([*tiny.args, "--tarball", str(tiny.archive)]) == 0
+    assert not (tiny.data / "wikidata").exists()
+
+
+def test_pool_gets_its_own_thresholds_and_index_and_leaves_the_others(fake_build):
+    tiny = fake_build
+    assert setup_data.main([*tiny.args, "--tarball", str(tiny.archive)]) == 0
+    base_config = (tiny.data / "config.json").read_bytes()
+
+    assert setup_data.main([*tiny.pool_args, "--wikidata-limit", "2"]) == 0
+
+    assert tiny.build_calls[-1][2] == 2
+    own = json.loads((tiny.data / "wikidata" / "config.json").read_text())
+    assert {"threshold_low", "threshold_high"} <= set(own)
+    assert (tiny.data / "wikidata" / ".matchcache" / "embeddings.npy").exists()
+    assert (tiny.data / "config.json").read_bytes() == base_config
+
+
+def test_default_pool_size_is_500(fake_build):
+    setup_data.main(fake_build.pool_args)
+    assert fake_build.build_calls[-1][2] == 500
+
+
+def test_pool_recalibrates_only_when_it_changed(fake_build, monkeypatch):
+    tiny = fake_build
+    assert setup_data.main([*tiny.pool_args, "--wikidata-limit", "2"]) == 0
+    calls = _count_calibrations(monkeypatch)
+    pool_config = tiny.data / "wikidata" / "config.json"
+
+    assert setup_data.main([*tiny.pool_args, "--wikidata-limit", "2"]) == 0
+    assert calls == []
+
+    # Grown, so the threshold fitted to the old size no longer holds.
+    os.utime(pool_config, (1, 1))
+    assert setup_data.main([*tiny.pool_args, "--wikidata-limit", "3"]) == 0
+    assert len(calls) == 1
+    assert "wikidata" in calls[0][calls[0].index("--dataset") + 1]
+
+
+def test_pool_failure_reports_resume_and_exits_1(fake_build, monkeypatch, capsys):
+    def stopped(*a, **k):
+        raise setup_data.PoolError("rate limited: run the same command again later")
+
+    monkeypatch.setattr(setup_data, "build_pool", stopped)
+
+    assert setup_data.main(fake_build.pool_args) == 1
+
+    assert "again" in capsys.readouterr().err
+    assert not (fake_build.data / "wikidata" / "config.json").exists()
+
+
+def test_committed_people_list_is_usable():
+    people = json.loads((REPO_ROOT / "data" / "wikidata_people.json").read_text(encoding="utf-8"))
+
+    assert len(people) >= 500
+    assert len({p["qid"] for p in people}) == len(people)
+    assert len({p["folder"] for p in people}) == len(people)
+    assert all(p["folder"].isascii() and "/" not in p["folder"] and ".." not in p["folder"] for p in people)
