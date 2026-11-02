@@ -90,3 +90,25 @@ def test_cli_report_credits_the_photos(tmp_path):
 
     assert result.returncode == 0, result.stderr
     assert "Pool Author" in out.read_text(encoding="utf-8")
+
+
+def test_matching_a_built_pool_uses_no_network(tmp_path, monkeypatch, capsys):
+    """Everything after the build is local: any connection attempt fails this test."""
+    import socket
+
+    import match
+
+    def no_network(*args, **kwargs):
+        raise AssertionError("matching tried to use the network")
+
+    dataset = tmp_path / "pool"
+    shutil.copytree(FIXTURES / "dataset", dataset)
+    _write(dataset, {"Barack_Obama/Barack_Obama_0001.jpg": {"author": "A", "license": "CC0", "source": SOURCE}})
+    (dataset / "config.json").write_text(json.dumps({"threshold_low": 0.2, "threshold_high": 0.4}))
+    monkeypatch.setattr(socket.socket, "connect", no_network)
+    monkeypatch.setattr(socket, "create_connection", no_network)
+
+    status = match.main(["--image", str(QUERY), "--dataset", str(dataset), "--report-out", str(tmp_path / "r.html")])
+
+    assert status == 0
+    assert "Barack_Obama" in capsys.readouterr().out

@@ -54,9 +54,16 @@ application control blocks pyarrow here).
 
 Branch `getting-started` adds `setup_data.py`: one command from a fresh clone
 to a working page (verified LFW download, datasets built from the committed
-`data/lfw_split.json`, calibration). README section 6 has the steps. 110 tests
-passing (the 22 in `tests/test_app.py` are skipped without Streamlit). Next:
-`online-candidate-pool`.
+`data/lfw_split.json`, calibration). README section 6 has the steps.
+
+Branch `online-candidate-pool` adds an optional pool of 500 recognisable adults
+(no politicians) in `data/wikidata`: built once by `setup_data.py --wikidata` from
+the committed `data/wikidata_people.json`, rate limited and resumable, with photo
+credits on cards and in the report, and its own thresholds (a dataset's
+`config.json` wins over its parent's). `cv2.imread` fails silently on non-ASCII
+paths on Windows, so dataset folder names stay ASCII. 204 tests passing (the 28 in
+`tests/test_app.py` are skipped without Streamlit). Next: move Beat 1 onto the pool
+in README section 1, before the 2026-11-07 hand-in.
 
 ## Workflow
 

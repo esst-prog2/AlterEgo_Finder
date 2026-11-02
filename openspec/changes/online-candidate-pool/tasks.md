@@ -22,13 +22,13 @@
 
 ## 5. Full pool and proof
 
-- [ ] 5.1 Run the full build (500) in the background; verify 500 images and the reported skips, and record `threshold_high` for this size
-- [ ] 5.2 Verify matching stays offline: with the built pool, block network use in a test or run, and get results
-- [ ] 5.3 Measure in Chromium: `PK.jpg`'s top matches on the pool, Kubica's photos on a pool copy, and the same-person scores from the spike's overlapping people against the pool's threshold; look at the top matches for bad images. Report the numbers, since they decide whether section 1 moves
-- [ ] 5.4 Walk through README's three beats on LFW in Chromium; verify they are unchanged
+- [x] 5.1 Run the full build (500) in the background; verify 500 images and the reported skips, and record `threshold_high` for this size
+- [x] 5.2 Verify matching stays offline: with the built pool, block network use in a test or run, and get results
+- [x] 5.3 Measure in Chromium: `PK.jpg`'s top matches on the pool, Kubica's photos on a pool copy, and the same-person scores from the spike's overlapping people against the pool's threshold; look at the top matches for bad images. Report the numbers, since they decide whether section 1 moves
+- [x] 5.4 Walk through README's three beats on LFW in Chromium; verify they are unchanged
 
 ## 6. Docs and record
 
-- [ ] 6.1 README sections 3 (the "live downloads" item narrowed: built once, never at match time), 5 (the privacy note) and 6 (how to build the pool, with time and disk); verify each command was actually run
-- [ ] 6.2 Update AGENTS.md and the run-alterego-finder skill; verify `pytest` passes in full, and with Streamlit hidden
-- [ ] 6.3 Append the outcome to PLANNING_LOG.md (tests, red/green, build numbers, the 5.3 measurements)
+- [x] 6.1 README sections 3 (the "live downloads" item narrowed: built once, never at match time), 5 (the privacy note) and 6 (how to build the pool, with time and disk); verify each command was actually run
+- [x] 6.2 Update AGENTS.md and the run-alterego-finder skill; verify `pytest` passes in full, and with Streamlit hidden
+- [x] 6.3 Append the outcome to PLANNING_LOG.md (tests, red/green, build numbers, the 5.3 measurements)
