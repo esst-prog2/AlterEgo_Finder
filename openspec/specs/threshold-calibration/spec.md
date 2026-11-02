@@ -31,6 +31,17 @@ dataset being matched against, not on the pairwise inter-class distribution.
 - **THEN** at most the target false-accept rate (1%) of those top-1 scores
   are at or above the high threshold
 
+#### Scenario: Calibration identities present in the dataset are excluded
+- **WHEN** a calibration identity has the same name as a person in the dataset
+  being matched against, ignoring case, accents and the difference between
+  spaces and underscores
+- **THEN** that identity's faces are not used as absent strangers for the high
+  threshold, and the low threshold is unaffected
+
+#### Scenario: Disjoint datasets are unaffected
+- **WHEN** no calibration identity is in the dataset
+- **THEN** the thresholds are the same as without the exclusion
+
 #### Scenario: High threshold grows with index size
 - **WHEN** calibration runs for a larger index size N
 - **THEN** the high threshold is greater than or equal to the high threshold
