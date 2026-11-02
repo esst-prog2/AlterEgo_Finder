@@ -8,6 +8,7 @@ committed. Everyone gets the same faces, so README section 1's scores reproduce.
 
 Usage (from the repository root):
     python setup_data.py
+    python setup_data.py --wikidata    # also the optional public-figure pool (slow)
 """
 
 from __future__ import annotations
@@ -24,8 +25,10 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import calibrate
+from face_pipeline.attribution import ATTRIBUTION_FILENAME
 from face_pipeline.index import get_or_build_index
 from face_pipeline.weights import ModelWeightError
+from face_pipeline.wikidata_pool import PoolError, build_pool
 
 # Original LFW, via the figshare mirror scikit-learn uses; the SHA-256 is the
 # one published in sklearn/datasets/_lfw.py (see spike_eval.py).
@@ -36,6 +39,7 @@ ROOT = Path(__file__).resolve().parent
 ARCHIVE_PREFIX = "lfw/"  # where the images sit inside the archive
 DOWNLOAD_TIMEOUT_S = 60  # per network read, so a stalled download fails instead of hanging
 CHUNK_SIZE = 1 << 20  # 1 MiB
+DEFAULT_POOL_SIZE = 500
 
 
 class SetupError(Exception):
@@ -59,6 +63,23 @@ def build_arg_parser() -> argparse.ArgumentParser:
         "--recalibrate",
         action="store_true",
         help="Compute the thresholds again even if config.json already exists.",
+    )
+    parser.add_argument(
+        "--wikidata",
+        action="store_true",
+        help="Also build the public-figure pool in data/wikidata from Wikimedia "
+        "(about 25 minutes for 500 images; stop any time and run again to continue).",
+    )
+    parser.add_argument(
+        "--wikidata-limit",
+        type=int,
+        default=DEFAULT_POOL_SIZE,
+        help=f"How many images the pool should hold (default: {DEFAULT_POOL_SIZE}).",
+    )
+    parser.add_argument(
+        "--people",
+        default=str(ROOT / "data" / "wikidata_people.json"),
+        help="The list of people for the pool.",
     )
     parser.add_argument(
         "--split",
@@ -163,6 +184,42 @@ def _missing_images(split: Dict[str, List[str]], data_dir: Path) -> Dict[str, Pa
     return missing
 
 
+def _calibrate(calibration: Path, dataset: Path, config: Path) -> None:
+    print(f"Calibrating the thresholds for {dataset.name} (a few minutes) ...")
+    status = calibrate.main([
+        "--calibration-dir", str(calibration),
+        "--dataset", str(dataset),
+        "--config-out", str(config),
+    ])
+    if status != 0:
+        raise SetupError("Calibration failed; see the message above.")
+
+
+def _build_public_figure_pool(args: argparse.Namespace, data_dir: Path) -> None:
+    try:
+        people = json.loads(Path(args.people).read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as e:
+        raise SetupError(f"Could not read the list of people {args.people}: {e}") from e
+
+    pool = data_dir / "wikidata"
+    print(f"Building the public-figure pool in {pool} (limit {args.wikidata_limit}). "
+          "It waits between requests; stop any time and run again to continue.")
+    try:
+        stats = build_pool(people, pool, args.wikidata_limit)
+    except PoolError as e:
+        raise SetupError(str(e)) from e
+    print("Pool build: " + (", ".join(f"{k} {v}" for k, v in sorted(stats.items())) or "nothing to do"))
+
+    config = pool / "config.json"
+    attribution = pool / ATTRIBUTION_FILENAME
+    # The high threshold depends on the pool's size, so a changed pool needs a new one.
+    changed = not config.exists() or config.stat().st_mtime < attribution.stat().st_mtime
+    if args.recalibrate or changed:
+        _calibrate(data_dir / "calibration", pool, config)
+    else:
+        get_or_build_index(pool)
+
+
 def run(args: argparse.Namespace) -> None:
     data_dir = Path(args.data_dir)
     try:
@@ -182,17 +239,12 @@ def run(args: argparse.Namespace) -> None:
     config = data_dir / "config.json"
     try:
         if args.recalibrate or not config.exists():
-            print("Calibrating the thresholds (a few minutes) ...")
-            status = calibrate.main([
-                "--calibration-dir", str(calibration),
-                "--dataset", str(celebrities),
-                "--config-out", str(config),
-            ])
-            if status != 0:
-                raise SetupError("Calibration failed; see the message above.")
+            _calibrate(calibration, celebrities, config)
         else:
             print(f"Keeping the thresholds in {config} (--recalibrate to redo them).")
             get_or_build_index(celebrities)
+        if args.wikidata:
+            _build_public_figure_pool(args, data_dir)
     except ModelWeightError as e:
         raise SetupError(f"Could not get the model weights ({e}). Run setup_data.py again.") from e
 

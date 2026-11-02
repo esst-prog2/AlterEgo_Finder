@@ -9,11 +9,12 @@ from __future__ import annotations
 import base64
 import html
 from pathlib import Path
-from typing import List, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import cv2
 import numpy as np
 
+from face_pipeline.attribution import credit_for, safe_source_url
 from face_pipeline.index import IndexEntry
 
 REPORT_TOP_K = 10
@@ -33,7 +34,17 @@ def _image_to_data_uri(image: np.ndarray) -> str:
     return f"data:image/jpeg;base64,{encoded}"
 
 
-def _candidate_card(entry: IndexEntry, score: float, label: str) -> str:
+def _credit_line(credit: Optional[dict]) -> str:
+    if not credit:
+        return ""
+    # Credits are text from strangers: escaped, and linked only to Commons pages.
+    text = html.escape(f"Photo: {credit.get('author', '')}, {credit.get('license', '')}")
+    url = safe_source_url(credit.get("source", ""))
+    link = f' <a href="{html.escape(url, quote=True)}">source</a>' if url else ""
+    return f'\n        <div class="candidate-credit">{text}{link}</div>'
+
+
+def _candidate_card(entry: IndexEntry, score: float, label: str, credit: Optional[dict] = None) -> str:
     image = cv2.imread(str(entry.filepath))
     data_uri = _image_to_data_uri(image) if image is not None else ""
     color = _LABEL_COLORS.get(label, "#57606a")
@@ -45,7 +56,7 @@ def _candidate_card(entry: IndexEntry, score: float, label: str) -> str:
       <div class="candidate-info">
         <div class="candidate-name">{person}</div>
         <div class="candidate-score">{score:.4f}</div>
-        <div class="candidate-label" style="color: {color}">{label}</div>
+        <div class="candidate-label" style="color: {color}">{label}</div>{_credit_line(credit)}
       </div>
     </div>"""
 
@@ -54,6 +65,7 @@ def render_report(
     query_image: Union[Path, np.ndarray],
     results: List[Tuple[IndexEntry, float, str]],
     output_path: Path,
+    attribution: Optional[Dict[str, dict]] = None,
 ) -> None:
     """Render a self-contained HTML report to ``output_path``.
 
@@ -62,7 +74,8 @@ def render_report(
 
     ``results`` is a list of ``(IndexEntry, score, confidence_label)``
     tuples, already ranked most-similar first. Only the top
-    ``REPORT_TOP_K`` are included.
+    ``REPORT_TOP_K`` are included. ``attribution`` holds the dataset's photo
+    credits, if it records any (see face_pipeline.attribution).
     """
     if not isinstance(query_image, np.ndarray):
         query_image = cv2.imread(str(query_image))
@@ -70,7 +83,8 @@ def render_report(
 
     top_results = results[:REPORT_TOP_K]
     candidate_cards = "\n".join(
-        _candidate_card(entry, score, label) for entry, score, label in top_results
+        _candidate_card(entry, score, label, credit_for(attribution, entry.filepath))
+        for entry, score, label in top_results
     )
 
     page = f"""<!DOCTYPE html>
@@ -90,6 +104,7 @@ def render_report(
   .candidate-name {{ font-weight: 600; font-size: 0.9rem; }}
   .candidate-score {{ font-size: 0.8rem; color: #57606a; }}
   .candidate-label {{ font-size: 0.8rem; font-weight: 700; margin-top: 0.25rem; }}
+  .candidate-credit {{ font-size: 0.7rem; color: #57606a; margin-top: 0.25rem; overflow-wrap: anywhere; }}
 </style>
 </head>
 <body>

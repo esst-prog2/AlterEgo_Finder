@@ -44,7 +44,7 @@ in between    detect + align face -> extract a fixed-length embedding vector ->
 ### Not this term
 
 - Real-time webcam stream matching.
-- Automated web scraping or live downloads from external image APIs.
+- Web scraping, reverse image search, or any download at match time. (The optional public-figure pool in section 6 is fetched once, ahead of time, from Wikimedia, and matching against it uses no network.)
 - Hosted, multi-user web application (public URL, accounts) / React frontend dashboard; the web UI runs on the user's own machine only.
 - Approximate Nearest Neighbor (ANN) index trees (e.g. FAISS / Annoy) — a vectorized matrix product over BLAS is sufficient at this term's dataset size; revisit if the dataset grows past what fits comfortably in memory.
 
@@ -62,7 +62,7 @@ To run it yourself, see section 6.
 
 ## 5. What could stop this
 
-- **Privacy & GDPR / legal risk:** storing or using sensitive real-world personal data without consent. Mitigation: the tool uses a publicly available, open-license dataset (LFW - Labeled Faces in the Wild), running entirely offline without uploading images anywhere (the only network access is the one-time, checksum-verified download of the two model weight files and, in `setup_data.py`, of LFW itself; LFW's images are downloaded from the source and never stored in this repository). The web UI is served on localhost only, so the photo dropped onto the page is processed on this machine and is neither sent anywhere nor reachable from other devices on the network. The second photo of me used in the self-match demo is my own and stays out of the repository.
+- **Privacy & GDPR / legal risk:** storing or using sensitive real-world personal data without consent. Mitigation: the tool uses a publicly available, open-license dataset (LFW - Labeled Faces in the Wild), running entirely offline without uploading images anywhere (the only network access is the one-time, checksum-verified download of the two model weight files and, in `setup_data.py`, of LFW itself; LFW's images are downloaded from the source and never stored in this repository). The web UI is served on localhost only, so the photo dropped onto the page is processed on this machine and is neither sent anywhere nor reachable from other devices on the network. The second photo of me used in the self-match demo is my own and stays out of the repository. The optional public-figure pool adds real people's faces, and face embeddings are sensitive data, so it is limited to adults known to the public (no politicians), its photos and embeddings stay on the user's machine and are never committed, every photo's author and licence are recorded and shown wherever it appears, and building it never involves a query photo. This is a course project's position, not legal advice.
 - **Performance bottleneck at scale:** pre-computing face embeddings into a single consolidated `.npy` vector matrix during initialization, reducing matching to one vectorized matrix product (BLAS-optimized) instead of a per-file Python loop.
 
 ## 6. Getting started
@@ -82,6 +82,8 @@ Then open `http://localhost:8501` and drop a photo with a face on the page. `dat
 `setup_data.py` downloads LFW (about 180 MB, checksum-verified), builds `data/celebrities` (500 faces) and `data/calibration` (200 people) from the file list in `data/lfw_split.json`, and calibrates the thresholds. Installing took about a minute and setup about 3.5 minutes on a home connection, most of it the download and calibration. Running it again is safe: it skips what is finished and leaves your other folders alone. Use `--tarball <file>` if you already have `lfw.tgz`, and `--recalibrate` to compute the thresholds again.
 
 For the CLI alone, `pip install -r requirements.txt` is enough, and `python match.py --image <photo> --dataset data/celebrities` prints the matches.
+
+**Optional: a pool of people you will recognise.** `python setup_data.py --wikidata` also builds `data/wikidata`: 500 well-known actors, footballers, singers, tennis players and racing drivers, one licensed photo each, chosen from the list in `data/wikidata_people.json`. It takes about 30 minutes, because it waits between requests to Wikimedia, and uses about 42 MB; stop it any time and run it again to continue. It then appears in the page's dropdown with its own thresholds, and works offline from then on. Use `--wikidata-limit 100` for a quicker, smaller pool. The thresholds are fitted with LFW faces as the strangers, while the pool's photos come from Wikimedia Commons, so read its confidence labels as a little less exact than LFW's. On the pool, `data/my_photo/PK.jpg`'s top match in our run was Psy at 0.2702.
 
 **See your own self-match (Beat 2).** You need two different photos of yourself. Copy `data/celebrities` to `data/celebrities_plus_me`, add one photo as `data/celebrities_plus_me/Me/me.jpg`, and index it once with `python match.py --image <your other photo> --dataset data/celebrities_plus_me`. The new dataset then appears in the page's dropdown; drop your other photo on the page. Your photos stay on your machine, but check that they stay out of git too: add the new folder to `.gitignore`.
 

@@ -80,7 +80,10 @@ data\calibration --dataset data\celebrities` first; both CLIs default to the
 
 On a fresh clone, `python setup_data.py` downloads LFW, builds `data/celebrities`
 and `data/calibration` from `data/lfw_split.json`, and calibrates (about 3.5
-minutes). It is safe to run again.
+minutes). It is safe to run again. `--wikidata` also builds the optional
+public-figure pool in `data/wikidata` (about 30 minutes, resumable, rate limited:
+never speed it up, Commons answers HTTP 429). Dataset folders must stay ASCII,
+because `cv2.imread` fails silently on non-ASCII paths on Windows.
 
 ## Run the web UI
 
@@ -102,8 +105,8 @@ new one with one `match.py` run first. To drive the page headless, use
 python -m pytest tests/ -v
 ```
 
-110 tests pass as of the `getting-started` change; without Streamlit
-installed, `tests/test_app.py` (22 tests) is skipped and 88 pass.
+204 tests pass as of the `online-candidate-pool` change; without Streamlit
+installed, `tests/test_app.py` (28 tests) is skipped and 175 pass.
 
 Charts: give `st.vega_lite_chart` a spec whose layers carry their own inline
 data. A DataFrame or top-level `data` makes Streamlit load pyarrow, whose DLL

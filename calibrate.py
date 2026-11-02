@@ -12,9 +12,8 @@ import json
 import sys
 from pathlib import Path
 
-import numpy as np
-
 from face_pipeline.calibration import (
+    absent_strangers,
     compute_index_high_threshold,
     compute_thresholds,
     embed_calibration_dataset,
@@ -82,7 +81,9 @@ def main(argv: list[str] | None = None) -> int:
     threshold_low, _pairwise_high = compute_thresholds(intra_scores, inter_scores)
 
     index = get_or_build_index(dataset_dir)
-    strangers = np.array([e for embs in by_person.values() for e in embs])
+    strangers, removed = absent_strangers(by_person, index.entries)
+    if removed:
+        print(f"Left out {len(removed)} calibration people who are also in the dataset.")
     threshold_high = max(
         compute_index_high_threshold(strangers, index.embeddings), threshold_low
     )

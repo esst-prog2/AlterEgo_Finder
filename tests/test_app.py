@@ -438,3 +438,104 @@ def test_card_images_are_cropped_to_squares():
     assert _square_crop(wide).shape == (100, 100, 3)
     assert _square_crop(wide).min() == 255  # centred crop
     assert _square_crop(tall).shape == (40, 40, 3)
+
+
+# --- photo credits ---------------------------------------------------------------
+
+
+@pytest.fixture
+def credited_data_dir(tmp_path):
+    """A dataset of 12 faces whose photos carry credits, one with hostile text."""
+    data_dir = tmp_path / "data"
+    dataset = data_dir / "pool"
+    _twelve_faces(dataset)
+    images = {
+        f"{p.parent.name}/{p.name}": {
+            "name": p.parent.name, "author": "Jane Doe", "license": "CC BY-SA 4.0",
+            "source": "https://commons.wikimedia.org/wiki/File:Good.jpg",
+        }
+        for p in dataset.glob("*/*.jpg")
+    }
+    images["Person_00/face.jpg"].update(
+        author="**bold** <img src=x onerror=alert(1)>", source="https://evil.example/page",
+    )
+    (dataset / "attribution.json").write_text(json.dumps({"images": images, "skipped": {}}), encoding="utf-8")
+    get_or_build_index(dataset)
+    _write_config(data_dir, 0.0, 0.5)
+    return data_dir
+
+
+def _credits(at):
+    return [t.value for t in at.text if t.value.startswith("Photo: ")]
+
+
+def test_cards_show_author_and_licence_as_plain_text(credited_data_dir, monkeypatch):
+    at = _upload(_app(credited_data_dir, monkeypatch), (FIXTURES / "biden_1.jpg").read_bytes())
+
+    credits = _credits(at)
+    assert len(credits) == 10
+    assert "Photo: Jane Doe, CC BY-SA 4.0" in credits
+    # biden_1.jpg is Person_00's own photo, so the hostile text is on the top card.
+    assert "Photo: **bold** <img src=x onerror=alert(1)>, CC BY-SA 4.0" in credits
+    assert not any("<img src=x" in m.value or "**bold**" in m.value for m in at.markdown)
+
+
+def test_only_commons_pages_become_links(credited_data_dir, monkeypatch):
+    at = _upload(_app(credited_data_dir, monkeypatch), (FIXTURES / "biden_1.jpg").read_bytes())
+
+    links = [m.value for m in at.markdown if m.value.startswith("[Source](")]
+    assert len(links) == 9  # the hostile card has no link
+    assert all(link == "[Source](https://commons.wikimedia.org/wiki/File:Good.jpg)" for link in links)
+    assert not any("evil.example" in m.value for m in at.markdown)
+
+
+def test_tooltips_of_named_faces_carry_the_credit(credited_data_dir, monkeypatch):
+    at = _upload(_app(credited_data_dir, monkeypatch), (FIXTURES / "biden_1.jpg").read_bytes())
+    spec, faces = _target_faces(at)
+
+    named = [row for row in faces if row["named"]]
+    assert all(row["photo"].endswith("CC BY-SA 4.0") for row in named)
+    named_layer = next(l for l in spec["layer"]
+                       if l["mark"]["type"] == "circle" and l["data"]["values"][0].get("named") is True)
+    assert {"field": "photo", "type": "nominal", "title": "Photo"} in named_layer["encoding"]["tooltip"]
+
+
+def test_datasets_without_credits_look_as_before(indexed_data_dir, monkeypatch):
+    at = _upload(_app(indexed_data_dir, monkeypatch), QUERY.read_bytes())
+
+    assert _credits(at) == []
+    assert not any(m.value.startswith("[Source](") for m in at.markdown)
+    spec, faces = _target_faces(at)
+    assert all("photo" not in row for row in faces)
+    assert '"Photo"' not in json.dumps(spec)
+
+
+def test_report_from_the_page_credits_the_photos(credited_data_dir, monkeypatch):
+    _upload(_app(credited_data_dir, monkeypatch), (FIXTURES / "biden_1.jpg").read_bytes())
+    report = (credited_data_dir / "results" / "summary.html").read_text(encoding="utf-8")
+    assert "Jane Doe" in report and "<img src=x" not in report
+
+
+
+def test_long_credits_are_shortened_on_cards_but_not_in_the_report(tmp_path, monkeypatch):
+    # Seen on the real pool: a seven-line author credit broke the card layout.
+    data_dir = tmp_path / "data"
+    dataset = data_dir / "pool"
+    _twelve_faces(dataset)
+    long_author = "Steffi in Hamburg: Mark Henckel from Hamburg, derivative work: " + "x" * 120
+    images = {f"{p.parent.name}/{p.name}": {"author": long_author, "license": "CC BY-SA 2.0",
+                                             "source": "https://commons.wikimedia.org/wiki/File:A.jpg"}
+              for p in dataset.glob("*/*.jpg")}
+    (dataset / "attribution.json").write_text(json.dumps({"images": images, "skipped": {}}), encoding="utf-8")
+    get_or_build_index(dataset)
+    _write_config(data_dir, 0.0, 0.5)
+
+    at = _upload(_app(data_dir, monkeypatch), QUERY.read_bytes())
+
+    credits = _credits(at)
+    assert credits
+    for credit in credits:
+        assert len(credit) < 100
+        assert credit.endswith("CC BY-SA 2.0")  # the licence always survives
+        assert "..." in credit
+    assert long_author in (data_dir / "results" / "summary.html").read_text(encoding="utf-8")
