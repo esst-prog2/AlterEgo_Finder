@@ -25,8 +25,8 @@ MVP complete, matching README section 3's "First useful version" scope:
 detection+alignment (YuNet), ArcFace (512-d) embedding, dataset
 auto-indexing, calibrated two-threshold confidence classification
 (`calibrate.py`), model weights fetched on demand with SHA-256
-verification, and a self-contained `summary.html` report. 6 capabilities
-under `openspec/specs/` (`web-ui` added for the final demo), all archived changes under
+verification, and a self-contained `summary.html` report. 7 capabilities
+under `openspec/specs/` (`web-ui` and `project-setup` added for the final demo), all archived changes under
 `openspec/changes/archive/`. See PLANNING_LOG.md for
 the decision history.
 
@@ -50,8 +50,12 @@ Final demo: README section 1 is a three-beat story in a local web UI
 `requirements-ui.txt` only. Branch `similarity-target` adds the
 similarity target (exact `1 - score` distances with threshold rings, layout in
 `face_pipeline/target.py`; the chart's data stays inline because Windows'
-application control blocks pyarrow here). 97 tests passing (the 22 in
-`tests/test_app.py` are skipped without Streamlit). Next, as a stretch goal:
+application control blocks pyarrow here).
+
+Branch `getting-started` adds `setup_data.py`: one command from a fresh clone
+to a working page (verified LFW download, datasets built from the committed
+`data/lfw_split.json`, calibration). README section 6 has the steps. 110 tests
+passing (the 22 in `tests/test_app.py` are skipped without Streamlit). Next:
 `online-candidate-pool`.
 
 ## Workflow
