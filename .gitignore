@@ -30,5 +30,7 @@ data/other_photos_test/
 data/celebrities_plus_me_plus_others/
 # Optional public-figure pool: photos fetched from Wikimedia by setup_data.py --wikidata.
 data/wikidata/
+# data/wikidata plus the user's second photo (demo Beat 2): private, never commit.
+data/wikidata_plus_me/
 # Private test photos of real people, used to investigate detection; never commit.
 photo_face_problem/

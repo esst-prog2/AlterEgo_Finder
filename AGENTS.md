@@ -65,8 +65,9 @@ credits on cards and in the report, and its own thresholds (a dataset's
 paths on Windows, so dataset folder names stay ASCII. Branch `detect-large-faces`
 retries detection on smaller copies when full size finds nothing, since YuNet scores
 very large faces lower. 217 tests passing (the 28 in
-`tests/test_app.py` are skipped without Streamlit). Next: move Beat 1 onto the pool
-in README section 1, before the 2026-11-07 hand-in.
+`tests/test_app.py` are skipped without Streamlit). Branch `demo-on-pool` moves README section 1's
+Beats 1 and 2 onto the pool, with a local, gitignored `data/wikidata_plus_me`; LFW stays
+as the fallback. Section 1 is the demo description for Canvas, due 2026-11-07.
 
 ## Workflow
 
