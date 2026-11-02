@@ -11,8 +11,8 @@ someone the viewer recognises. Matching against it stays local and offline.
 The people in the pool SHALL come from a list committed to the repository,
 holding identifiers, names and image file names but no images. Building the pool
 SHALL NOT run a live search for people. The list SHALL contain only adults with
-an English name, selected across several occupations by fame, and SHALL NOT contain
-politicians.
+an English name, selected across several occupations by fame or added by hand, and SHALL NOT contain
+politicians or people left out by hand.
 
 #### Scenario: Build uses the list
 - **WHEN** the pool is built
@@ -32,6 +32,15 @@ politicians.
 - **WHEN** the pool is built after someone has been removed from the list
 - **THEN** that person's image and credit leave the pool, and nothing else in the
   folder is touched
+
+#### Scenario: Added by hand
+- **WHEN** a person is on the list of hand-picked additions
+- **THEN** they are on the list ahead of the others, and their image still has to pass
+  the licence, author and face checks
+
+#### Scenario: Left out by hand
+- **WHEN** a person is on the list of exclusions
+- **THEN** they are not on the list, whatever their occupation or fame
 
 #### Scenario: Refreshing the list
 - **WHEN** a maintainer runs the refresh command
