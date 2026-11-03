@@ -4,10 +4,10 @@ import json
 import shutil
 from pathlib import Path
 
-import cv2
 import numpy as np
 import pytest
 
+from face_pipeline.images import read_image
 from face_pipeline.embedder import NoFaceDetectedError
 from face_pipeline.index import get_or_build_index
 from face_pipeline.matching import (
@@ -50,7 +50,7 @@ def test_match_image_ranks_same_person_first_and_returns_crop(tmp_path):
     dataset_dir = tmp_path / "dataset"
     shutil.copytree(FIXTURES / "dataset", dataset_dir)
     index = get_or_build_index(dataset_dir)
-    query = cv2.imread(str(FIXTURES / "obama_query.jpg"))
+    query = read_image(FIXTURES / "obama_query.jpg")
 
     result = match_image(query, index, 0.2, 0.4)
 

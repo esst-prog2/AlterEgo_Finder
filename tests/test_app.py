@@ -18,6 +18,8 @@ import pytest
 pytest.importorskip("streamlit")
 from streamlit.testing.v1 import AppTest  # noqa: E402
 
+from image_helpers import write_image  # noqa: E402
+from face_pipeline.images import read_image  # noqa: E402
 from face_pipeline.index import get_or_build_index  # noqa: E402
 
 REPO_ROOT = Path(__file__).parent.parent
@@ -50,13 +52,13 @@ def _twelve_faces(dataset_dir: Path, first_person: str = "Person_00") -> None:
         FIXTURES / "pk_sunglasses_shirt.jpg",
         *sorted((FIXTURES / "calibration").glob("*/*.jpg")),
     ]
-    images = [cv2.imread(str(p)) for p in distinct]
+    images = [read_image(p) for p in distinct]
     images += [cv2.flip(img, 1) for img in images[:3]]
     for i, image in enumerate(images):
         person = first_person if i == 0 else f"Person_{i:02d}"
         person_dir = dataset_dir / person
         person_dir.mkdir(parents=True)
-        cv2.imwrite(str(person_dir / "face.jpg"), image)
+        write_image(person_dir / "face.jpg", image)
 
 
 @pytest.fixture(scope="module")
@@ -66,7 +68,7 @@ def indexed_data_dir(tmp_path_factory):
     _twelve_faces(data_dir / "twelve")
     get_or_build_index(data_dir / "twelve")
     shutil.copytree(FIXTURES / "dataset", data_dir / "unindexed")
-    shutil.rmtree(data_dir / "unindexed" / ".matchcache")
+    shutil.rmtree(data_dir / "unindexed" / ".matchcache", ignore_errors=True)
     (data_dir / "results").mkdir()
     _write_config(data_dir, 0.2, 0.4)
     return data_dir
@@ -105,7 +107,7 @@ def test_lists_only_indexed_datasets(indexed_data_dir, monkeypatch):
 def test_no_indexed_dataset_tells_user_to_index_one(tmp_path, monkeypatch):
     data_dir = tmp_path / "data"
     shutil.copytree(FIXTURES / "dataset", data_dir / "unindexed")
-    shutil.rmtree(data_dir / "unindexed" / ".matchcache")
+    shutil.rmtree(data_dir / "unindexed" / ".matchcache", ignore_errors=True)
 
     at = _app(data_dir, monkeypatch)
 

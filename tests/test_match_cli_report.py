@@ -3,8 +3,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-import cv2
 import numpy as np
+from image_helpers import write_image
 
 REPO_ROOT = Path(__file__).parent.parent
 FIXTURES = REPO_ROOT / "tests" / "fixtures"
@@ -50,7 +50,7 @@ def test_no_report_written_on_no_face_error(tmp_path):
 
     blank_path = tmp_path / "blank.jpg"
     blank = np.full((300, 300, 3), 255, dtype=np.uint8)
-    cv2.imwrite(str(blank_path), blank)
+    write_image(blank_path, blank)
 
     result = run_match(
         "--image", str(blank_path),

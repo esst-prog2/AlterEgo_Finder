@@ -13,10 +13,9 @@ import sys
 from pathlib import Path
 from typing import Optional, Tuple
 
-import cv2
-
 from face_pipeline.attribution import load_attribution
 from face_pipeline.embedder import NoFaceDetectedError
+from face_pipeline.images import read_image
 from face_pipeline.index import get_or_build_index, rank_matches
 from face_pipeline.matching import (  # noqa: F401 (re-exported for callers of match.py)
     HIGH_CONFIDENCE,
@@ -116,7 +115,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Error: Dataset directory not found: {dataset_path}", file=sys.stderr)
         return 1
 
-    query_image = cv2.imread(str(image_path))
+    query_image = read_image(image_path)
     if query_image is None:
         print(f"Error: Unable to read image file: {image_path}", file=sys.stderr)
         return 1
@@ -146,4 +145,6 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
+    # A person's name may have characters this console cannot show.
+    sys.stdout.reconfigure(errors="replace")
     sys.exit(main())

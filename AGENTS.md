@@ -61,12 +61,13 @@ Branch `online-candidate-pool` adds an optional pool of 500 recognisable adults
 (no politicians) in `data/wikidata`: built once by `setup_data.py --wikidata` from
 the committed `data/wikidata_people.json`, rate limited and resumable, with photo
 credits on cards and in the report, and its own thresholds (a dataset's
-`config.json` wins over its parent's). `cv2.imread` fails silently on non-ASCII
-paths on Windows, so dataset folder names stay ASCII. Branch `detect-large-faces`
+`config.json` wins over its parent's). OpenCV cannot open non-ASCII paths on Windows, so
+the program reads images and models as bytes (`face_pipeline/images.py`) and works from any
+folder; the pool's folder names stay ASCII anyway. Branch `detect-large-faces`
 retries detection on smaller copies when full size finds nothing, since YuNet scores
 very large faces lower. Branch `target-label-overlap` moves a name on the target to
 another side of its dot when its usual place collides (`place_names`); dots never move.
-241 tests passing (the 32 in
+253 tests passing (the 32 in
 `tests/test_app.py` are skipped without Streamlit). Branch `demo-on-pool` moves README section 1's
 demo onto the pool, with a local, gitignored `data/wikidata_plus_me`; LFW stays as the
 fallback. Branch `shorten-demo-description` cuts section 1 to six sentences, as Homework 8

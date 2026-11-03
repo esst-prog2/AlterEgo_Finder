@@ -11,12 +11,13 @@ import cv2
 import numpy as np
 import pytest
 
+from face_pipeline.images import read_image
 from face_pipeline import wikidata_pool as wp
 
 FIXTURES = Path(__file__).parent / "fixtures"
 FACE = (FIXTURES / "obama_1.jpg").read_bytes()
 OTHER_FACE = (FIXTURES / "biden_1.jpg").read_bytes()
-PNG_FACE = cv2.imencode(".png", cv2.imread(str(FIXTURES / "obama_2.jpg")))[1].tobytes()
+PNG_FACE = cv2.imencode(".png", read_image(FIXTURES / "obama_2.jpg"))[1].tobytes()
 BLANK = cv2.imencode(".jpg", np.full((300, 300, 3), 255, dtype=np.uint8))[1].tobytes()
 
 

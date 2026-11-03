@@ -146,7 +146,7 @@ def test_run_after_an_interruption_finishes_the_job(tiny):
 
 def test_missing_index_is_rebuilt_without_recalibrating(tiny, monkeypatch):
     assert setup_data.main([*tiny.args, "--tarball", str(tiny.archive)]) == 0
-    shutil.rmtree(tiny.data / "celebrities" / ".matchcache")
+    shutil.rmtree(tiny.data / "celebrities" / ".matchcache", ignore_errors=True)
     calls = _count_calibrations(monkeypatch)
 
     assert setup_data.main(tiny.args) == 0
