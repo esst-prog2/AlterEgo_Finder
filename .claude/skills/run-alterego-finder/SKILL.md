@@ -105,8 +105,8 @@ new one with one `match.py` run first. To drive the page headless, use
 python -m pytest tests/ -v
 ```
 
-253 tests pass as of the `fix-install-path-and-download-stall` change; without Streamlit
-installed, `tests/test_app.py` (32 tests) is skipped and 220 pass.
+271 tests pass as of the `pick-face-orientation` change; without Streamlit
+installed, `tests/test_app.py` (32 tests) is skipped and 238 pass.
 
 Charts: give `st.vega_lite_chart` a spec whose layers carry their own inline
 data. A DataFrame or top-level `data` makes Streamlit load pyarrow, whose DLL

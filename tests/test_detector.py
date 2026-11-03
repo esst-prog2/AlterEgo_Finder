@@ -2,6 +2,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+import pytest
 
 from face_pipeline.images import read_image
 from face_pipeline import detector
@@ -122,6 +123,7 @@ def _row(x=10.0, y=20.0, w=100.0, h=120.0):
 
 def test_sizes_are_tried_largest_first_and_stop_at_the_first_hit(monkeypatch):
     calls = []
+    monkeypatch.setattr(detector, "_choose_turn", lambda image: 0)
     monkeypatch.setattr(detector, "_faces_at_size", _fake_faces(1024, _row(), calls))
 
     assert detector.detect_face(np.zeros((1500, 3000, 3), dtype=np.uint8)) is not None
@@ -131,6 +133,7 @@ def test_sizes_are_tried_largest_first_and_stop_at_the_first_hit(monkeypatch):
 
 def test_only_sizes_below_the_image_are_tried(monkeypatch):
     calls = []
+    monkeypatch.setattr(detector, "_choose_turn", lambda image: 0)
     monkeypatch.setattr(detector, "_faces_at_size", _fake_faces(None, calls=calls))
 
     assert detector.detect_face(np.zeros((1200, 900, 3), dtype=np.uint8)) is None
@@ -140,6 +143,7 @@ def test_only_sizes_below_the_image_are_tried(monkeypatch):
 
 def test_face_found_at_full_size_means_no_retry(monkeypatch):
     calls = []
+    monkeypatch.setattr(detector, "_choose_turn", lambda image: 0)
     monkeypatch.setattr(detector, "_faces_at_size", _fake_faces(3000, _row(), calls))
 
     assert detector.detect_face(np.zeros((1500, 3000, 3), dtype=np.uint8)) is not None
@@ -150,6 +154,7 @@ def test_face_found_at_full_size_means_no_retry(monkeypatch):
 def test_small_image_is_never_retried(monkeypatch):
     # LFW's 250-px images: why calibration cannot change.
     calls = []
+    monkeypatch.setattr(detector, "_choose_turn", lambda image: 0)
     monkeypatch.setattr(detector, "_faces_at_size", _fake_faces(None, calls=calls))
 
     assert detector.detect_face(np.zeros((250, 250, 3), dtype=np.uint8)) is None
@@ -159,6 +164,7 @@ def test_small_image_is_never_retried(monkeypatch):
 
 def test_box_and_landmarks_are_mapped_back_from_the_copy(monkeypatch):
     # Found on a 1600-px copy of a 3200-px image, so coordinates double.
+    monkeypatch.setattr(detector, "_choose_turn", lambda image: 0)
     monkeypatch.setattr(detector, "_faces_at_size", _fake_faces(1600, _row()))
 
     found = detector.detect_face(np.zeros((2000, 3200, 3), dtype=np.uint8))
@@ -169,6 +175,7 @@ def test_box_and_landmarks_are_mapped_back_from_the_copy(monkeypatch):
 
 
 def test_box_is_clipped_to_the_full_image_after_mapping_back(monkeypatch):
+    monkeypatch.setattr(detector, "_choose_turn", lambda image: 0)
     monkeypatch.setattr(detector, "_faces_at_size", _fake_faces(1600, _row(x=1550.0, y=-5.0, w=100.0, h=100.0)))
 
     found = detector.detect_face(np.zeros((2000, 3200, 3), dtype=np.uint8))
@@ -178,3 +185,126 @@ def test_box_is_clipped_to_the_full_image_after_mapping_back(monkeypatch):
 
 def test_large_blank_image_has_no_face():
     assert detector.detect_face(np.full((3000, 3000, 3), 255, dtype=np.uint8)) is None
+
+
+# --- photos on their side or upside down (decided 2026-11-03) --------------------
+
+# How a point (x, y) of an image h high and w wide moves under np.rot90(image, k).
+_TURNED = {
+    1: lambda x, y, h, w: (y, w - 1 - x),
+    2: lambda x, y, h, w: (w - 1 - x, h - 1 - y),
+    3: lambda x, y, h, w: (h - 1 - y, x),
+}
+
+
+@pytest.mark.parametrize("k", [1, 2, 3])
+def test_a_turned_photo_is_found_in_the_coordinates_it_was_given(k):
+    upright = read_image(FIXTURES / "obama_1.jpg")
+    h, w = upright.shape[:2]
+    expected = detect_face(upright).landmarks
+    photo = np.rot90(upright, k).copy()
+
+    found = detect_face(photo)
+
+    assert found is not None
+    x1, y1, x2, y2 = found.box
+    assert 0 <= x1 < x2 <= photo.shape[1] and 0 <= y1 < y2 <= photo.shape[0]
+    ux1, uy1, ux2, uy2 = detect_face(upright).box
+    corners = np.array([_TURNED[k](ux1, uy1, h, w), _TURNED[k](ux2, uy2, h, w)])
+    assert abs(x1 - corners[:, 0].min()) < 12 and abs(x2 - corners[:, 0].max()) < 12
+    assert abs(y1 - corners[:, 1].min()) < 12 and abs(y2 - corners[:, 1].max()) < 12
+    for (x, y), (fx, fy) in zip(expected, found.landmarks):
+        ex, ey = _TURNED[k](x, y, h, w)
+        assert abs(fx - ex) < 8 and abs(fy - ey) < 8
+
+
+@pytest.mark.parametrize("k", [1, 2, 3])
+def test_a_turned_photo_gives_about_the_same_embedding(k):
+    upright = read_image(FIXTURES / "obama_1.jpg")
+    a = extract_embedding(upright)
+    b = extract_embedding(np.rot90(upright, k).copy())
+    assert a @ b / (np.linalg.norm(a) * np.linalg.norm(b)) > 0.9
+
+
+@pytest.mark.parametrize("name", ["obama_1.jpg", "obama_2.jpg", "obama_query.jpg", "biden_1.jpg", "pk_sunglasses_shirt.jpg"])
+def test_an_upright_photo_is_not_turned(name):
+    assert detector._choose_turn(read_image(FIXTURES / name)) == 0
+
+
+def _scores_by_turn(scores):
+    """A detection pass whose score depends on which corner is now top-left."""
+    def faces_at_size(image):
+        score = scores[int(image[0, 0, 0])]
+        return None if score is None else np.array([_row()[:-1] + [score]], dtype=np.float32)
+    return faces_at_size
+
+
+def _marked_image():
+    image = np.zeros((100, 100, 3), dtype=np.uint8)
+    image[0, 0], image[0, 99], image[99, 99], image[99, 0] = 0, 1, 2, 3  # top-left under k = 0, 1, 2, 3
+    return image
+
+
+def test_a_clear_win_turns_and_one_within_the_margin_does_not(monkeypatch):
+    margin = detector.TURN_MARGIN
+    monkeypatch.setattr(detector, "_faces_at_size", _scores_by_turn([0.8, None, 0.8 + margin + 0.01, None]))
+    assert detector._choose_turn(_marked_image()) == 2
+
+    monkeypatch.setattr(detector, "_faces_at_size", _scores_by_turn([0.8, None, 0.8 + margin - 0.01, None]))
+    assert detector._choose_turn(_marked_image()) == 0
+
+
+def test_the_most_confident_turn_wins(monkeypatch):
+    monkeypatch.setattr(detector, "_faces_at_size", _scores_by_turn([0.8, 0.85, 0.9, 0.95]))
+    assert detector._choose_turn(_marked_image()) == 3
+
+
+def test_no_face_any_way_up_stays_as_it_is(monkeypatch):
+    monkeypatch.setattr(detector, "_faces_at_size", _scores_by_turn([None, None, None, None]))
+    assert detector._choose_turn(_marked_image()) == 0
+
+
+def _portrait_only(also_landscape_at=None):
+    """Finds a face only once a 500 x 1000 photo is turned, or as it is at one size."""
+    def faces_at_size(image):
+        h, w = image.shape[:2]
+        if h > w or w == also_landscape_at:
+            return np.array([_row()], dtype=np.float32)
+        return None
+    return faces_at_size
+
+
+def test_upright_found_only_at_full_size_is_not_turned(monkeypatch):
+    # The face is missed on the small copy, where a turned copy gives one.
+    monkeypatch.setattr(detector, "_faces_at_size", _portrait_only(also_landscape_at=1000))
+    assert detector._choose_turn(np.zeros((500, 1000, 3), dtype=np.uint8)) == 0
+
+
+def test_a_face_found_only_when_turned_turns(monkeypatch):
+    monkeypatch.setattr(detector, "_faces_at_size", _portrait_only())
+    assert detector._choose_turn(np.zeros((500, 1000, 3), dtype=np.uint8)) == 1
+
+
+def test_the_choice_is_made_on_a_small_copy(monkeypatch):
+    sizes = []
+
+    def faces_at_size(image):
+        sizes.append(max(image.shape[:2]))
+        return np.array([_row()], dtype=np.float32)
+
+    monkeypatch.setattr(detector, "_faces_at_size", faces_at_size)
+    detector._choose_turn(np.zeros((1500, 3000, 3), dtype=np.uint8))
+    assert sizes == [detector.TURN_CHECK_SIZE] * 4
+
+
+def test_a_cut_off_bystander_does_not_make_an_upright_group_photo_turn(monkeypatch):
+    # Two LFW photos turned wrongly when only the largest face's score counted: a big
+    # face cut off at the edge scored low, though a clear face was right beside it.
+    def faces_at_size(image):
+        if int(image[0, 0, 0]) == 0:  # as it is: a big low-scoring face and a small sharp one
+            return np.array([_row(w=200.0, h=200.0)[:-1] + [0.81], _row(w=50.0, h=50.0)[:-1] + [0.95]], dtype=np.float32)
+        return np.array([_row()[:-1] + [0.86]], dtype=np.float32)
+
+    monkeypatch.setattr(detector, "_faces_at_size", faces_at_size)
+    assert detector._choose_turn(_marked_image()) == 0
+
