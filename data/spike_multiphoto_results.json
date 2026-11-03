@@ -1,0 +1,830 @@
+{
+ "seed": 20261103,
+ "gallery": [
+  "Psy",
+  "Stoffel_Vandoorne",
+  "Roberto_Carlos",
+  "Mariah_Carey",
+  "Noah_Wyle",
+  "Alia_Bhatt",
+  "Vitantonio_Liuzzi",
+  "Nikita_Mazepin",
+  "Valery_Leontiev",
+  "Steffi_Graf",
+  "Bruce_Springsteen",
+  "Michael_Ballack",
+  "Juan_Pablo_Montoya",
+  "Salman_Khan",
+  "Arantxa_Sanchez_Vicario",
+  "Carlo_Ancelotti",
+  "Jim_Carrey",
+  "Kimi_Raikkonen",
+  "Gwyneth_Paltrow",
+  "Amelie_Mauresmo",
+  "Alfredo_Di_Stefano",
+  "Heath_Ledger",
+  "Michael_Schumacher",
+  "John_Travolta",
+  "Nadia_Petrova",
+  "Francesco_Totti",
+  "Elizabeth_Taylor",
+  "Takuma_Sato",
+  "Mick_Jagger",
+  "John_McEnroe",
+  "Jose_Mourinho",
+  "Jodie_Foster",
+  "Mika_Hakkinen",
+  "Celine_Dion",
+  "Anna_Kournikova",
+  "Zinedine_Zidane",
+  "Winona_Ryder",
+  "David_Coulthard",
+  "Lleyton_Hewitt",
+  "Luis_Figo",
+  "Uma_Thurman",
+  "Jacques_Villeneuve",
+  "Julie_Andrews",
+  "Pete_Sampras",
+  "Jason_Statham",
+  "Jack_Nicholson",
+  "Fernando_Alonso",
+  "Elvis_Presley",
+  "Boris_Becker",
+  "Alex_Ferguson"
+ ],
+ "people_with_no_category": 0,
+ "rejected_totals": {
+  "no_face": 92,
+  "several_faces": 76,
+  "licence": 5,
+  "author": 2
+ },
+ "arms": {
+  "strangers_fit": 1000,
+  "strangers_test": 1000,
+  "same_person_queries": 142,
+  "same_person_people": 44,
+  "floors": {
+   "0.25": {
+    "photos_total": 117,
+    "photos_per_person": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     2,
+     2,
+     2,
+     2,
+     2,
+     2,
+     2,
+     3,
+     3,
+     3,
+     3,
+     3,
+     3,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4
+    ],
+    "one_photo_misses": 4,
+    "queries_for_people_with_extras": 86,
+    "people_with_extras": [
+     "Alex_Ferguson",
+     "Alfredo_Di_Stefano",
+     "Anna_Kournikova",
+     "Arantxa_Sanchez_Vicario",
+     "Boris_Becker",
+     "Bruce_Springsteen",
+     "Carlo_Ancelotti",
+     "Celine_Dion",
+     "Elizabeth_Taylor",
+     "Gwyneth_Paltrow",
+     "Jack_Nicholson",
+     "Jason_Statham",
+     "Jim_Carrey",
+     "Jodie_Foster",
+     "John_McEnroe",
+     "Jose_Mourinho",
+     "Juan_Pablo_Montoya",
+     "Lleyton_Hewitt",
+     "Luis_Figo",
+     "Michael_Ballack",
+     "Michael_Schumacher",
+     "Noah_Wyle",
+     "Pete_Sampras",
+     "Psy",
+     "Roberto_Carlos",
+     "Salman_Khan",
+     "Takuma_Sato",
+     "Uma_Thurman",
+     "Vitantonio_Liuzzi"
+    ],
+    "arms": {
+     "one": {
+      "threshold_high": 0.2989888952740759,
+      "strangers_test_reaching": 12,
+      "same_person_hits": 138,
+      "same_person_median_own_score": 0.5752442091435221,
+      "same_person_median_own_score_people_with_extras": 0.5714371804137146,
+      "same_person_hits_at_pool_high": 133,
+      "same_person_misses": [
+       "Bruce_Springsteen",
+       "Kimi_Raikkonen",
+       "Kimi_Raikkonen",
+       "Winona_Ryder"
+      ],
+      "fixed_from_one_photo": 0,
+      "broken_from_one_photo": 0,
+      "own_top": [
+       {
+        "person": "Psy",
+        "score": 0.27016629187812324,
+        "label": "Alter Ego"
+       },
+       {
+        "person": "Stoffel_Vandoorne",
+        "score": 0.24761704191398043,
+        "label": "Alter Ego"
+       },
+       {
+        "person": "Roberto_Carlos",
+        "score": 0.21329391852092994,
+        "label": "Alter Ego"
+       }
+      ],
+      "own_second_photo_score": 0.4321776774035765,
+      "own_second_photo_reaches": true
+     },
+     "best": {
+      "threshold_high": 0.32107390239511097,
+      "strangers_test_reaching": 9,
+      "same_person_hits": 138,
+      "same_person_median_own_score": 0.6161748837979666,
+      "same_person_median_own_score_people_with_extras": 0.6276269409642352,
+      "same_person_hits_at_pool_high": 135,
+      "same_person_misses": [
+       "Anna_Kournikova",
+       "Kimi_Raikkonen",
+       "Kimi_Raikkonen",
+       "Winona_Ryder"
+      ],
+      "fixed_from_one_photo": 1,
+      "broken_from_one_photo": 1,
+      "own_top": [
+       {
+        "person": "Psy",
+        "score": 0.27016629187812324,
+        "label": "Alter Ego"
+       },
+       {
+        "person": "Noah_Wyle",
+        "score": 0.2651763627347135,
+        "label": "Alter Ego"
+       },
+       {
+        "person": "Stoffel_Vandoorne",
+        "score": 0.24761704191398048,
+        "label": "Alter Ego"
+       }
+      ],
+      "own_second_photo_score": 0.4321776774035765,
+      "own_second_photo_reaches": true
+     },
+     "averaged": {
+      "threshold_high": 0.3092742496670933,
+      "strangers_test_reaching": 7,
+      "same_person_hits": 137,
+      "same_person_median_own_score": 0.6063934819170433,
+      "same_person_median_own_score_people_with_extras": 0.6326859184741628,
+      "same_person_hits_at_pool_high": 133,
+      "same_person_misses": [
+       "Anna_Kournikova",
+       "Kimi_Raikkonen",
+       "Kimi_Raikkonen",
+       "Lleyton_Hewitt",
+       "Winona_Ryder"
+      ],
+      "fixed_from_one_photo": 1,
+      "broken_from_one_photo": 2,
+      "own_top": [
+       {
+        "person": "Noah_Wyle",
+        "score": 0.26726549685688583,
+        "label": "Alter Ego"
+       },
+       {
+        "person": "Stoffel_Vandoorne",
+        "score": 0.24761704191398043,
+        "label": "Alter Ego"
+       },
+       {
+        "person": "Psy",
+        "score": 0.22821977986858294,
+        "label": "Alter Ego"
+       }
+      ],
+      "own_second_photo_score": 0.4321776774035765,
+      "own_second_photo_reaches": true
+     },
+     "top": {
+      "threshold_high": 0.31794636759220746,
+      "strangers_test_reaching": 8,
+      "same_person_hits": 138,
+      "same_person_median_own_score": 0.6161748837979666,
+      "same_person_median_own_score_people_with_extras": 0.6276269409642352,
+      "same_person_hits_at_pool_high": 135,
+      "same_person_misses": [
+       "Anna_Kournikova",
+       "Kimi_Raikkonen",
+       "Kimi_Raikkonen",
+       "Winona_Ryder"
+      ],
+      "fixed_from_one_photo": 1,
+      "broken_from_one_photo": 1,
+      "own_top": [
+       {
+        "person": "Psy",
+        "score": 0.27016629187812324,
+        "label": "Alter Ego"
+       },
+       {
+        "person": "Noah_Wyle",
+        "score": 0.2651763627347135,
+        "label": "Alter Ego"
+       },
+       {
+        "person": "Stoffel_Vandoorne",
+        "score": 0.24761704191398048,
+        "label": "Alter Ego"
+       }
+      ],
+      "own_second_photo_score": 0.4321776774035765,
+      "own_second_photo_reaches": true,
+      "strangers_test_reaching_one_photo_threshold": 16
+     }
+    }
+   },
+   "0.15": {
+    "photos_total": 126,
+    "photos_per_person": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     2,
+     2,
+     2,
+     2,
+     2,
+     2,
+     2,
+     2,
+     3,
+     3,
+     3,
+     3,
+     3,
+     3,
+     3,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4
+    ],
+    "one_photo_misses": 4,
+    "queries_for_people_with_extras": 95,
+    "people_with_extras": [
+     "Alex_Ferguson",
+     "Alfredo_Di_Stefano",
+     "Anna_Kournikova",
+     "Arantxa_Sanchez_Vicario",
+     "Boris_Becker",
+     "Bruce_Springsteen",
+     "Carlo_Ancelotti",
+     "Celine_Dion",
+     "Elizabeth_Taylor",
+     "Gwyneth_Paltrow",
+     "Jack_Nicholson",
+     "Jason_Statham",
+     "Jim_Carrey",
+     "Jodie_Foster",
+     "John_McEnroe",
+     "Jose_Mourinho",
+     "Juan_Pablo_Montoya",
+     "Julie_Andrews",
+     "Kimi_Raikkonen",
+     "Lleyton_Hewitt",
+     "Luis_Figo",
+     "Michael_Ballack",
+     "Michael_Schumacher",
+     "Mick_Jagger",
+     "Noah_Wyle",
+     "Pete_Sampras",
+     "Psy",
+     "Roberto_Carlos",
+     "Salman_Khan",
+     "Takuma_Sato",
+     "Uma_Thurman",
+     "Valery_Leontiev",
+     "Vitantonio_Liuzzi"
+    ],
+    "arms": {
+     "one": {
+      "threshold_high": 0.2989888952740759,
+      "strangers_test_reaching": 12,
+      "same_person_hits": 138,
+      "same_person_median_own_score": 0.5752442091435221,
+      "same_person_median_own_score_people_with_extras": 0.5688220475201116,
+      "same_person_hits_at_pool_high": 133,
+      "same_person_misses": [
+       "Bruce_Springsteen",
+       "Kimi_Raikkonen",
+       "Kimi_Raikkonen",
+       "Winona_Ryder"
+      ],
+      "fixed_from_one_photo": 0,
+      "broken_from_one_photo": 0,
+      "own_top": [
+       {
+        "person": "Psy",
+        "score": 0.27016629187812324,
+        "label": "Alter Ego"
+       },
+       {
+        "person": "Stoffel_Vandoorne",
+        "score": 0.24761704191398043,
+        "label": "Alter Ego"
+       },
+       {
+        "person": "Roberto_Carlos",
+        "score": 0.21329391852092994,
+        "label": "Alter Ego"
+       }
+      ],
+      "own_second_photo_score": 0.4321776774035765,
+      "own_second_photo_reaches": true
+     },
+     "best": {
+      "threshold_high": 0.32107390239511097,
+      "strangers_test_reaching": 9,
+      "same_person_hits": 138,
+      "same_person_median_own_score": 0.6161748837979666,
+      "same_person_median_own_score_people_with_extras": 0.621434547163119,
+      "same_person_hits_at_pool_high": 135,
+      "same_person_misses": [
+       "Anna_Kournikova",
+       "Kimi_Raikkonen",
+       "Kimi_Raikkonen",
+       "Winona_Ryder"
+      ],
+      "fixed_from_one_photo": 1,
+      "broken_from_one_photo": 1,
+      "own_top": [
+       {
+        "person": "Psy",
+        "score": 0.27016629187812324,
+        "label": "Alter Ego"
+       },
+       {
+        "person": "Noah_Wyle",
+        "score": 0.2651763627347135,
+        "label": "Alter Ego"
+       },
+       {
+        "person": "Stoffel_Vandoorne",
+        "score": 0.24761704191398048,
+        "label": "Alter Ego"
+       }
+      ],
+      "own_second_photo_score": 0.4321776774035765,
+      "own_second_photo_reaches": true
+     },
+     "averaged": {
+      "threshold_high": 0.3092742496670933,
+      "strangers_test_reaching": 6,
+      "same_person_hits": 137,
+      "same_person_median_own_score": 0.5936176505577887,
+      "same_person_median_own_score_people_with_extras": 0.5936930544547816,
+      "same_person_hits_at_pool_high": 133,
+      "same_person_misses": [
+       "Anna_Kournikova",
+       "Kimi_Raikkonen",
+       "Kimi_Raikkonen",
+       "Lleyton_Hewitt",
+       "Winona_Ryder"
+      ],
+      "fixed_from_one_photo": 1,
+      "broken_from_one_photo": 2,
+      "own_top": [
+       {
+        "person": "Noah_Wyle",
+        "score": 0.26726549685688583,
+        "label": "Alter Ego"
+       },
+       {
+        "person": "Stoffel_Vandoorne",
+        "score": 0.24761704191398043,
+        "label": "Alter Ego"
+       },
+       {
+        "person": "Psy",
+        "score": 0.22821977986858294,
+        "label": "Alter Ego"
+       }
+      ],
+      "own_second_photo_score": 0.4321776774035765,
+      "own_second_photo_reaches": true
+     },
+     "top": {
+      "threshold_high": 0.31794636759220746,
+      "strangers_test_reaching": 8,
+      "same_person_hits": 138,
+      "same_person_median_own_score": 0.6161748837979666,
+      "same_person_median_own_score_people_with_extras": 0.621434547163119,
+      "same_person_hits_at_pool_high": 135,
+      "same_person_misses": [
+       "Anna_Kournikova",
+       "Kimi_Raikkonen",
+       "Kimi_Raikkonen",
+       "Winona_Ryder"
+      ],
+      "fixed_from_one_photo": 1,
+      "broken_from_one_photo": 1,
+      "own_top": [
+       {
+        "person": "Psy",
+        "score": 0.27016629187812324,
+        "label": "Alter Ego"
+       },
+       {
+        "person": "Noah_Wyle",
+        "score": 0.2651763627347135,
+        "label": "Alter Ego"
+       },
+       {
+        "person": "Stoffel_Vandoorne",
+        "score": 0.24761704191398048,
+        "label": "Alter Ego"
+       }
+      ],
+      "own_second_photo_score": 0.4321776774035765,
+      "own_second_photo_reaches": true,
+      "strangers_test_reaching_one_photo_threshold": 16
+     }
+    }
+   },
+   "0.35": {
+    "photos_total": 112,
+    "photos_per_person": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     2,
+     2,
+     2,
+     2,
+     2,
+     3,
+     3,
+     3,
+     3,
+     3,
+     3,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4,
+     4
+    ],
+    "one_photo_misses": 4,
+    "queries_for_people_with_extras": 77,
+    "people_with_extras": [
+     "Alex_Ferguson",
+     "Alfredo_Di_Stefano",
+     "Anna_Kournikova",
+     "Arantxa_Sanchez_Vicario",
+     "Boris_Becker",
+     "Bruce_Springsteen",
+     "Carlo_Ancelotti",
+     "Celine_Dion",
+     "Gwyneth_Paltrow",
+     "Jack_Nicholson",
+     "Jason_Statham",
+     "Jim_Carrey",
+     "Jodie_Foster",
+     "John_McEnroe",
+     "Juan_Pablo_Montoya",
+     "Luis_Figo",
+     "Michael_Ballack",
+     "Michael_Schumacher",
+     "Noah_Wyle",
+     "Pete_Sampras",
+     "Psy",
+     "Roberto_Carlos",
+     "Salman_Khan",
+     "Takuma_Sato",
+     "Uma_Thurman",
+     "Vitantonio_Liuzzi"
+    ],
+    "arms": {
+     "one": {
+      "threshold_high": 0.2989888952740759,
+      "strangers_test_reaching": 12,
+      "same_person_hits": 138,
+      "same_person_median_own_score": 0.5752442091435221,
+      "same_person_median_own_score_people_with_extras": 0.5582348824654952,
+      "same_person_hits_at_pool_high": 133,
+      "same_person_misses": [
+       "Bruce_Springsteen",
+       "Kimi_Raikkonen",
+       "Kimi_Raikkonen",
+       "Winona_Ryder"
+      ],
+      "fixed_from_one_photo": 0,
+      "broken_from_one_photo": 0,
+      "own_top": [
+       {
+        "person": "Psy",
+        "score": 0.27016629187812324,
+        "label": "Alter Ego"
+       },
+       {
+        "person": "Stoffel_Vandoorne",
+        "score": 0.24761704191398043,
+        "label": "Alter Ego"
+       },
+       {
+        "person": "Roberto_Carlos",
+        "score": 0.21329391852092994,
+        "label": "Alter Ego"
+       }
+      ],
+      "own_second_photo_score": 0.4321776774035765,
+      "own_second_photo_reaches": true
+     },
+     "best": {
+      "threshold_high": 0.3172739711476208,
+      "strangers_test_reaching": 9,
+      "same_person_hits": 138,
+      "same_person_median_own_score": 0.6161748837979668,
+      "same_person_median_own_score_people_with_extras": 0.6337662620483205,
+      "same_person_hits_at_pool_high": 135,
+      "same_person_misses": [
+       "Anna_Kournikova",
+       "Kimi_Raikkonen",
+       "Kimi_Raikkonen",
+       "Winona_Ryder"
+      ],
+      "fixed_from_one_photo": 1,
+      "broken_from_one_photo": 1,
+      "own_top": [
+       {
+        "person": "Psy",
+        "score": 0.27016629187812324,
+        "label": "Alter Ego"
+       },
+       {
+        "person": "Noah_Wyle",
+        "score": 0.2651763627347135,
+        "label": "Alter Ego"
+       },
+       {
+        "person": "Stoffel_Vandoorne",
+        "score": 0.24761704191398048,
+        "label": "Alter Ego"
+       }
+      ],
+      "own_second_photo_score": 0.4321776774035765,
+      "own_second_photo_reaches": true
+     },
+     "averaged": {
+      "threshold_high": 0.31611942578703484,
+      "strangers_test_reaching": 4,
+      "same_person_hits": 138,
+      "same_person_median_own_score": 0.6234782327386671,
+      "same_person_median_own_score_people_with_extras": 0.6451570575446394,
+      "same_person_hits_at_pool_high": 135,
+      "same_person_misses": [
+       "Anna_Kournikova",
+       "Kimi_Raikkonen",
+       "Kimi_Raikkonen",
+       "Winona_Ryder"
+      ],
+      "fixed_from_one_photo": 1,
+      "broken_from_one_photo": 1,
+      "own_top": [
+       {
+        "person": "Psy",
+        "score": 0.2765015206009081,
+        "label": "Alter Ego"
+       },
+       {
+        "person": "Noah_Wyle",
+        "score": 0.26726549685688583,
+        "label": "Alter Ego"
+       },
+       {
+        "person": "Stoffel_Vandoorne",
+        "score": 0.24761704191398043,
+        "label": "Alter Ego"
+       }
+      ],
+      "own_second_photo_score": 0.4321776774035765,
+      "own_second_photo_reaches": true
+     },
+     "top": {
+      "threshold_high": 0.3172739711476208,
+      "strangers_test_reaching": 9,
+      "same_person_hits": 138,
+      "same_person_median_own_score": 0.6161748837979668,
+      "same_person_median_own_score_people_with_extras": 0.6337662620483205,
+      "same_person_hits_at_pool_high": 135,
+      "same_person_misses": [
+       "Anna_Kournikova",
+       "Kimi_Raikkonen",
+       "Kimi_Raikkonen",
+       "Winona_Ryder"
+      ],
+      "fixed_from_one_photo": 1,
+      "broken_from_one_photo": 1,
+      "own_top": [
+       {
+        "person": "Psy",
+        "score": 0.27016629187812324,
+        "label": "Alter Ego"
+       },
+       {
+        "person": "Noah_Wyle",
+        "score": 0.2651763627347135,
+        "label": "Alter Ego"
+       },
+       {
+        "person": "Stoffel_Vandoorne",
+        "score": 0.24761704191398048,
+        "label": "Alter Ego"
+       }
+      ],
+      "own_second_photo_score": 0.4321776774035765,
+      "own_second_photo_reaches": true,
+      "strangers_test_reaching_one_photo_threshold": 16
+     }
+    }
+   }
+  }
+ },
+ "walk": {
+  "graph_faces": 5549,
+  "strangers": 200,
+  "people_with_a_face_in_the_graph": 100,
+  "k": {
+   "5": {
+    "median_faces_checked": 10.0,
+    "median_steps": 1.0,
+    "strangers_found_true_best": 3,
+    "strangers_median_score_reached": 0.16937053257264453,
+    "strangers_median_true_best": 0.3141085883476932,
+    "strangers_ending_at_or_above_pool_high": 0,
+    "strangers_exact_search_at_or_above_pool_high": 16,
+    "people_led_back_to_own_face": 4,
+    "people_ending_on_own_face": 4,
+    "people_exact_search_finds_own_face": 99,
+    "own_photo": {
+     "score_reached": 0.1739350986540667,
+     "steps": 2,
+     "faces_checked": 15,
+     "true_best": 0.38845469065702415,
+     "found_true_best": false
+    }
+   },
+   "10": {
+    "median_faces_checked": 20.0,
+    "median_steps": 1.0,
+    "strangers_found_true_best": 7,
+    "strangers_median_score_reached": 0.202805363639564,
+    "strangers_median_true_best": 0.3141085883476932,
+    "strangers_ending_at_or_above_pool_high": 2,
+    "strangers_exact_search_at_or_above_pool_high": 16,
+    "people_led_back_to_own_face": 13,
+    "people_ending_on_own_face": 13,
+    "people_exact_search_finds_own_face": 99,
+    "own_photo": {
+     "score_reached": 0.21169583983914012,
+     "steps": 2,
+     "faces_checked": 30,
+     "true_best": 0.38845469065702415,
+     "found_true_best": false
+    }
+   },
+   "20": {
+    "median_faces_checked": 56.0,
+    "median_steps": 2.0,
+    "strangers_found_true_best": 24,
+    "strangers_median_score_reached": 0.23101805318789237,
+    "strangers_median_true_best": 0.3141085883476932,
+    "strangers_ending_at_or_above_pool_high": 5,
+    "strangers_exact_search_at_or_above_pool_high": 16,
+    "people_led_back_to_own_face": 29,
+    "people_ending_on_own_face": 29,
+    "people_exact_search_finds_own_face": 99,
+    "own_photo": {
+     "score_reached": 0.23660976190140326,
+     "steps": 2,
+     "faces_checked": 59,
+     "true_best": 0.38845469065702415,
+     "found_true_best": false
+    }
+   }
+  }
+ }
+}

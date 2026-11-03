@@ -32,5 +32,7 @@ data/celebrities_plus_me_plus_others/
 data/wikidata/
 # data/wikidata plus the user's second photo (demo Beat 2): private, never commit.
 data/wikidata_plus_me/
+# multi-photo-spike: extra Wikimedia photos for about 50 people; never commit.
+data/spike_multiphoto/
 # Private test photos of real people, used to investigate detection; never commit.
 photo_face_problem/

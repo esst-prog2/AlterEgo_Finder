@@ -66,11 +66,12 @@ paths on Windows, so dataset folder names stay ASCII. Branch `detect-large-faces
 retries detection on smaller copies when full size finds nothing, since YuNet scores
 very large faces lower. Branch `target-label-overlap` moves a name on the target to
 another side of its dot when its usual place collides (`place_names`); dots never move.
-228 tests passing (the 32 in
+241 tests passing (the 32 in
 `tests/test_app.py` are skipped without Streamlit). Branch `demo-on-pool` moves README section 1's
 demo onto the pool, with a local, gitignored `data/wikidata_plus_me`; LFW stays as the
 fallback. Branch `shorten-demo-description` cuts section 1 to six sentences, as Homework 8
-asks; it is the demo description for Canvas, due 2026-11-07.
+asks; it is the demo description submitted on Canvas. Branch `multi-photo-spike` measured
+several photos per person and a lookalike walk: no full build, see PLANNING_LOG.md.
 
 ## Workflow
 
