@@ -4,7 +4,7 @@ and calibration datasets from the committed list data/lfw_split.json, calibrate
 the thresholds and index the candidates. Safe to run again.
 
 The list holds file paths only; the images are downloaded here and never
-committed. Everyone gets the same faces, so README section 1's scores reproduce.
+committed. Everyone gets the same faces, so README section 6's score reproduces.
 
 Usage (from the repository root):
     python setup_data.py

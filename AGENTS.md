@@ -68,8 +68,9 @@ very large faces lower. Branch `target-label-overlap` moves a name on the target
 another side of its dot when its usual place collides (`place_names`); dots never move.
 228 tests passing (the 32 in
 `tests/test_app.py` are skipped without Streamlit). Branch `demo-on-pool` moves README section 1's
-Beats 1 and 2 onto the pool, with a local, gitignored `data/wikidata_plus_me`; LFW stays
-as the fallback. Section 1 is the demo description for Canvas, due 2026-11-07.
+demo onto the pool, with a local, gitignored `data/wikidata_plus_me`; LFW stays as the
+fallback. Branch `shorten-demo-description` cuts section 1 to six sentences, as Homework 8
+asks; it is the demo description for Canvas, due 2026-11-07.
 
 ## Workflow
 
