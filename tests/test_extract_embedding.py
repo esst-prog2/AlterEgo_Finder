@@ -1,16 +1,16 @@
 from pathlib import Path
 
-import cv2
 import numpy as np
 import pytest
 
+from face_pipeline.images import read_image
 from face_pipeline.embedder import EMBEDDING_SIZE, NoFaceDetectedError, extract_embedding
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
 
 def test_extract_embedding_returns_correct_size_vector_for_face_present():
-    image = cv2.imread(str(FIXTURES / "obama_1.jpg"))
+    image = read_image(FIXTURES / "obama_1.jpg")
     vec = extract_embedding(image)
     assert vec.shape == (EMBEDDING_SIZE,)
 

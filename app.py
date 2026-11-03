@@ -21,6 +21,7 @@ import streamlit as st
 
 from face_pipeline.attribution import credit_for, load_attribution, safe_source_url
 from face_pipeline.embedder import NoFaceDetectedError
+from face_pipeline.images import read_image
 from face_pipeline.index import CACHE_DIRNAME, EMBEDDINGS_FILENAME, get_or_build_index, rank_matches
 from face_pipeline.matching import (
     HIGH_CONFIDENCE,
@@ -145,7 +146,7 @@ def _show_cards(labeled, top: int, credits: Optional[dict] = None) -> None:
         columns = st.columns(CARDS_PER_ROW)
         for offset, (entry, score, label) in enumerate(shown[row_start: row_start + CARDS_PER_ROW]):
             with columns[offset]:
-                image = cv2.imread(str(entry.filepath))
+                image = read_image(entry.filepath)
                 if image is not None:
                     st.image(_square_crop(image), channels="BGR", width="stretch")
                 # Person names are dataset folder names, i.e. untrusted input:
@@ -166,7 +167,7 @@ def _show_cards(labeled, top: int, credits: Optional[dict] = None) -> None:
 @st.cache_data(show_spinner=False, max_entries=1024)
 def _thumbnail(path: str) -> str:
     """A small JPEG data URI of the image at ``path``, or "" if unreadable."""
-    image = cv2.imread(path)
+    image = read_image(path)
     if image is None:
         return ""
     height, width = image.shape[:2]

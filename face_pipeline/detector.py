@@ -8,6 +8,7 @@ from typing import Optional, Tuple
 import cv2
 import numpy as np
 
+from face_pipeline.images import read_file_bytes
 from face_pipeline.weights import ensure_weight
 
 YUNET_MODEL_FILENAME = "face_detection_yunet_2023mar.onnx"
@@ -31,7 +32,8 @@ def _get_detector() -> cv2.FaceDetectorYN:
     if _detector is None:
         model_path = ensure_weight(YUNET_MODEL_FILENAME)
         _detector = cv2.FaceDetectorYN.create(
-            str(model_path), "", (320, 320), SCORE_THRESHOLD, NMS_THRESHOLD, TOP_K
+            "onnx", read_file_bytes(model_path), np.empty(0, dtype=np.uint8),
+            (320, 320), SCORE_THRESHOLD, NMS_THRESHOLD, TOP_K,
         )
     return _detector
 

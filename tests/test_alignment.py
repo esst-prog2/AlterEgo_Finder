@@ -3,6 +3,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+from face_pipeline.images import read_image
 from face_pipeline.alignment import ALIGNED_SIZE, REFERENCE_LANDMARKS, align_face
 from face_pipeline.detector import DetectedFace, detect_face
 
@@ -15,7 +16,7 @@ LANDMARK_TOLERANCE_PX = 10.0
 
 
 def test_align_face_produces_112x112_image():
-    image = cv2.imread(str(FIXTURES / "obama_1.jpg"))
+    image = read_image(FIXTURES / "obama_1.jpg")
     detected = detect_face(image)
     aligned = align_face(image, detected)
     assert aligned.shape == (ALIGNED_SIZE, ALIGNED_SIZE, 3)
@@ -28,7 +29,7 @@ def test_alignment_landmark_correspondence_is_correct():
     swapped left/right pairing produces tens of pixels of residual, not a
     crash, so this must check distances, not just that alignment runs.
     """
-    image = cv2.imread(str(FIXTURES / "obama_1.jpg"))
+    image = read_image(FIXTURES / "obama_1.jpg")
     detected: DetectedFace = detect_face(image)
 
     transform, _ = cv2.estimateAffinePartial2D(detected.landmarks, REFERENCE_LANDMARKS)

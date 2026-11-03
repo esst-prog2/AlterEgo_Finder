@@ -1,6 +1,7 @@
 import re
 from pathlib import Path
 
+from face_pipeline.images import read_image
 from face_pipeline.index import IndexEntry
 from face_pipeline.report import REPORT_TOP_K, render_report
 
@@ -91,6 +92,6 @@ def test_render_report_accepts_query_as_image_array(tmp_path):
     from_array = tmp_path / "from_array.html"
 
     render_report(QUERY_IMAGE, results, from_path)
-    render_report(cv2.imread(str(QUERY_IMAGE)), results, from_array)
+    render_report(read_image(QUERY_IMAGE), results, from_array)
 
     assert from_array.read_text(encoding="utf-8") == from_path.read_text(encoding="utf-8")

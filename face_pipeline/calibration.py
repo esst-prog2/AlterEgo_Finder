@@ -19,10 +19,10 @@ import unicodedata
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-import cv2
 import numpy as np
 
 from face_pipeline.embedder import NoFaceDetectedError, extract_embedding
+from face_pipeline.images import read_image
 
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png"}
 
@@ -51,7 +51,7 @@ def embed_calibration_dataset(calibration_dir: Path) -> Dict[str, List[np.ndarra
     for person, image_paths in _iter_people(calibration_dir):
         embeddings = []
         for image_path in image_paths:
-            image = cv2.imread(str(image_path))
+            image = read_image(image_path)
             if image is None:
                 continue
             try:

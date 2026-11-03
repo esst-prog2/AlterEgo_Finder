@@ -1,6 +1,6 @@
 import hashlib
+import io
 import json
-from pathlib import Path
 
 import pytest
 
@@ -103,11 +103,15 @@ def test_download_failure_leaves_no_file_behind(tmp_path, monkeypatch):
     # destination (or a stray .part) for a later run to trust.
     destination = tmp_path / "fake.onnx"
 
-    def interrupted(url, filename):
-        Path(filename).write_bytes(b"half a model")
-        raise OSError("connection reset")
+    class Interrupted(io.BytesIO):
+        def read(self, *args):
+            if self.tell() == 0:
+                return super().read(*args)
+            raise OSError("connection reset")
 
-    monkeypatch.setattr(weights_module.urllib.request, "urlretrieve", interrupted)
+    monkeypatch.setattr(
+        weights_module.urllib.request, "urlopen", lambda *a, **k: Interrupted(b"half a model")
+    )
 
     with pytest.raises(ModelWeightError, match="connection reset"):
         weights_module._download("https://example.invalid/fake.onnx", destination)

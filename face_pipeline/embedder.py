@@ -9,6 +9,7 @@ import numpy as np
 
 from face_pipeline.alignment import ALIGNED_SIZE, align_face
 from face_pipeline.detector import detect_face
+from face_pipeline.images import read_file_bytes
 from face_pipeline.weights import ensure_weight
 
 EMBEDDER_MODEL_FILENAME = "arcfaceresnet100-11-int8.onnx"
@@ -34,7 +35,7 @@ def _get_net() -> cv2.dnn.Net:
     global _net
     if _net is None:
         model_path = ensure_weight(EMBEDDER_MODEL_FILENAME)
-        _net = cv2.dnn.readNetFromONNX(str(model_path))
+        _net = cv2.dnn.readNetFromONNX(read_file_bytes(model_path))
     return _net
 
 

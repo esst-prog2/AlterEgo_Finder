@@ -109,7 +109,7 @@ def test_disjoint_dataset_keeps_every_stranger_in_order():
 def _calibrated(tmp_path, name, extra_person=None):
     dataset = tmp_path / name
     shutil.copytree(FIXTURES / "dataset", dataset)
-    (dataset / ".matchcache").exists() and shutil.rmtree(dataset / ".matchcache")
+    (dataset / ".matchcache").exists() and shutil.rmtree(dataset / ".matchcache", ignore_errors=True)
     if extra_person:
         folder = dataset / extra_person
         folder.mkdir()

@@ -9,10 +9,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterator, List, Tuple
 
-import cv2
 import numpy as np
 
 from face_pipeline.embedder import EMBEDDING_SIZE, NoFaceDetectedError, extract_embedding
+from face_pipeline.images import read_image
 
 CACHE_DIRNAME = ".matchcache"
 EMBEDDINGS_FILENAME = "embeddings.npy"
@@ -74,7 +74,7 @@ def build_index(dataset_dir: Path) -> DatasetIndex:
     entries: List[IndexEntry] = []
 
     for person, image_path in _iter_dataset_images(dataset_dir):
-        image = cv2.imread(str(image_path))
+        image = read_image(image_path)
         if image is None:
             continue
         try:

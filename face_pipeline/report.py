@@ -15,6 +15,7 @@ import cv2
 import numpy as np
 
 from face_pipeline.attribution import credit_for, safe_source_url
+from face_pipeline.images import read_image
 from face_pipeline.index import IndexEntry
 
 REPORT_TOP_K = 10
@@ -45,7 +46,7 @@ def _credit_line(credit: Optional[dict]) -> str:
 
 
 def _candidate_card(entry: IndexEntry, score: float, label: str, credit: Optional[dict] = None) -> str:
-    image = cv2.imread(str(entry.filepath))
+    image = read_image(entry.filepath)
     data_uri = _image_to_data_uri(image) if image is not None else ""
     color = _LABEL_COLORS.get(label, "#57606a")
     # Person names are dataset folder names, i.e. untrusted input.
@@ -78,7 +79,7 @@ def render_report(
     credits, if it records any (see face_pipeline.attribution).
     """
     if not isinstance(query_image, np.ndarray):
-        query_image = cv2.imread(str(query_image))
+        query_image = read_image(query_image)
     query_data_uri = _image_to_data_uri(query_image) if query_image is not None else ""
 
     top_results = results[:REPORT_TOP_K]

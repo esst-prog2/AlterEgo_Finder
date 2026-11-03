@@ -82,8 +82,8 @@ On a fresh clone, `python setup_data.py` downloads LFW, builds `data/celebrities
 and `data/calibration` from `data/lfw_split.json`, and calibrates (about 3.5
 minutes). It is safe to run again. `--wikidata` also builds the optional
 public-figure pool in `data/wikidata` (about 30 minutes, resumable, rate limited:
-never speed it up, Commons answers HTTP 429). Dataset folders must stay ASCII,
-because `cv2.imread` fails silently on non-ASCII paths on Windows.
+never speed it up, Commons answers HTTP 429). OpenCV cannot open non-ASCII paths on
+Windows, so read images with `read_image` from `face_pipeline/images.py`, never `cv2.imread`.
 
 ## Run the web UI
 
@@ -105,8 +105,8 @@ new one with one `match.py` run first. To drive the page headless, use
 python -m pytest tests/ -v
 ```
 
-241 tests pass as of the `multi-photo-spike` change; without Streamlit
-installed, `tests/test_app.py` (32 tests) is skipped and 208 pass.
+253 tests pass as of the `fix-install-path-and-download-stall` change; without Streamlit
+installed, `tests/test_app.py` (32 tests) is skipped and 220 pass.
 
 Charts: give `st.vega_lite_chart` a spec whose layers carry their own inline
 data. A DataFrame or top-level `data` makes Streamlit load pyarrow, whose DLL

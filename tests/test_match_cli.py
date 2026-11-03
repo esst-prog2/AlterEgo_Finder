@@ -6,6 +6,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 import pytest
+from image_helpers import write_image
+from face_pipeline.images import read_image
 
 REPO_ROOT = Path(__file__).parent.parent
 FIXTURES = REPO_ROOT / "tests" / "fixtures"
@@ -69,7 +71,7 @@ def test_exits_1_with_message_when_query_has_no_face(tmp_path):
 
     blank_path = tmp_path / "blank.jpg"
     blank = np.full((300, 300, 3), 255, dtype=np.uint8)
-    cv2.imwrite(str(blank_path), blank)
+    write_image(blank_path, blank)
 
     result = run_match(
         "--image", str(blank_path),
@@ -94,7 +96,7 @@ def twelve_face_dataset(tmp_path_factory):
         FIXTURES / "pk_sunglasses_shirt.jpg",
         *sorted((FIXTURES / "calibration").glob("*/*.jpg")),
     ]
-    images = [cv2.imread(str(p)) for p in distinct]
+    images = [read_image(p) for p in distinct]
     images += [cv2.flip(img, 1) for img in images[:3]]
     assert len(images) == 12
 
@@ -102,7 +104,7 @@ def twelve_face_dataset(tmp_path_factory):
     for i, image in enumerate(images):
         person_dir = dataset_dir / f"Person_{i:02d}"
         person_dir.mkdir(parents=True)
-        cv2.imwrite(str(person_dir / "face.jpg"), image)
+        write_image(person_dir / "face.jpg", image)
     return dataset_dir
 
 

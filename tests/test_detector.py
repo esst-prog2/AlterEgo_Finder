@@ -3,6 +3,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+from face_pipeline.images import read_image
 from face_pipeline import detector
 from face_pipeline.detector import detect_face, pick_largest_face
 from face_pipeline.embedder import extract_embedding
@@ -11,7 +12,7 @@ FIXTURES = Path(__file__).parent / "fixtures"
 
 
 def test_detects_face_in_known_face_image():
-    image = cv2.imread(str(FIXTURES / "obama_1.jpg"))
+    image = read_image(FIXTURES / "obama_1.jpg")
     result = detect_face(image)
     assert result is not None
     x1, y1, x2, y2 = result.box
@@ -29,8 +30,8 @@ def test_detects_face_regardless_of_image_size():
     # YuNet's input size isn't fixed at load time; setInputSize() must be
     # called per image. Verify detection works on two differently-sized
     # fixture images (a regression guard for that gotcha).
-    small = cv2.imread(str(FIXTURES / "obama_1.jpg"))
-    large = cv2.imread(str(FIXTURES / "obama_query.jpg"))
+    small = read_image(FIXTURES / "obama_1.jpg")
+    large = read_image(FIXTURES / "obama_query.jpg")
     assert small.shape != large.shape  # sanity: fixtures are actually different sizes
 
     assert detect_face(small) is not None
@@ -56,7 +57,7 @@ def test_detects_wearer_not_shirt_print_in_sunglasses_photo():
     # printed face on the T-shirt. Expected value (PLANNING_LOG.md,
     # 2026-10-08), read by eye: the user's head spans x 220-390, y 225-440;
     # the print is below y 515.
-    image = cv2.imread(str(FIXTURES / "pk_sunglasses_shirt.jpg"))
+    image = read_image(FIXTURES / "pk_sunglasses_shirt.jpg")
     result = detect_face(image)
     assert result is not None
     x1, y1, x2, y2 = result.box
@@ -71,13 +72,13 @@ def test_detects_wearer_not_shirt_print_in_sunglasses_photo():
 
 
 def _enlarged(longest=3000):
-    image = cv2.imread(str(FIXTURES / "obama_1.jpg"))
+    image = read_image(FIXTURES / "obama_1.jpg")
     scale = longest / max(image.shape[:2])
     return cv2.resize(image, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC), scale
 
 
 def test_large_face_missed_at_full_size_is_found_in_full_size_coordinates():
-    original = cv2.imread(str(FIXTURES / "obama_1.jpg"))
+    original = read_image(FIXTURES / "obama_1.jpg")
     reference = detector.detect_face(original)
     image, scale = _enlarged()
     assert detector._faces_at_size(image) is None  # the bug: nothing at full size
@@ -94,7 +95,7 @@ def test_large_face_missed_at_full_size_is_found_in_full_size_coordinates():
 
 
 def test_large_face_gives_the_same_identity():
-    original = extract_embedding(cv2.imread(str(FIXTURES / "obama_1.jpg")))
+    original = extract_embedding(read_image(FIXTURES / "obama_1.jpg"))
     enlarged = extract_embedding(_enlarged()[0])
     similarity = original @ enlarged / (np.linalg.norm(original) * np.linalg.norm(enlarged))
     assert similarity > 0.9

@@ -9,7 +9,9 @@ whether the file was just downloaded or already present locally.
 from __future__ import annotations
 
 import hashlib
+import http.client
 import json
+import shutil
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -18,6 +20,7 @@ MODELS_DIR = Path(__file__).resolve().parent.parent / "models"
 MANIFEST_PATH = MODELS_DIR / "manifest.json"
 
 _CHUNK_SIZE = 1 << 20  # 1 MiB
+DOWNLOAD_TIMEOUT_S = 60  # per network read, so a stalled download fails instead of hanging
 
 
 class ModelWeightError(Exception):
@@ -43,8 +46,10 @@ def _download(url: str, destination: Path) -> None:
     """
     part_path = destination.with_name(destination.name + ".part")
     try:
-        urllib.request.urlretrieve(url, part_path)
-    except (urllib.error.URLError, OSError) as exc:
+        with urllib.request.urlopen(url, timeout=DOWNLOAD_TIMEOUT_S) as response:
+            with part_path.open("wb") as out:
+                shutil.copyfileobj(response, out, _CHUNK_SIZE)
+    except (urllib.error.URLError, OSError, http.client.HTTPException) as exc:
         part_path.unlink(missing_ok=True)
         raise ModelWeightError(
             f"Failed to download model weight file {destination.name} from {url}: {exc}"
