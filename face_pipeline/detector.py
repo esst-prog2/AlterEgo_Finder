@@ -20,6 +20,13 @@ TOP_K = 5000
 # full size against the cutoff, and over 0.8 at 1600 px. Tried largest first when
 # full size finds nothing, each as the copy's longest side.
 RETRY_SIZES = (1600, 1024, 640)
+# A photo on its side or upside down can still "find" a face, with a useless embedding
+# (at 180 degrees, 97 of 150 LFW photos), so a retry when nothing is found is not enough.
+# YuNet is more confident the right way up: of four orientations, upright scored highest
+# on 300 of 300 LFW photos, by at least 0.024. Compared on a copy of this longest side,
+# since scores change with size; a photo turns only for a win above the margin.
+TURN_CHECK_SIZE = 640
+TURN_MARGIN = 0.02
 
 # YuNet's native landmark order.
 LANDMARK_ORDER = ("right_eye", "left_eye", "nose", "right_mouth", "left_mouth")
@@ -86,13 +93,58 @@ def _find_faces(image: np.ndarray) -> Optional[Tuple[np.ndarray, float]]:
     return None
 
 
+def _best_face_score(image: np.ndarray) -> Optional[float]:
+    """The most confident face's score, of any size. The largest face can be a bystander
+    cut off at the edge, whose low score let upside-down copies of two upright LFW photos win.
+    """
+    faces = _faces_at_size(image)
+    return None if faces is None else float(faces[:, -1].max())
+
+
+def _choose_turn(image: np.ndarray) -> int:
+    """How many quarter turns (``np.rot90``'s k) put ``image`` the right way up: 0 unless
+    another orientation clearly beats it as it is.
+
+    A face missed as it is on the small copy may just be tiny, and a turned copy may give
+    a false one, so a turn then also needs ``image`` itself to have no face.
+    """
+    longest = max(image.shape[:2])
+    small = image
+    if longest > TURN_CHECK_SIZE:
+        scale = TURN_CHECK_SIZE / longest
+        small = cv2.resize(image, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
+
+    as_it_is = _best_face_score(small)
+    scores = {k: _best_face_score(np.rot90(small, k).copy()) for k in (1, 2, 3)}
+    scores = {k: score for k, score in scores.items() if score is not None}
+    if not scores:
+        return 0
+    best = max(scores, key=scores.get)
+    if as_it_is is None:
+        return best if _find_faces(image) is None else 0
+    return best if scores[best] > as_it_is + TURN_MARGIN else 0
+
+
+def _from_turned(points: np.ndarray, k: int, h: int, w: int) -> np.ndarray:
+    """(x, y) rows in ``np.rot90(image, k)`` back in ``image``, which is ``h`` by ``w``."""
+    x, y = points[:, 0], points[:, 1]
+    if k == 1:
+        return np.stack([w - 1 - y, x], axis=1)
+    if k == 2:
+        return np.stack([w - 1 - x, h - 1 - y], axis=1)
+    return np.stack([y, h - 1 - x], axis=1)
+
+
 def detect_face(image: np.ndarray) -> Optional[DetectedFace]:
-    """Detect the largest face in ``image`` (see ``pick_largest_face``).
+    """Detect the largest face in ``image`` (see ``pick_largest_face``), turning the photo
+    first if it is on its side or upside down (see ``_choose_turn``).
 
     Returns a ``DetectedFace`` (bounding box + 5 landmarks, in ``image``'s own
     coordinates), or ``None`` if no face is detected above ``SCORE_THRESHOLD``.
     """
-    found = _find_faces(image)
+    turn = _choose_turn(image)
+    working = np.rot90(image, turn).copy() if turn else image
+    found = _find_faces(working)
     if found is None:
         return None
 
@@ -100,10 +152,15 @@ def detect_face(image: np.ndarray) -> Optional[DetectedFace]:
     h, w = image.shape[:2]
     best = pick_largest_face(faces)
     x, y, box_w, box_h = best[0:4] / scale
+    landmarks = best[4:14].reshape(5, 2) / scale
+    if turn:
+        corners = _from_turned(np.array([[x, y], [x + box_w, y + box_h]]), turn, h, w)
+        x, y = corners.min(axis=0)
+        box_w, box_h = corners.max(axis=0) - corners.min(axis=0)
+        landmarks = _from_turned(landmarks, turn, h, w)
     x1, y1 = max(0, int(round(x))), max(0, int(round(y)))
     x2, y2 = min(w, int(round(x + box_w))), min(h, int(round(y + box_h)))
     if x2 <= x1 or y2 <= y1:
         return None
 
-    landmarks = best[4:14].reshape(5, 2) / scale
     return DetectedFace(box=(x1, y1, x2, y2), landmarks=landmarks)

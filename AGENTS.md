@@ -65,9 +65,10 @@ credits on cards and in the report, and its own thresholds (a dataset's
 the program reads images and models as bytes (`face_pipeline/images.py`) and works from any
 folder; the pool's folder names stay ASCII anyway. Branch `detect-large-faces`
 retries detection on smaller copies when full size finds nothing, since YuNet scores
-very large faces lower. Branch `target-label-overlap` moves a name on the target to
+very large faces lower. Branch `pick-face-orientation` turns a photo on its side or upside
+down when YuNet is clearly more confident that way; tilts near 45 degrees stay poor. Branch `target-label-overlap` moves a name on the target to
 another side of its dot when its usual place collides (`place_names`); dots never move.
-253 tests passing (the 32 in
+271 tests passing (the 32 in
 `tests/test_app.py` are skipped without Streamlit). Branch `demo-on-pool` moves README section 1's
 demo onto the pool, with a local, gitignored `data/wikidata_plus_me`; LFW stays as the
 fallback. Branch `shorten-demo-description` cuts section 1 to six sentences, as Homework 8
