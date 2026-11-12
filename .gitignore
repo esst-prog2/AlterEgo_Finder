@@ -36,3 +36,7 @@ data/wikidata_plus_me/
 data/spike_multiphoto/
 # Private test photos of real people, used to investigate detection; never commit.
 photo_face_problem/
+# Impeccable, the design tool for the promo page (installed by npx impeccable install);
+# a tool, not part of the program, so each person installs it themselves.
+.claude/skills/impeccable/
+.claude/agents/impeccable-*.md
