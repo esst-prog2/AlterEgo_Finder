@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AlterEgo Finder: a lookalike finder that says Not You</title>
+<meta name="description" content="Find the public figures closest to a face, labelled Same person, Alter Ego or Not You by thresholds calibrated on held-out strangers. Runs on your own machine.">
+<style>
+@font-face { font-family: "Barlow Condensed"; font-weight: 600; font-style: normal; font-display: swap; src: url("fonts/barlow-condensed-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow Condensed"; font-weight: 700; font-style: normal; font-display: swap; src: url("fonts/barlow-condensed-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 400; font-style: normal; font-display: swap; src: url("fonts/barlow-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 400; font-style: italic; font-display: swap; src: url("fonts/barlow-latin-400-italic.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 500; font-style: normal; font-display: swap; src: url("fonts/barlow-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 600; font-style: normal; font-display: swap; src: url("fonts/barlow-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Kalam"; font-weight: 400; font-style: normal; font-display: swap; src: url("fonts/kalam-latin-400-normal.woff2") format("woff2"); }
+
+:root {
+  --card: #eef3f8;
+  --card-raised: #f8fbfd;
+  --rule: #1d3c78;
+  --grid-line: rgba(29, 60, 120, 0.09);
+  --grid-line-strong: rgba(29, 60, 120, 0.22);
+  --ink: #1f2328;
+  --ink-soft: #46505d;
+  --pencil: #3d4450;
+  --same: #1a7f37;
+  --alter: #d4a72c;
+  --notyou: #8c959f;
+  --same-wash: rgba(26, 127, 55, 0.13);
+  --alter-wash: rgba(212, 167, 44, 0.24);
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --body: "Barlow", system-ui, sans-serif;
+  --hand: "Kalam", cursive;
+  --gutter: clamp(1rem, 4vw, 3rem);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  background-color: var(--card);
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 24px 24px;
+  font-variant-numeric: tabular-nums;
+}
+::selection { background: var(--rule); color: var(--card-raised); }
+:focus-visible { outline: 3px solid var(--rule); outline-offset: 3px; border-radius: 2px; }
+a { color: var(--rule); text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
+a:hover { text-decoration-thickness: 2px; }
+html { scrollbar-color: var(--rule) var(--card); }
+
+.sheet { max-width: 76rem; margin: 0 auto; padding: 0 var(--gutter); }
+
+/* The card: printed blue rules frame every section of the scoresheet. */
+.card {
+  background: var(--card-raised);
+  border: 2px solid var(--rule);
+  box-shadow: 0 1px 0 var(--rule), 0 10px 28px -18px rgba(29, 60, 120, 0.45);
+}
+
+h1, h2, h3 { font-family: var(--display); font-weight: 700; line-height: 1.02; margin: 0; letter-spacing: 0.005em; text-wrap: balance; }
+h2 { font-size: clamp(1.9rem, 3.4vw, 2.6rem); color: var(--rule); text-transform: uppercase; }
+h3 { font-size: 1.25rem; text-transform: uppercase; color: var(--rule); }
+p { margin: 0; max-width: 68ch; }
+code, .cmd { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 0.92em; }
+
+/* Labels: the three colours mean these labels and nothing else. */
+.label { display: inline-flex; align-items: center; gap: 0.4em; font-family: var(--display); font-weight: 600; font-size: 0.95em; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; }
+.label::before { content: ""; width: 0.75em; height: 0.75em; border-radius: 50%; border: 1.5px solid var(--ink); }
+.label.same::before { background: var(--same); }
+.label.alter::before { background: var(--alter); }
+.label.notyou::before { background: var(--notyou); }
+
+/* ---------- First viewport: a masthead across the card, then the target beside Try it locally ---------- */
+.round { display: grid; grid-template-columns: minmax(0, 1fr); margin: clamp(1rem, 3vw, 2.25rem) auto 0; }
+.mast { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 1.25rem 2.5rem; align-items: end; padding: 1.6rem 2.2rem; border-bottom: 2px solid var(--rule); }
+.mast h1 { font-size: clamp(3rem, 7vw, 6rem); text-transform: uppercase; color: var(--ink); letter-spacing: -0.01em; }
+.mast .lead { display: grid; gap: 0.7rem; }
+.mast .what { font-size: clamp(1.15rem, 1.7vw, 1.35rem); line-height: 1.4; font-weight: 500; }
+.mast .who { color: var(--ink-soft); }
+.mast .promise { grid-column: 1 / -1; max-width: none; font: 700 1.2rem/1.2 var(--display); text-transform: uppercase; color: var(--rule); letter-spacing: 0.02em; border-top: 2px solid var(--rule); padding-top: 0.6rem; }
+.play { display: grid; grid-template-columns: minmax(0, 60%) minmax(0, 1fr); }
+.target-face { min-width: 0; padding: 1.5rem; border-right: 2px solid var(--rule); display: flex; flex-direction: column; gap: 0.9rem; }
+.target-face svg { width: 100%; height: auto; display: block; }
+.target-note { font-size: 0.95rem; color: var(--ink-soft); }
+.key { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.45rem; font-size: 0.95rem; }
+.key li { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr); gap: 0.6rem; align-items: baseline; }
+.jump { display: none; }
+.side { min-width: 0; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.1rem; }
+.side .switch { align-self: flex-start; }
+.switch {
+  display: inline-flex; align-items: center; gap: 0.7rem;
+  font: 600 1.05rem/1 var(--display); text-transform: uppercase; letter-spacing: 0.03em;
+  color: var(--card-raised); background: var(--rule);
+  border: 2px solid var(--rule); padding: 0.7rem 1rem; cursor: pointer;
+  transition: background-color 180ms ease-out, color 180ms ease-out;
+}
+.switch:hover { background: #142c5a; }
+.switch[aria-pressed="true"] { background: var(--card-raised); color: var(--rule); }
+.switch .knob { width: 2.1rem; height: 1.15rem; border: 2px solid currentColor; border-radius: 1rem; position: relative; flex: none; }
+.switch .knob::after { content: ""; position: absolute; top: 2px; left: 2px; width: 0.65rem; height: 0.65rem; border-radius: 50%; background: currentColor; transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1); }
+.switch[aria-pressed="true"] .knob::after { transform: translateX(0.92rem); background: var(--same); }
+.readout { border-top: 1.5px dashed var(--grid-line-strong); padding-top: 0.85rem; display: grid; gap: 0.35rem; font-size: 0.98rem; }
+.readout .top { display: flex; flex-wrap: wrap; gap: 0.25rem 0.9rem; align-items: baseline; }
+.readout .name { font-weight: 600; }
+.readout .score { font-family: var(--display); font-weight: 600; font-size: 1.05rem; }
+.readout .tally { color: var(--ink-soft); }
+
+.entry { min-width: 0; border: 2px solid var(--rule); background: var(--card); }
+.entry-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.55rem 0.85rem; border-bottom: 2px solid var(--rule); }
+.entry-head h2 { font-size: 1.35rem; }
+.copy {
+  font: 600 0.95rem/1 var(--display); text-transform: uppercase; letter-spacing: 0.04em;
+  color: var(--card-raised); background: var(--rule); border: 2px solid var(--rule);
+  padding: 0.55rem 0.9rem; cursor: pointer; min-width: 6.5rem;
+}
+.copy:hover { background: #142c5a; }
+.copy[data-state="done"] { background: var(--card-raised); color: var(--rule); }
+.entry pre { margin: 0; padding: 0.85rem; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.92rem; line-height: 1.6; color: var(--ink); }
+.entry pre .note { color: var(--ink-soft); }
+.entry-foot { padding: 0 0.85rem 0.75rem; font-size: 0.92rem; color: var(--ink-soft); }
+
+/* ---------- Sections below ---------- */
+section.block { margin: clamp(2.5rem, 6vw, 4.5rem) auto 0; }
+.block-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 0.75rem 2rem; margin-bottom: 1.1rem; }
+.block-head p { color: var(--ink-soft); max-width: 60ch; }
+
+.how { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); }
+.how .prose { padding: clamp(1.25rem, 3vw, 2rem); display: grid; gap: 1rem; border-right: 2px solid var(--rule); }
+.how ol { list-style: none; margin: 0; padding: 0; display: grid; }
+.how li { padding: 0.95rem clamp(1rem, 2.5vw, 1.5rem); border-bottom: 1.5px solid var(--grid-line-strong); display: grid; grid-template-columns: 7.5rem 1fr; gap: 0.75rem; align-items: baseline; }
+.how li:last-child { border-bottom: 0; }
+.how li b { font: 700 1.1rem/1.1 var(--display); text-transform: uppercase; color: var(--rule); }
+
+/* The scorecard ledger */
+.ledger { width: 100%; border-collapse: collapse; }
+.ledger caption { text-align: left; padding: 0.85rem clamp(1rem, 2.5vw, 1.5rem); border-bottom: 2px solid var(--rule); color: var(--ink-soft); font-size: 0.95rem; }
+.ledger th, .ledger td { text-align: left; vertical-align: top; padding: 0.85rem 0.9rem; border-bottom: 1.5px solid var(--grid-line-strong); }
+.ledger thead th { font: 700 0.98rem/1.1 var(--display); text-transform: uppercase; letter-spacing: 0.03em; color: var(--rule); border-bottom: 2px solid var(--rule); background: var(--card); }
+.ledger .c-claim { width: 30%; }
+.ledger .c-before { width: 26%; }
+.ledger .c-measured { width: 28%; }
+.ledger .c-src { width: 16%; }
+.ledger .claim strong { display: block; font-weight: 600; }
+.ledger .claim .set { display: block; margin-top: 0.2rem; font-size: 0.88rem; color: var(--ink-soft); }
+.ledger .before { font-family: var(--hand); color: var(--pencil); font-size: 1rem; line-height: 1.45; }
+.ledger .before.none { font-family: var(--body); font-style: italic; color: var(--ink-soft); font-size: 0.95rem; }
+.ledger .measured { font-weight: 500; }
+.ledger .measured .fig { font-family: var(--display); font-weight: 700; font-size: 1.15rem; }
+.ledger .src { font-size: 0.9rem; }
+.ledger .measured .fig { display: inline; }
+.ledger-foot { padding: 0.9rem clamp(1rem, 2.5vw, 1.5rem); border-top: 2px solid var(--rule); display: grid; gap: 0.6rem; font-size: 0.95rem; color: var(--ink-soft); }
+.ledger-foot code { display: block; white-space: pre-wrap; padding: 0.45rem 0.6rem; background: var(--card); border: 1.5px solid var(--grid-line-strong); color: var(--ink); }
+.ledger-note { padding: 0.9rem clamp(1rem, 2.5vw, 1.5rem); font-size: 0.95rem; color: var(--ink-soft); border-top: 2px solid var(--rule); }
+
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 2.5rem); }
+.panel { padding: clamp(1.25rem, 3vw, 2rem); display: grid; gap: 0.9rem; align-content: start; }
+.panel ul { margin: 0; padding-left: 1.1rem; display: grid; gap: 0.45rem; }
+.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; display: grid; gap: 0.9rem; }
+.steps li { counter-increment: step; display: grid; grid-template-columns: 2rem minmax(0, 1fr); gap: 0.6rem; }
+.panel { min-width: 0; }
+.steps li::before { content: counter(step); font: 700 1.35rem/1.2 var(--display); color: var(--rule); }
+.steps code { display: block; margin: 0.3rem 0 0.5rem; padding: 0.45rem 0.6rem; background: var(--card); border: 1.5px solid var(--grid-line-strong); white-space: pre-wrap; overflow-wrap: anywhere; }
+.os { display: flex; border-bottom: 1.5px dashed var(--grid-line-strong); }
+.os-btn { font: 600 0.95rem/1 var(--display); text-transform: uppercase; letter-spacing: 0.03em; color: var(--rule); background: transparent; border: 0; border-right: 1.5px solid var(--grid-line-strong); padding: 0.75rem 0.9rem; min-height: 44px; cursor: pointer; }
+.os-btn[aria-pressed="true"] { background: var(--rule); color: var(--card-raised); }
+p, li, dd { text-wrap: pretty; }
+.src a, footer a { display: inline-block; padding-block: 0.5rem; }
+
+.facts dt { font: 700 1.05rem/1.2 var(--display); text-transform: uppercase; color: var(--rule); margin-top: 0.9rem; }
+.facts dt:first-child { margin-top: 0; }
+.facts dd { margin: 0.25rem 0 0; max-width: 68ch; }
+.facts dd ul { margin: 0.3rem 0 0; padding-left: 1.1rem; display: grid; gap: 0.35rem; }
+
+footer { margin: clamp(2.5rem, 6vw, 4rem) auto 0; padding: 1.5rem var(--gutter) 2.5rem; border-top: 2px solid var(--rule); color: var(--ink-soft); font-size: 0.95rem; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.75rem 2rem; max-width: 76rem; }
+
+/* Target face */
+.ring-same { fill: var(--same-wash); stroke: var(--same); stroke-width: 0.012; }
+.ring-alter { fill: var(--alter-wash); stroke: var(--alter); stroke-width: 0.012; }
+.ring-guide { fill: none; stroke: var(--grid-line-strong); stroke-width: 0.004; }
+.cloud circle { fill: var(--notyou); opacity: 0.45; }
+.hit { transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1), opacity 400ms ease-out; }
+.hit circle { stroke: var(--ink); stroke-width: 0.006; }
+.hit.HIGH_CONFIDENCE circle { fill: var(--same); }
+.hit.LOW_CONFIDENCE circle { fill: var(--alter); }
+.hit.NO_MATCH circle { fill: var(--notyou); }
+.hit text { font: 600 0.085px var(--display); fill: var(--ink); paint-order: stroke; stroke: var(--card-raised); stroke-width: 0.014px; stroke-linejoin: round; }
+.hit.lead text { font-weight: 700; font-size: 0.1px; }
+.hit.gone { opacity: 0; }
+.centre line { stroke: var(--ink); stroke-width: 0.012; }
+.centre text, .ring-label { font: 600 0.062px var(--display); fill: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.002px; }
+@media (prefers-reduced-motion: reduce) { .hit, .switch .knob::after { transition: none; } }
+
+/* ---------- Narrow screens ---------- */
+@media (max-width: 900px) {
+  .mast, .play, .how, .two { grid-template-columns: minmax(0, 1fr); }
+  .mast { padding: 1.5rem 1.25rem; }
+  .target-face { border-right: 0; border-bottom: 2px solid var(--rule); }
+  .how .prose { border-right: 0; border-bottom: 2px solid var(--rule); }
+}
+@media (max-width: 600px) {
+  .hit text { font-size: 0.13px; }
+  .hit.lead text { font-size: 0.14px; }
+  .hit.r5 text, .hit.r6 text, .hit.r7 text, .hit.r8 text, .hit.r9 text, .hit.r10 text { display: none; }
+  .ring-label { font-size: 0.085px; }
+  .key li { grid-template-columns: minmax(0, 1fr); gap: 0.1rem; }
+}
+@media (max-width: 900px) {
+  .jump { display: block; margin-top: 0.6rem; font: 600 1.05rem/1.2 var(--display); text-transform: none; letter-spacing: 0; padding-block: 0.6rem; }
+}
+@media (max-width: 760px) {
+  .ledger thead { display: none; }
+  .ledger, .ledger tbody, .ledger tr, .ledger td { display: block; width: 100%; }
+  .ledger caption { display: block; }
+  .ledger tr { padding: 0.9rem 1rem; border-bottom: 2px solid var(--rule); }
+  .ledger td { border: 0; padding: 0.3rem 0; }
+  .ledger td[data-head]::before { content: attr(data-head); display: block; font: 700 0.85rem/1.2 var(--display); text-transform: uppercase; letter-spacing: 0.04em; color: var(--rule); margin-bottom: 0.1rem; }
+  .how li { grid-template-columns: 1fr; gap: 0.2rem; }
+}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <main>
+    <div class="round card">
+      <div class="mast">
+        <h1>AlterEgo Finder</h1>
+        <div class="lead">
+          <p class="what">Drop a face photo, and it finds the ten closest public figures, each labelled <span class="label same">Same person</span>, <span class="label alter">Alter Ego</span> or <span class="label notyou">Not You</span>.</p>
+          <p class="who">For anyone curious who they resemble, and for data scientists who want to know how much to believe the answer: the labels come from thresholds calibrated on held-out strangers.</p>
+        </div>
+        <p class="promise">Your photo never leaves your machine. <a class="jump" href="#try">Run it on your computer: three commands</a></p>
+      </div>
+      <div class="play">
+        <div class="target-face" id="target">
+          <svg viewBox="-1.72 -1.3 3.44 2.6" role="img" aria-labelledby="target-title target-desc">
+            <title id="target-title">Similarity target for an LFW photo of Lennox Lewis</title>
+            <desc id="target-desc">Each of the pool's 500 public figures sits at a distance of one minus its similarity score from the centre. The inner ring is the Same person threshold, the band around it is Alter Ego, and everything outside is Not You.</desc>
+            <g id="rings"></g>
+            <g class="cloud" id="cloud"></g>
+            <g id="hits"></g>
+            <g class="centre">
+              <line x1="-0.05" y1="0" x2="0.05" y2="0"></line>
+              <line x1="0" y1="-0.05" x2="0" y2="0.05"></line>
+            </g>
+          </svg>
+          <button class="switch" id="second" type="button" aria-pressed="false" aria-controls="target readout">
+            <span class="knob" aria-hidden="true"></span>
+            <span>Add his second photo</span>
+          </button>
+          <div class="readout" id="readout" aria-live="polite"></div>
+          <ul class="key">
+            <li><span class="label same">Same person</span> <span>Score 0.3706 or more: treated as the same person.</span></li>
+            <li><span class="label alter">Alter Ego</span> <span>0.1864 to 0.3706: the closest public figures, and not you. 97% of strangers' best matches land here, so it is not a striking likeness.</span></li>
+            <li><span class="label notyou">Not You</span> <span>Below 0.1864: nobody close.</span></li>
+          </ul>
+          <p class="target-note">An LFW photo of Lennox Lewis, who is not in the pool, against its 500 public figures. Distance from the centre is exactly one minus the score; direction means nothing.</p>
+        </div>
+        <div class="side">
+          <div class="entry" id="try">
+          <div class="entry-head">
+            <h2>Try it locally</h2>
+            <button class="copy" type="button" data-copy="quickstart">Copy</button>
+          </div>
+          <div class="os" role="group" aria-label="Your operating system">
+            <button type="button" class="os-btn" data-os="win" aria-pressed="true">Windows</button>
+            <button type="button" class="os-btn" data-os="unix" aria-pressed="false">macOS or Linux</button>
+          </div>
+<pre id="quickstart">git clone https://github.com/esst-prog2/AlterEgo_Finder
+cd AlterEgo_Finder
+python -m venv .venv
+<span class="os-win">.venv\Scripts\activate</span><span class="os-unix" hidden>source .venv/bin/activate</span>
+pip install -r requirements-ui.txt
+python setup_data.py
+streamlit run app.py</pre>
+          <p class="entry-foot">Setup takes about 3.5 minutes. Then open <code>http://localhost:8501</code> and drop a photo. Python 3.10 or newer, about 750 MB of disk. <a href="#try-full">All steps, and the public-figure pool</a>.</p>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="block" aria-labelledby="how-title">
+      <div class="block-head">
+        <h2 id="how-title">How it works</h2>
+      </div>
+      <div class="how card">
+        <div class="prose">
+          <p>A face is detected, turned into a fingerprint of 512 numbers, and compared with every face in a dataset by cosine similarity: 500 faces from LFW by default, or the optional pool of 500 public figures.</p>
+          <p>Two thresholds turn each score into a label. The upper one, for <span class="label same">Same person</span>, is fitted to the best matches of strangers who are not in the dataset, at the dataset's size, so a bigger dataset gets a higher bar. The lower one, between <span class="label alter">Alter Ego</span> and <span class="label notyou">Not You</span>, is the equal-error-rate point: as many same-person pairs fall below it as different-person pairs rise above it, in proportion.</p>
+        </div>
+        <ol>
+          <li><b>Detect</b><span>YuNet finds the largest face, and turns the photo first if it is on its side or upside down.</span></li>
+          <li><b>Fingerprint</b><span>ArcFace turns the aligned face into 512 numbers.</span></li>
+          <li><b>Compare</b><span>One matrix multiplication scores it against every face in the dataset.</span></li>
+          <li><b>Label</b><span>The calibrated thresholds name each of the ten closest.</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="ledger-title">
+      <div class="block-head">
+        <h2 id="ledger-title">The scorecard</h2>
+        <p>Every claim, with what was predicted before the run where a prediction was written down, what was measured, and where it is recorded. Misses included.</p>
+      </div>
+      <div class="card">
+        <table class="ledger">
+          <caption>Each claim names its dataset: LFW (the default setup) or the public-figure pool (an optional step). Sources link to the project's planning log.</caption>
+          <thead>
+            <tr><th scope="col" class="c-claim">Claim</th><th scope="col" class="c-before">Predicted before the run</th><th scope="col" class="c-measured">Measured</th><th scope="col" class="c-src">Source</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="claim" data-head="Claim"><strong>A stranger rarely reaches Same person</strong><span class="set">Pool, 567 strangers' best matches against the 500 faces</span></td>
+              <td class="before none" data-head="Predicted before the run">Not written down beforehand</td>
+              <td class="measured" data-head="Measured"><span class="fig">0.9%</span> reach Same person; 97.0% land in Alter Ego, 2.1% in Not You</td>
+              <td class="src" data-head="Source"><a href="https://github.com/esst-prog2/AlterEgo_Finder/blob/main/PLANNING_LOG.md">Planning log, 2 Nov 2026</a></td>
+            </tr>
+            <tr>
+              <td class="claim" data-head="Claim"><strong>One fixed threshold fails as the dataset grows</strong><span class="set">LFW, 200 absent strangers (spike of 1 Oct 2026)</span></td>
+              <td class="before" data-head="Predicted before the run">What fraction of strangers' top matches reach the bar with 50, 500 and 5,000 faces?</td>
+              <td class="measured" data-head="Measured">With one fixed bar for every size (0.2017, reached by 1% of pairs of strangers): <span class="fig">33.0%</span> of strangers' top matches reach it with 50 faces, <span class="fig">99.0%</span> with 500, <span class="fig">100.0%</span> with 5,000</td>
+              <td class="src" data-head="Source"><a href="https://github.com/esst-prog2/AlterEgo_Finder/blob/main/PLANNING_LOG.md">Planning log, 1 Oct 2026</a>; <a href="https://github.com/esst-prog2/AlterEgo_Finder/blob/main/data/spike_results.json">spike_results.json</a></td>
+            </tr>
+            <tr>
+              <td class="claim" data-head="Claim"><strong>The same person is recognised across photo sources</strong><span class="set">Pool, 32 pairs from 9 people, LFW photos against Wikimedia photos</span></td>
+              <td class="before none" data-head="Predicted before the run">Not written down beforehand</td>
+              <td class="measured" data-head="Measured"><span class="fig">30 of 32</span> pairs reach Same person, median score 0.538; both misses are Bruce Springsteen</td>
+              <td class="src" data-head="Source"><a href="https://github.com/esst-prog2/AlterEgo_Finder/blob/main/PLANNING_LOG.md">Planning log, 2 Nov 2026</a></td>
+            </tr>
+            <tr>
+              <td class="claim" data-head="Claim"><strong>Photos on their side or upside down still match</strong><span class="set">LFW, 150 people</span></td>
+              <td class="before" data-head="Predicted before the run">At least 120 of 150 at 90, 180 and 270 degrees, against 148 upright</td>
+              <td class="measured" data-head="Measured">At each of 90, 180 and 270 degrees: <span class="fig">0 of 150</span> before the fix, <span class="fig">148 of 150</span> after</td>
+              <td class="src" data-head="Source"><a href="https://github.com/esst-prog2/AlterEgo_Finder/blob/main/PLANNING_LOG.md">Planning log, 3 Nov 2026</a></td>
+            </tr>
+            <tr>
+              <td class="claim" data-head="Claim"><strong>A wrong first version, caught</strong><span class="set">LFW, all 13,233 photos</span></td>
+              <td class="before" data-head="Predicted before the run">No image turns in the datasets, the calibration set or the test fixtures</td>
+              <td class="measured" data-head="Measured">The first version turned <span class="fig">2</span> upright group photos; a 300-photo sample had missed them. Fixed: none turn</td>
+              <td class="src" data-head="Source"><a href="https://github.com/esst-prog2/AlterEgo_Finder/blob/main/PLANNING_LOG.md">Planning log, 3 Nov 2026</a></td>
+            </tr>
+            <tr>
+              <td class="claim" data-head="Claim"><strong>More photos per person did not earn a place</strong><span class="set">Pool, 50 people, 142 same-person queries</span></td>
+              <td class="before" data-head="Predicted before the run">Build it only if one method fixes at least half of the one-photo misses, keeps strangers at 2% or below, and keeps the test photo's top match out of Same person</td>
+              <td class="measured" data-head="Measured">Each method fixed <span class="fig">1 of 4</span> misses and broke 1 or 2. Not built</td>
+              <td class="src" data-head="Source"><a href="https://github.com/esst-prog2/AlterEgo_Finder/blob/main/PLANNING_LOG.md">Planning log, 3 Nov 2026</a>; <a href="https://github.com/esst-prog2/AlterEgo_Finder/blob/main/data/spike_multiphoto_results.json">spike_multiphoto_results.json</a></td>
+            </tr>
+            <tr>
+              <td class="claim" data-head="Claim"><strong>The automated tests pass</strong><span class="set">The whole program</span></td>
+              <td class="before none" data-head="Predicted before the run">Not written down beforehand</td>
+              <td class="measured" data-head="Measured"><span class="fig">271</span> tests</td>
+              <td class="src" data-head="Source"><a href="https://github.com/esst-prog2/AlterEgo_Finder/blob/main/PLANNING_LOG.md">Planning log, 3 Nov 2026</a></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="ledger-foot">
+          <p>These are records: each measurement was run once and written down in the log. The byte-for-byte checks after each fix (16,461 images read identically, embeddings and calibration unchanged) are records too. What you can run yourself is the test suite:</p>
+          <code>pip install -r requirements-dev.txt -r requirements-ui.txt
+python -m pytest tests/</code>
+        </div>
+      </div>
+    </section>
+
+    <section class="block two" aria-label="Privacy and how to run it">
+      <div class="panel card">
+        <h2>Privacy</h2>
+        <p>Everything runs on your computer. Your photo goes only to a server on your own machine, served on localhost; there is no account, and nothing about you is sent anywhere.</p>
+        <p>Setup downloads data and models: the LFW faces, the two model files, and, if you ask for it, the pool's photos from Wikimedia Commons. The pool is limited to adults known to the public, with no politicians, and every photo's author and licence are credited in the program and its reports.</p>
+      </div>
+      <div class="panel card" id="try-full">
+        <h2>Run it at home</h2>
+        <ol class="steps">
+          <li><span>You need Python 3.10 or newer and about 750 MB of disk. Get the code and create a virtual environment:<code>git clone https://github.com/esst-prog2/AlterEgo_Finder
+cd AlterEgo_Finder
+python -m venv .venv</code></span></li>
+          <li><span>Activate it. On Windows:<code>.venv\Scripts\activate</code>On macOS or Linux:<code>source .venv/bin/activate</code></span></li>
+          <li><span>Install and set up the default dataset, 500 LFW faces (about 3.5 minutes):<code>pip install -r requirements-ui.txt
+python setup_data.py</code></span></li>
+          <li><span>Start the page and open <code style="display:inline;padding:0 .3rem">http://localhost:8501</code>:<code>streamlit run app.py</code></span></li>
+          <li><span>Optional, the public-figure pool (about 30 minutes, resumable), then choose <em>wikidata</em> in the page's dropdown:<code>python setup_data.py --wikidata</code></span></li>
+        </ol>
+        <p>On Windows, if a library is blocked by Smart App Control or a managed PC's policy, see the <a href="https://github.com/esst-prog2/AlterEgo_Finder#6-getting-started">README's getting started section</a>.</p>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="limits-title">
+      <div class="block-head">
+        <h2 id="limits-title">Limits</h2>
+        <p>Written the way a model card is, because the limits are part of the answer.</p>
+      </div>
+      <div class="panel card">
+        <dl class="facts">
+          <dt>Intended use</dt>
+          <dd>Finding the closest public figures to a face, with a calibrated label, on your own machine.</dd>
+          <dt>Out-of-scope use</dt>
+          <dd>Identifying people, or any decision about a person.</dd>
+          <dt>Evaluation data</dt>
+          <dd>LFW for calibration and tests; 500 Wikimedia Commons photos for the pool.</dd>
+          <dt>Metrics</dt>
+          <dd>The scorecard above.</dd>
+          <dt>Limitations</dt>
+          <dd><ul>
+            <li><span class="label alter">Alter Ego</span> means the closest public figure in this pool, and not you. It is not a striking likeness: 97% of strangers' best matches land there.</li>
+            <li>The pool's thresholds are fitted with LFW faces as the strangers, while its photos come from Wikimedia Commons, so its labels are a little less exact than LFW's.</li>
+            <li>At these low scores, a match can cross gender.</li>
+            <li>Faces tilted by about 45 degrees still match poorly. One photo per person in the pool.</li>
+            <li>Each <span class="label same">Same person</span> is evidence, not proof of identity.</li>
+          </ul></dd>
+        </dl>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer>
+  <span>AlterEgo Finder, a course project for ELTE Advanced Programming 2026/27.</span>
+  <span><a href="https://github.com/esst-prog2/AlterEgo_Finder">Source on GitHub</a></span>
+</footer>
+
+<script id="example-data" type="application/json">{"thresholds":{"low":0.1864,"high":0.3706},"cloud":[[0.006,0.931],[0.018,0.926],[0.032,1.004],[0.041,0.915],[0.061,1.057],[0.071,1.003],[0.088,1.049],[0.097,1.004],[0.097,0.889],[0.126,1.025],[0.139,1.026],[0.157,1.057],[0.173,1.073],[0.185,1.06],[0.198,1.051],[0.192,0.953],[0.205,0.956],[0.246,1.078],[0.247,1.021],[0.268,1.048],[0.292,1.085],[0.26,0.918],[0.288,0.972],[0.312,1.003],[0.261,0.802],[0.336,0.99],[0.322,0.91],[0.361,0.98],[0.311,0.814],[0.372,0.935],[0.392,0.951],[0.416,0.974],[0.412,0.93],[0.467,1.018],[0.446,0.94],[0.449,0.917],[0.43,0.85],[0.466,0.893],[0.481,0.895],[0.502,0.905],[0.529,0.925],[0.511,0.868],[0.542,0.893],[0.497,0.797],[0.568,0.884],[0.561,0.85],[0.576,0.849],[0.592,0.849],[0.525,0.732],[0.581,0.789],[0.603,0.798],[0.697,0.897],[0.59,0.74],[0.636,0.776],[0.697,0.829],[0.615,0.713],[0.648,0.732],[0.662,0.729],[0.686,0.737],[0.596,0.624],[0.758,0.773],[0.838,0.833],[0.737,0.713],[0.791,0.746],[0.783,0.72],[0.719,0.644],[0.786,0.686],[0.772,0.658],[0.819,0.679],[0.722,0.583],[0.856,0.674],[0.796,0.61],[0.816,0.609],[0.802,0.583],[0.861,0.609],[0.88,0.606],[0.828,0.554],[0.86,0.56],[0.846,0.535],[0.942,0.579],[0.966,0.577],[0.822,0.477],[0.877,0.494],[0.85,0.465],[0.864,0.458],[0.915,0.47],[0.986,0.49],[1.0,0.482],[0.926,0.431],[0.87,0.392],[0.81,0.352],[0.944,0.396],[0.822,0.333],[0.866,0.338],[0.814,0.305],[1.023,0.369],[1.0,0.346],[1.053,0.35],[0.897,0.285],[0.888,0.27],[0.886,0.257],[0.972,0.268],[1.001,0.262],[1.056,0.263],[0.972,0.229],[0.848,0.188],[1.037,0.216],[1.001,0.195],[1.0,0.181],[0.999,0.168],[0.927,0.144],[0.994,0.141],[1.026,0.132],[0.97,0.112],[1.049,0.108],[0.983,0.088],[1.002,0.077],[0.93,0.06],[0.957,0.049],[1.031,0.04],[0.954,0.025],[0.942,0.012],[0.94,0.0],[0.963,-0.012],[1.028,-0.026],[1.02,-0.039],[1.119,-0.058],[0.994,-0.064],[0.979,-0.075],[0.921,-0.083],[0.869,-0.089],[1.02,-0.118],[0.95,-0.122],[1.007,-0.143],[1.075,-0.167],[1.005,-0.169],[0.989,-0.179],[1.008,-0.196],[1.092,-0.227],[0.995,-0.221],[1.025,-0.241],[0.89,-0.221],[1.043,-0.274],[0.942,-0.26],[0.972,-0.282],[0.979,-0.297],[0.918,-0.292],[0.966,-0.321],[1.016,-0.352],[0.925,-0.334],[0.969,-0.363],[0.975,-0.38],[0.975,-0.395],[0.927,-0.389],[0.875,-0.381],[0.881,-0.397],[0.913,-0.426],[0.885,-0.426],[0.806,-0.401],[1.061,-0.545],[0.928,-0.492],[1.045,-0.571],[0.95,-0.535],[0.827,-0.48],[0.881,-0.527],[0.941,-0.579],[0.78,-0.493],[0.823,-0.536],[0.746,-0.499],[0.844,-0.581],[0.787,-0.557],[0.906,-0.658],[0.762,-0.569],[0.938,-0.719],[0.837,-0.659],[0.823,-0.665],[0.72,-0.597],[0.842,-0.717],[0.887,-0.775],[0.755,-0.677],[0.726,-0.668],[0.777,-0.733],[0.743,-0.719],[0.663,-0.658],[0.744,-0.758],[0.787,-0.823],[0.739,-0.793],[0.704,-0.775],[0.626,-0.707],[0.661,-0.766],[0.632,-0.752],[0.569,-0.695],[0.621,-0.779],[0.612,-0.788],[0.613,-0.811],[0.61,-0.829],[0.644,-0.898],[0.601,-0.862],[0.609,-0.897],[0.508,-0.769],[0.527,-0.82],[0.488,-0.783],[0.536,-0.884],[0.495,-0.84],[0.496,-0.867],[0.489,-0.882],[0.452,-0.84],[0.498,-0.955],[0.488,-0.965],[0.421,-0.86],[0.375,-0.792],[0.445,-0.971],[0.42,-0.949],[0.35,-0.82],[0.35,-0.849],[0.34,-0.856],[0.365,-0.955],[0.366,-0.994],[0.335,-0.948],[0.338,-0.995],[0.304,-0.935],[0.292,-0.941],[0.299,-1.006],[0.279,-0.985],[0.258,-0.957],[0.225,-0.881],[0.26,-1.073],[0.226,-0.988],[0.217,-1.01],[0.178,-0.886],[0.203,-1.079],[0.185,-1.06],[0.157,-0.972],[0.14,-0.944],[0.128,-0.948],[0.121,-0.991],[0.107,-0.978],[0.094,-0.976],[0.086,-1.031],[0.07,-0.997],[0.053,-0.915],[0.042,-0.937],[0.035,-1.098],[0.017,-0.892],[0.006,-1.006],[-0.006,-1.021],[-0.019,-0.978],[-0.035,-1.083],[-0.039,-0.862],[-0.057,-0.991],[-0.078,-1.103],[-0.073,-0.875],[-0.096,-0.996],[-0.105,-0.962],[-0.12,-0.98],[-0.142,-1.052],[-0.145,-0.98],[-0.158,-0.974],[-0.192,-1.099],[-0.162,-0.862],[-0.167,-0.829],[-0.21,-0.976],[-0.212,-0.929],[-0.236,-0.976],[-0.229,-0.896],[-0.298,-1.106],[-0.273,-0.965],[-0.276,-0.93],[-0.296,-0.953],[-0.316,-0.972],[-0.311,-0.918],[-0.299,-0.847],[-0.328,-0.891],[-0.409,-1.07],[-0.371,-0.934],[-0.382,-0.927],[-0.428,-1.001],[-0.432,-0.977],[-0.394,-0.86],[-0.38,-0.802],[-0.462,-0.943],[-0.452,-0.894],[-0.444,-0.852],[-0.489,-0.908],[-0.434,-0.783],[-0.49,-0.857],[-0.568,-0.965],[-0.46,-0.758],[-0.473,-0.759],[-0.581,-0.906],[-0.57,-0.863],[-0.559,-0.824],[-0.554,-0.794],[-0.612,-0.854],[-0.603,-0.818],[-0.554,-0.733],[-0.669,-0.861],[-0.618,-0.775],[-0.673,-0.822],[-0.785,-0.934],[-0.625,-0.725],[-0.697,-0.787],[-0.654,-0.72],[-0.657,-0.705],[-0.739,-0.773],[-0.669,-0.682],[-0.724,-0.719],[-0.77,-0.746],[-0.754,-0.712],[-0.706,-0.65],[-0.775,-0.695],[-0.736,-0.643],[-0.722,-0.614],[-0.826,-0.685],[-0.81,-0.654],[-0.823,-0.648],[-0.939,-0.72],[-0.856,-0.639],[-0.779,-0.566],[-0.857,-0.606],[-0.913,-0.628],[-0.797,-0.534],[-0.88,-0.573],[-0.922,-0.584],[-0.874,-0.538],[-0.898,-0.537],[-0.908,-0.527],[-0.955,-0.538],[-0.887,-0.485],[-0.874,-0.463],[-0.977,-0.502],[-0.905,-0.45],[-0.837,-0.403],[-0.917,-0.427],[-1.017,-0.458],[-0.924,-0.402],[-0.951,-0.399],[-0.98,-0.397],[-0.997,-0.389],[-0.997,-0.374],[-1.063,-0.384],[-0.951,-0.329],[-0.979,-0.325],[-0.876,-0.279],[-0.935,-0.284],[-1.024,-0.297],[-0.925,-0.255],[-1.057,-0.277],[-0.955,-0.237],[-0.911,-0.214],[-0.999,-0.221],[-0.923,-0.192],[-0.993,-0.193],[-0.944,-0.171],[-0.835,-0.141],[-1.056,-0.164],[-0.953,-0.135],[-0.928,-0.12],[-0.957,-0.111],[-1.118,-0.115],[-1.057,-0.095],[-0.983,-0.076],[-0.962,-0.062],[-0.864,-0.044],[-0.951,-0.037],[-1.015,-0.026],[-0.894,-0.011],[-1.124,-0.0],[-1.136,0.015],[-0.947,0.024],[-0.962,0.037],[-1.142,0.059],[-0.903,0.058],[-0.966,0.074],[-1.049,0.094],[-0.887,0.091],[-1.031,0.119],[-0.915,0.118],[-0.999,0.142],[-0.971,0.151],[-1.017,0.171],[-0.954,0.173],[-0.89,0.173],[-1.018,0.212],[-0.997,0.221],[-1.088,0.256],[-0.99,0.246],[-0.92,0.241],[-0.899,0.248],[-1.108,0.321],[-0.998,0.303],[-1.007,0.32],[-0.933,0.31],[-0.801,0.278],[-0.92,0.332],[-0.889,0.334],[-0.897,0.35],[-0.998,0.404],[-0.914,0.384],[-0.891,0.388],[-0.93,0.419],[-0.85,0.396],[-0.954,0.459],[-0.84,0.418],[-0.911,0.468],[-0.819,0.434],[-0.963,0.526],[-0.939,0.529],[-0.851,0.494],[-0.85,0.508],[-0.81,0.498],[-0.868,0.549],[-0.853,0.555],[-0.833,0.558],[-0.83,0.571],[-0.766,0.542],[-0.85,0.618],[-0.775,0.578],[-0.84,0.644],[-0.734,0.577],[-0.844,0.682],[-0.802,0.665],[-0.799,0.681],[-0.72,0.629],[-0.771,0.691],[-0.752,0.692],[-0.756,0.713],[-0.724,0.701],[-0.725,0.72],[-0.673,0.686],[-0.651,0.681],[-0.675,0.724],[-0.66,0.727],[-0.647,0.732],[-0.556,0.645],[-0.756,0.9],[-0.642,0.784],[-0.661,0.829],[-0.642,0.826],[-0.626,0.827],[-0.642,0.873],[-0.589,0.822],[-0.584,0.837],[-0.506,0.745],[-0.534,0.81],[-0.506,0.788],[-0.449,0.719],[-0.497,0.819],[-0.509,0.865],[-0.501,0.877],[-0.547,0.986],[-0.454,0.844],[-0.474,0.909],[-0.493,0.975],[-0.419,0.855],[-0.411,0.868],[-0.388,0.847],[-0.424,0.959],[-0.38,0.889],[-0.437,1.06],[-0.347,0.873],[-0.347,0.906],[-0.404,1.097],[-0.364,1.031],[-0.33,0.974],[-0.305,0.94],[-0.298,0.959],[-0.283,0.955],[-0.277,0.978],[-0.284,1.054],[-0.209,0.819],[-0.246,1.019],[-0.249,1.09],[-0.219,1.022],[-0.171,0.847],[-0.189,1.004],[-0.175,1.002],[-0.175,1.082],[-0.143,0.964],[-0.143,1.056],[-0.129,1.054],[-0.105,0.957],[-0.103,1.065],[-0.081,0.969],[-0.066,0.93],[-0.06,1.048],[-0.049,1.091],[-0.033,1.038],[-0.02,1.059],[-0.007,1.026]],"pool":{"named":[{"rank":1,"x":0.0,"y":0.7499,"r":0.7499,"label":"LOW_CONFIDENCE","person":"Elvis Presley","score":0.2501},{"rank":2,"x":0.4496,"y":0.6188,"r":0.7649,"label":"LOW_CONFIDENCE","person":"Noah Wyle","score":0.2351},{"rank":3,"x":0.7411,"y":0.2408,"r":0.7792,"label":"LOW_CONFIDENCE","person":"Barbra Streisand","score":0.2208},{"rank":4,"x":0.7688,"y":-0.2498,"r":0.8084,"label":"LOW_CONFIDENCE","person":"Esteban Ocon","score":0.1916},{"rank":5,"x":0.4788,"y":-0.6591,"r":0.8147,"label":"NO_MATCH","person":"Kylie Minogue","score":0.1853},{"rank":6,"x":0.0,"y":-0.8147,"r":0.8147,"label":"NO_MATCH","person":"Uma Thurman","score":0.1853},{"rank":7,"x":-0.4789,"y":-0.6592,"r":0.8148,"label":"NO_MATCH","person":"Anastasia Pavlyuchenkova","score":0.1852},{"rank":8,"x":-0.7843,"y":-0.2548,"r":0.8247,"label":"NO_MATCH","person":"Ivan Lendl","score":0.1753},{"rank":9,"x":-0.7959,"y":0.2586,"r":0.8369,"label":"NO_MATCH","person":"Stoffel Vandoorne","score":0.1631},{"rank":10,"x":-0.4955,"y":0.682,"r":0.8429,"label":"NO_MATCH","person":"Samuel Eto'o","score":0.1571}],"top":[{"person":"Elvis Presley","score":0.2501,"label":"LOW_CONFIDENCE"}],"counts":{"HIGH_CONFIDENCE":0,"LOW_CONFIDENCE":4,"NO_MATCH":496}},"with_second_photo":{"named":[{"rank":1,"x":0.0,"y":0.2979,"r":0.2979,"label":"HIGH_CONFIDENCE","person":"Lennox Lewis, second photo","score":0.7021},{"rank":2,"x":0.4408,"y":0.6067,"r":0.7499,"label":"LOW_CONFIDENCE","person":"Elvis Presley","score":0.2501},{"rank":3,"x":0.7274,"y":0.2364,"r":0.7649,"label":"LOW_CONFIDENCE","person":"Noah Wyle","score":0.2351},{"rank":4,"x":0.7411,"y":-0.2408,"r":0.7792,"label":"LOW_CONFIDENCE","person":"Barbra Streisand","score":0.2208},{"rank":5,"x":0.4751,"y":-0.654,"r":0.8084,"label":"LOW_CONFIDENCE","person":"Esteban Ocon","score":0.1916},{"rank":6,"x":0.0,"y":-0.8147,"r":0.8147,"label":"NO_MATCH","person":"Kylie Minogue","score":0.1853},{"rank":7,"x":-0.4788,"y":-0.6591,"r":0.8147,"label":"NO_MATCH","person":"Uma Thurman","score":0.1853},{"rank":8,"x":-0.7749,"y":-0.2518,"r":0.8148,"label":"NO_MATCH","person":"Anastasia Pavlyuchenkova","score":0.1852},{"rank":9,"x":-0.7843,"y":0.2548,"r":0.8247,"label":"NO_MATCH","person":"Ivan Lendl","score":0.1753},{"rank":10,"x":-0.4919,"y":0.677,"r":0.8369,"label":"NO_MATCH","person":"Stoffel Vandoorne","score":0.1631}],"top":[{"person":"Lennox Lewis, second photo","score":0.7021,"label":"HIGH_CONFIDENCE"}],"counts":{"HIGH_CONFIDENCE":1,"LOW_CONFIDENCE":4,"NO_MATCH":496}}}</script>
+<script>
+(() => {
+  const data = JSON.parse(document.getElementById("example-data").textContent);
+  const NS = "http://www.w3.org/2000/svg";
+  const low = data.thresholds.low, high = data.thresholds.high;
+  const svg = document.querySelector("#target svg");
+  const el = (name, attrs, parent) => {
+    const node = document.createElementNS(NS, name);
+    for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+    if (parent) parent.appendChild(node);
+    return node;
+  };
+
+  // Rings at exactly one minus each threshold.
+  const rings = document.getElementById("rings");
+  [1.2, 1.0].forEach(r => el("circle", { cx: 0, cy: 0, r, class: "ring-guide" }, rings));
+  el("circle", { cx: 0, cy: 0, r: 1 - low, class: "ring-alter" }, rings);
+  el("circle", { cx: 0, cy: 0, r: 1 - high, class: "ring-same" }, rings);
+  // At 9 o'clock: the ten named hits sit at 36-degree steps from 12 o'clock, so never here.
+  // Set vertically, each inside its own zone, reading up the ring.
+  const ringLabel = (x, text) => {
+    const node = el("text", { x, y: 0, "text-anchor": "middle", "dominant-baseline": "middle",
+                              transform: `rotate(-90 ${x} 0)`, class: "ring-label" }, rings);
+    node.textContent = text;
+  };
+  ringLabel(-(1 - high) + 0.06, "Same person");
+  ringLabel(-((1 - high) + (1 - low)) / 2, "Alter Ego");
+  ringLabel(-(1 - low) - 0.07, "Not You");
+
+  // The faint cloud: every face that is not one of the ten named.
+  const cloud = document.getElementById("cloud");
+  for (const [x, y] of data.cloud) el("circle", { cx: x, cy: -y, r: 0.012 }, cloud);
+
+  // Named hits, keyed by person so they can travel between the two states.
+  const hits = document.getElementById("hits");
+  const nodes = new Map();
+  const people = new Set([...data.pool.named, ...data.with_second_photo.named].map(p => p.person));
+  for (const person of people) {
+    const g = el("g", { class: "hit gone" }, hits);
+    el("circle", { cx: 0, cy: 0, r: 0.04 }, g);
+    const t = el("text", { x: 0.05, y: 0.02 }, g);
+    nodes.set(person, { g, t });
+  }
+
+  const labelName = { HIGH_CONFIDENCE: ["same", "Same person"], LOW_CONFIDENCE: ["alter", "Alter Ego"], NO_MATCH: ["notyou", "Not You"] };
+  const readout = document.getElementById("readout");
+
+  function show(state, entering) {
+    const shown = new Set();
+    for (const p of state.named) {
+      const node = nodes.get(p.person);
+      shown.add(p.person);
+      node.g.setAttribute("class", `hit ${p.label} r${p.rank}${p.rank === 1 ? " lead" : ""}`);
+      // A new hit starts beyond the rings and travels in.
+      if (entering === p.person) {
+        const f = 1.25 / Math.max(p.r, 0.01);
+        node.g.style.transition = "none";
+        node.g.style.transform = `translate(${p.x * f}px, ${-p.y * f}px)`;
+        node.g.getBoundingClientRect();
+        node.g.style.transition = "";
+      }
+      requestAnimationFrame(() => { node.g.style.transform = `translate(${p.x}px, ${-p.y}px)`; });
+      const right = p.x >= 0;
+      if (p.rank === 1) {
+        node.t.setAttribute("x", 0); node.t.setAttribute("y", -0.075); node.t.setAttribute("text-anchor", "middle");
+      } else {
+        node.t.setAttribute("x", right ? 0.065 : -0.065); node.t.setAttribute("y", 0.03);
+        node.t.setAttribute("text-anchor", right ? "start" : "end");
+      }
+      node.t.textContent = `${p.rank}  ${p.person}${p.rank <= 2 ? `  ${p.score.toFixed(4)}` : ""}`;
+    }
+    for (const [person, node] of nodes) if (!shown.has(person)) node.g.setAttribute("class", "hit gone");
+
+    const lead = state.top[0];
+    const [cls, name] = labelName[lead.label];
+    const c = state.counts;
+    readout.innerHTML = "";
+    const top = document.createElement("div");
+    top.className = "top";
+    top.innerHTML = `<span>Closest:</span> <span class="name"></span> <span class="score">${lead.score.toFixed(4)}</span> <span class="label ${cls}">${name}</span>`;
+    top.querySelector(".name").textContent = lead.person;
+    const tally = document.createElement("div");
+    tally.className = "tally";
+    tally.textContent = `${c.HIGH_CONFIDENCE} Same person, ${c.LOW_CONFIDENCE} Alter Ego, ${c.NO_MATCH} Not You`;
+    readout.append(top, tally);
+  }
+
+  const button = document.getElementById("second");
+  show(data.pool);
+  button.addEventListener("click", () => {
+    const on = button.getAttribute("aria-pressed") !== "true";
+    button.setAttribute("aria-pressed", String(on));
+    show(on ? data.with_second_photo : data.pool, on ? data.with_second_photo.top[0].person : null);
+  });
+
+  // Windows or macOS/Linux: the activate line shown is the one Copy copies.
+  document.querySelectorAll(".os-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const unix = btn.dataset.os === "unix";
+      document.querySelectorAll(".os-btn").forEach(b => b.setAttribute("aria-pressed", String(b === btn)));
+      document.querySelectorAll(".os-win").forEach(s => { s.hidden = unix; });
+      document.querySelectorAll(".os-unix").forEach(s => { s.hidden = !unix; });
+    });
+  });
+
+  // Copy the quickstart commands.
+  document.querySelectorAll(".copy").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const text = document.getElementById(btn.dataset.copy).innerText;
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.textContent = "Copied"; btn.dataset.state = "done";
+      } catch {
+        const range = document.createRange();
+        range.selectNodeContents(document.getElementById(btn.dataset.copy));
+        const sel = getSelection(); sel.removeAllRanges(); sel.addRange(range);
+        btn.textContent = "Selected";
+      }
+      setTimeout(() => { btn.textContent = "Copy"; delete btn.dataset.state; }, 2200);
+    });
+  });
+})();
+</script>
+</body>
+</html>
