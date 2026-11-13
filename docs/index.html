@@ -78,17 +78,20 @@ code, .cmd { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; fo
 .label.alter::before { background: var(--alter); }
 .label.notyou::before { background: var(--notyou); }
 
-/* ---------- First viewport: target face + scorecard header ---------- */
-.round {
-  display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
-  gap: 0;
-  margin: clamp(1rem, 3vw, 2.25rem) auto 0;
-}
-.target-face { min-width: 0; padding: clamp(1rem, 2.4vw, 1.75rem); border-right: 2px solid var(--rule); display: flex; flex-direction: column; gap: 0.9rem; }
+/* ---------- First viewport: a masthead across the card, then the target beside Try it locally ---------- */
+.round { display: grid; grid-template-columns: minmax(0, 1fr); margin: clamp(1rem, 3vw, 2.25rem) auto 0; }
+.mast { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 1.25rem 2.5rem; align-items: end; padding: 1.6rem 2.2rem; border-bottom: 2px solid var(--rule); }
+.mast h1 { font-size: clamp(3rem, 7vw, 6rem); text-transform: uppercase; color: var(--ink); letter-spacing: -0.01em; }
+.mast .lead { display: grid; gap: 0.7rem; }
+.mast .what { font-size: clamp(1.15rem, 1.7vw, 1.35rem); line-height: 1.4; font-weight: 500; }
+.mast .who { color: var(--ink-soft); }
+.mast .promise { grid-column: 1 / -1; max-width: none; font: 700 1.2rem/1.2 var(--display); text-transform: uppercase; color: var(--rule); letter-spacing: 0.02em; border-top: 2px solid var(--rule); padding-top: 0.6rem; }
+.play { display: grid; grid-template-columns: minmax(0, 60%) minmax(0, 1fr); }
+.target-face { min-width: 0; padding: 1.5rem; border-right: 2px solid var(--rule); display: flex; flex-direction: column; gap: 0.9rem; }
 .target-face svg { width: 100%; height: auto; display: block; }
-.target-caption { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1rem; }
-.target-caption p { font-size: 0.98rem; color: var(--ink-soft); }
+.target-note { font-size: 0.95rem; color: var(--ink-soft); }
+.side { min-width: 0; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.1rem; }
+.side .switch { align-self: flex-start; }
 .switch {
   display: inline-flex; align-items: center; gap: 0.7rem;
   font: 600 1.05rem/1 var(--display); text-transform: uppercase; letter-spacing: 0.03em;
@@ -106,12 +109,6 @@ code, .cmd { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; fo
 .readout .name { font-weight: 600; }
 .readout .score { font-family: var(--display); font-weight: 600; font-size: 1.05rem; }
 .readout .tally { color: var(--ink-soft); }
-
-.header { min-width: 0; padding: clamp(1.25rem, 3vw, 2.4rem); display: flex; flex-direction: column; gap: 1.15rem; }
-.header h1 { font-size: clamp(3rem, 7vw, 5.5rem); text-transform: uppercase; color: var(--ink); letter-spacing: -0.01em; }
-.header .what { font-size: clamp(1.2rem, 1.8vw, 1.4rem); line-height: 1.4; font-weight: 500; max-width: 34ch; }
-.header .who { color: var(--ink-soft); max-width: 46ch; }
-.header .promise { font: 700 1.2rem/1.2 var(--display); text-transform: uppercase; color: var(--rule); border-top: 2px solid var(--rule); border-bottom: 2px solid var(--rule); padding: 0.55rem 0; letter-spacing: 0.02em; }
 
 .entry { min-width: 0; border: 2px solid var(--rule); background: var(--card); }
 .entry-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.55rem 0.85rem; border-bottom: 2px solid var(--rule); }
@@ -197,9 +194,9 @@ footer { margin: clamp(2.5rem, 6vw, 4rem) auto 0; padding: 1.5rem var(--gutter) 
 
 /* ---------- Narrow screens ---------- */
 @media (max-width: 900px) {
-  .round, .how, .two { grid-template-columns: minmax(0, 1fr); }
-  .target-face { border-right: 0; border-bottom: 2px solid var(--rule); order: 2; }
-  .header { order: 1; }
+  .mast, .play, .how, .two { grid-template-columns: minmax(0, 1fr); }
+  .mast { padding: 1.5rem 1.25rem; }
+  .target-face { border-right: 0; border-bottom: 2px solid var(--rule); }
   .how .prose { border-right: 0; border-bottom: 2px solid var(--rule); }
 }
 @media (max-width: 760px) {
@@ -217,34 +214,36 @@ footer { margin: clamp(2.5rem, 6vw, 4rem) auto 0; padding: 1.5rem var(--gutter) 
 <div class="sheet">
   <main>
     <div class="round card">
-      <div class="target-face" id="target">
-        <svg viewBox="-1.72 -1.3 3.44 2.6" role="img" aria-labelledby="target-title target-desc">
-          <title id="target-title">Similarity target for an LFW photo of Lennox Lewis</title>
-          <desc id="target-desc">Each of the pool's 500 public figures sits at a distance of one minus its similarity score from the centre. The inner ring is the Same person threshold, the band around it is Alter Ego, and everything outside is Not You.</desc>
-          <g id="rings"></g>
-          <g class="cloud" id="cloud"></g>
-          <g id="hits"></g>
-          <g class="centre">
-            <line x1="-0.05" y1="0" x2="0.05" y2="0"></line>
-            <line x1="0" y1="-0.05" x2="0" y2="0.05"></line>
-          </g>
-        </svg>
-        <div class="target-caption">
-          <p>An LFW photo of Lennox Lewis against the pool of 500 public figures. Distance from the centre is exactly one minus the score; direction means nothing.</p>
+      <div class="mast">
+        <h1>AlterEgo Finder</h1>
+        <div class="lead">
+          <p class="what">Drop a face photo, and it finds the ten closest public figures, each labelled <span class="label same">Same person</span>, <span class="label alter">Alter Ego</span> or <span class="label notyou">Not You</span>.</p>
+          <p class="who">For anyone curious who they resemble, and for data scientists who want to know how much to believe the answer: the labels come from thresholds calibrated on held-out strangers.</p>
+        </div>
+        <p class="promise">Your photo never leaves your machine.</p>
+      </div>
+      <div class="play">
+        <div class="target-face" id="target">
+          <svg viewBox="-1.72 -1.3 3.44 2.6" role="img" aria-labelledby="target-title target-desc">
+            <title id="target-title">Similarity target for an LFW photo of Lennox Lewis</title>
+            <desc id="target-desc">Each of the pool's 500 public figures sits at a distance of one minus its similarity score from the centre. The inner ring is the Same person threshold, the band around it is Alter Ego, and everything outside is Not You.</desc>
+            <g id="rings"></g>
+            <g class="cloud" id="cloud"></g>
+            <g id="hits"></g>
+            <g class="centre">
+              <line x1="-0.05" y1="0" x2="0.05" y2="0"></line>
+              <line x1="0" y1="-0.05" x2="0" y2="0.05"></line>
+            </g>
+          </svg>
+          <p class="target-note">An LFW photo of Lennox Lewis against the pool of 500 public figures. Distance from the centre is exactly one minus the score; direction means nothing.</p>
+        </div>
+        <div class="side">
           <button class="switch" id="second" type="button" aria-pressed="false" aria-controls="target readout">
             <span class="knob" aria-hidden="true"></span>
             <span>Add his second photo</span>
           </button>
-        </div>
-        <div class="readout" id="readout" aria-live="polite"></div>
-      </div>
-
-      <div class="header">
-        <h1>AlterEgo Finder</h1>
-        <p class="what">Drop a face photo, and it finds the ten closest public figures, each labelled <span class="label same">Same person</span>, <span class="label alter">Alter Ego</span> or <span class="label notyou">Not You</span>.</p>
-        <p class="who">For anyone curious who they resemble, and for data scientists who want to know how much to believe the answer: the labels come from thresholds calibrated on held-out strangers.</p>
-        <p class="promise">Your photo never leaves your machine.</p>
-        <div class="entry" id="try">
+          <div class="readout" id="readout" aria-live="polite"></div>
+          <div class="entry" id="try">
           <div class="entry-head">
             <h2>Try it locally</h2>
             <button class="copy" type="button" data-copy="quickstart">Copy</button>
@@ -257,6 +256,7 @@ pip install -r requirements-ui.txt
 python setup_data.py     <span class="note"># about 3.5 minutes</span>
 streamlit run app.py</pre>
           <p class="entry-foot">Then open <code>http://localhost:8501</code> and drop a photo. Python 3.10 or newer, about 750 MB of disk. <a href="#try-full">All steps, and the public-figure pool</a>.</p>
+        </div>
         </div>
       </div>
     </div>
