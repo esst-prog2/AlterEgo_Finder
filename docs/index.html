@@ -90,6 +90,9 @@ code, .cmd { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; fo
 .target-face { min-width: 0; padding: 1.5rem; border-right: 2px solid var(--rule); display: flex; flex-direction: column; gap: 0.9rem; }
 .target-face svg { width: 100%; height: auto; display: block; }
 .target-note { font-size: 0.95rem; color: var(--ink-soft); }
+.key { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.45rem; font-size: 0.95rem; }
+.key li { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr); gap: 0.6rem; align-items: baseline; }
+.jump { display: none; }
 .side { min-width: 0; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.1rem; }
 .side .switch { align-self: flex-start; }
 .switch {
@@ -120,7 +123,7 @@ code, .cmd { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; fo
 }
 .copy:hover { background: #142c5a; }
 .copy[data-state="done"] { background: var(--card-raised); color: var(--rule); }
-.entry pre { margin: 0; padding: 0.85rem; overflow-x: auto; font-size: 0.92rem; line-height: 1.6; color: var(--ink); }
+.entry pre { margin: 0; padding: 0.85rem; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.92rem; line-height: 1.6; color: var(--ink); }
 .entry pre .note { color: var(--ink-soft); }
 .entry-foot { padding: 0 0.85rem 0.75rem; font-size: 0.92rem; color: var(--ink-soft); }
 
@@ -141,9 +144,10 @@ section.block { margin: clamp(2.5rem, 6vw, 4.5rem) auto 0; }
 .ledger caption { text-align: left; padding: 0.85rem clamp(1rem, 2.5vw, 1.5rem); border-bottom: 2px solid var(--rule); color: var(--ink-soft); font-size: 0.95rem; }
 .ledger th, .ledger td { text-align: left; vertical-align: top; padding: 0.85rem 0.9rem; border-bottom: 1.5px solid var(--grid-line-strong); }
 .ledger thead th { font: 700 0.98rem/1.1 var(--display); text-transform: uppercase; letter-spacing: 0.03em; color: var(--rule); border-bottom: 2px solid var(--rule); background: var(--card); }
-.ledger tbody tr { transition: background-color 160ms ease-out; }
-.ledger tbody tr:hover, .ledger tbody tr:focus-within, .ledger tbody tr.lit { background: #e3ebf4; }
-.ledger .end { font: 700 1.5rem/1 var(--display); color: var(--rule); width: 3.5rem; }
+.ledger .c-claim { width: 30%; }
+.ledger .c-before { width: 26%; }
+.ledger .c-measured { width: 28%; }
+.ledger .c-src { width: 16%; }
 .ledger .claim strong { display: block; font-weight: 600; }
 .ledger .claim .set { display: block; margin-top: 0.2rem; font-size: 0.88rem; color: var(--ink-soft); }
 .ledger .before { font-family: var(--hand); color: var(--pencil); font-size: 1rem; line-height: 1.45; }
@@ -151,9 +155,9 @@ section.block { margin: clamp(2.5rem, 6vw, 4.5rem) auto 0; }
 .ledger .measured { font-weight: 500; }
 .ledger .measured .fig { font-family: var(--display); font-weight: 700; font-size: 1.15rem; }
 .ledger .src { font-size: 0.9rem; }
-.ledger .check { font-size: 0.9rem; }
-.ledger .check .record { font-style: italic; color: var(--ink-soft); }
-.ledger .check code { display: inline-block; background: var(--card); border: 1.5px solid var(--grid-line-strong); padding: 0.1rem 0.35rem; margin-top: 0.15rem; }
+.ledger .measured .fig { display: inline; }
+.ledger-foot { padding: 0.9rem clamp(1rem, 2.5vw, 1.5rem); border-top: 2px solid var(--rule); display: grid; gap: 0.6rem; font-size: 0.95rem; color: var(--ink-soft); }
+.ledger-foot code { display: block; white-space: pre-wrap; padding: 0.45rem 0.6rem; background: var(--card); border: 1.5px solid var(--grid-line-strong); color: var(--ink); }
 .ledger-note { padding: 0.9rem clamp(1rem, 2.5vw, 1.5rem); font-size: 0.95rem; color: var(--ink-soft); border-top: 2px solid var(--rule); }
 
 .two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 2.5rem); }
@@ -163,7 +167,12 @@ section.block { margin: clamp(2.5rem, 6vw, 4.5rem) auto 0; }
 .steps li { counter-increment: step; display: grid; grid-template-columns: 2rem minmax(0, 1fr); gap: 0.6rem; }
 .panel { min-width: 0; }
 .steps li::before { content: counter(step); font: 700 1.35rem/1.2 var(--display); color: var(--rule); }
-.steps code { display: block; margin-top: 0.3rem; padding: 0.45rem 0.6rem; background: var(--card); border: 1.5px solid var(--grid-line-strong); overflow-x: auto; white-space: pre; }
+.steps code { display: block; margin: 0.3rem 0 0.5rem; padding: 0.45rem 0.6rem; background: var(--card); border: 1.5px solid var(--grid-line-strong); white-space: pre-wrap; overflow-wrap: anywhere; }
+.os { display: flex; border-bottom: 1.5px dashed var(--grid-line-strong); }
+.os-btn { font: 600 0.95rem/1 var(--display); text-transform: uppercase; letter-spacing: 0.03em; color: var(--rule); background: transparent; border: 0; border-right: 1.5px solid var(--grid-line-strong); padding: 0.75rem 0.9rem; min-height: 44px; cursor: pointer; }
+.os-btn[aria-pressed="true"] { background: var(--rule); color: var(--card-raised); }
+p, li, dd { text-wrap: pretty; }
+.src a, footer a { display: inline-block; padding-block: 0.5rem; }
 
 .facts dt { font: 700 1.05rem/1.2 var(--display); text-transform: uppercase; color: var(--rule); margin-top: 0.9rem; }
 .facts dt:first-child { margin-top: 0; }
@@ -187,9 +196,6 @@ footer { margin: clamp(2.5rem, 6vw, 4rem) auto 0; padding: 1.5rem var(--gutter) 
 .hit.gone { opacity: 0; }
 .centre line { stroke: var(--ink); stroke-width: 0.012; }
 .centre text, .ring-label { font: 600 0.062px var(--display); fill: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.002px; }
-.zone-lit .ring-same { stroke-width: 0.03; }
-.zone-lit .ring-alter { stroke-width: 0.03; }
-.lit-same .ring-same, .lit-alter .ring-alter { stroke-width: 0.03; }
 @media (prefers-reduced-motion: reduce) { .hit, .switch .knob::after { transition: none; } }
 
 /* ---------- Narrow screens ---------- */
@@ -199,13 +205,23 @@ footer { margin: clamp(2.5rem, 6vw, 4rem) auto 0; padding: 1.5rem var(--gutter) 
   .target-face { border-right: 0; border-bottom: 2px solid var(--rule); }
   .how .prose { border-right: 0; border-bottom: 2px solid var(--rule); }
 }
+@media (max-width: 600px) {
+  .hit text { font-size: 0.13px; }
+  .hit.lead text { font-size: 0.14px; }
+  .hit.r5 text, .hit.r6 text, .hit.r7 text, .hit.r8 text, .hit.r9 text, .hit.r10 text { display: none; }
+  .ring-label { font-size: 0.085px; }
+  .key li { grid-template-columns: minmax(0, 1fr); gap: 0.1rem; }
+}
+@media (max-width: 900px) {
+  .jump { display: block; margin-top: 0.6rem; font: 600 1.05rem/1.2 var(--display); text-transform: none; letter-spacing: 0; padding-block: 0.6rem; }
+}
 @media (max-width: 760px) {
   .ledger thead { display: none; }
   .ledger, .ledger tbody, .ledger tr, .ledger td { display: block; width: 100%; }
+  .ledger caption { display: block; }
   .ledger tr { padding: 0.9rem 1rem; border-bottom: 2px solid var(--rule); }
   .ledger td { border: 0; padding: 0.3rem 0; }
   .ledger td[data-head]::before { content: attr(data-head); display: block; font: 700 0.85rem/1.2 var(--display); text-transform: uppercase; letter-spacing: 0.04em; color: var(--rule); margin-bottom: 0.1rem; }
-  .ledger .end { width: auto; }
   .how li { grid-template-columns: 1fr; gap: 0.2rem; }
 }
 </style>
@@ -220,7 +236,7 @@ footer { margin: clamp(2.5rem, 6vw, 4rem) auto 0; padding: 1.5rem var(--gutter) 
           <p class="what">Drop a face photo, and it finds the ten closest public figures, each labelled <span class="label same">Same person</span>, <span class="label alter">Alter Ego</span> or <span class="label notyou">Not You</span>.</p>
           <p class="who">For anyone curious who they resemble, and for data scientists who want to know how much to believe the answer: the labels come from thresholds calibrated on held-out strangers.</p>
         </div>
-        <p class="promise">Your photo never leaves your machine.</p>
+        <p class="promise">Your photo never leaves your machine. <a class="jump" href="#try">Run it on your computer: three commands</a></p>
       </div>
       <div class="play">
         <div class="target-face" id="target">
@@ -235,27 +251,36 @@ footer { margin: clamp(2.5rem, 6vw, 4rem) auto 0; padding: 1.5rem var(--gutter) 
               <line x1="0" y1="-0.05" x2="0" y2="0.05"></line>
             </g>
           </svg>
-          <p class="target-note">An LFW photo of Lennox Lewis against the pool of 500 public figures. Distance from the centre is exactly one minus the score; direction means nothing.</p>
-        </div>
-        <div class="side">
           <button class="switch" id="second" type="button" aria-pressed="false" aria-controls="target readout">
             <span class="knob" aria-hidden="true"></span>
             <span>Add his second photo</span>
           </button>
           <div class="readout" id="readout" aria-live="polite"></div>
+          <ul class="key">
+            <li><span class="label same">Same person</span> <span>Score 0.3706 or more: treated as the same person.</span></li>
+            <li><span class="label alter">Alter Ego</span> <span>0.1864 to 0.3706: the closest public figures, and not you. 97% of strangers' best matches land here, so it is not a striking likeness.</span></li>
+            <li><span class="label notyou">Not You</span> <span>Below 0.1864: nobody close.</span></li>
+          </ul>
+          <p class="target-note">An LFW photo of Lennox Lewis, who is not in the pool, against its 500 public figures. Distance from the centre is exactly one minus the score; direction means nothing.</p>
+        </div>
+        <div class="side">
           <div class="entry" id="try">
           <div class="entry-head">
             <h2>Try it locally</h2>
             <button class="copy" type="button" data-copy="quickstart">Copy</button>
           </div>
+          <div class="os" role="group" aria-label="Your operating system">
+            <button type="button" class="os-btn" data-os="win" aria-pressed="true">Windows</button>
+            <button type="button" class="os-btn" data-os="unix" aria-pressed="false">macOS or Linux</button>
+          </div>
 <pre id="quickstart">git clone https://github.com/esst-prog2/AlterEgo_Finder
 cd AlterEgo_Finder
 python -m venv .venv
-.venv\Scripts\activate   <span class="note"># macOS or Linux: source .venv/bin/activate</span>
+<span class="os-win">.venv\Scripts\activate</span><span class="os-unix" hidden>source .venv/bin/activate</span>
 pip install -r requirements-ui.txt
-python setup_data.py     <span class="note"># about 3.5 minutes</span>
+python setup_data.py
 streamlit run app.py</pre>
-          <p class="entry-foot">Then open <code>http://localhost:8501</code> and drop a photo. Python 3.10 or newer, about 750 MB of disk. <a href="#try-full">All steps, and the public-figure pool</a>.</p>
+          <p class="entry-foot">Setup takes about 3.5 minutes. Then open <code>http://localhost:8501</code> and drop a photo. Python 3.10 or newer, about 750 MB of disk. <a href="#try-full">All steps, and the public-figure pool</a>.</p>
         </div>
         </div>
       </div>
@@ -282,74 +307,64 @@ streamlit run app.py</pre>
     <section class="block" aria-labelledby="ledger-title">
       <div class="block-head">
         <h2 id="ledger-title">The scorecard</h2>
-        <p>Every claim, scored. What was written down before the run, what was measured, where it is recorded, and how to check it. Misses included.</p>
+        <p>Every claim, with what was predicted before the run where a prediction was written down, what was measured, and where it is recorded. Misses included.</p>
       </div>
       <div class="card">
         <table class="ledger">
-          <caption>Each row names its dataset: LFW (the default setup) or the public-figure pool (an optional step). Sources link to the project's planning log.</caption>
+          <caption>Each claim names its dataset: LFW (the default setup) or the public-figure pool (an optional step). Sources link to the project's planning log.</caption>
           <thead>
-            <tr><th scope="col">End</th><th scope="col">Claim</th><th scope="col">Written before the run</th><th scope="col">Measured</th><th scope="col">Source</th><th scope="col">Check it</th></tr>
+            <tr><th scope="col" class="c-claim">Claim</th><th scope="col" class="c-before">Predicted before the run</th><th scope="col" class="c-measured">Measured</th><th scope="col" class="c-src">Source</th></tr>
           </thead>
           <tbody>
-            <tr data-zone="same" tabindex="0">
-              <td class="end">1</td>
+            <tr>
               <td class="claim" data-head="Claim"><strong>A stranger rarely reaches Same person</strong><span class="set">Pool, 567 strangers' best matches against the 500 faces</span></td>
-              <td class="before none" data-head="Written before the run">None logged</td>
+              <td class="before none" data-head="Predicted before the run">Not written down beforehand</td>
               <td class="measured" data-head="Measured"><span class="fig">0.9%</span> reach Same person; 97.0% land in Alter Ego, 2.1% in Not You</td>
               <td class="src" data-head="Source"><a href="https://github.com/esst-prog2/AlterEgo_Finder/blob/main/PLANNING_LOG.md">Planning log, 2 Nov 2026</a></td>
-              <td class="check" data-head="Check it"><span class="record">Record only</span></td>
             </tr>
-            <tr data-zone="same" tabindex="0">
-              <td class="end">2</td>
+            <tr>
               <td class="claim" data-head="Claim"><strong>One fixed threshold fails as the dataset grows</strong><span class="set">LFW, 200 absent strangers (spike of 1 Oct 2026)</span></td>
-              <td class="before" data-head="Written before the run">What fraction of strangers' top matches reach the bar with 50, 500 and 5,000 faces?</td>
-              <td class="measured" data-head="Measured">At the pairwise 1% threshold of the time: <span class="fig">33.0%</span> with 50 faces, <span class="fig">99.0%</span> with 500, <span class="fig">100.0%</span> with 5,000</td>
+              <td class="before" data-head="Predicted before the run">What fraction of strangers' top matches reach the bar with 50, 500 and 5,000 faces?</td>
+              <td class="measured" data-head="Measured">With one fixed bar for every size (0.2017, reached by 1% of pairs of strangers): <span class="fig">33.0%</span> of strangers' top matches reach it with 50 faces, <span class="fig">99.0%</span> with 500, <span class="fig">100.0%</span> with 5,000</td>
               <td class="src" data-head="Source"><a href="https://github.com/esst-prog2/AlterEgo_Finder/blob/main/PLANNING_LOG.md">Planning log, 1 Oct 2026</a>; <a href="https://github.com/esst-prog2/AlterEgo_Finder/blob/main/data/spike_results.json">spike_results.json</a></td>
-              <td class="check" data-head="Check it"><span class="record">Record only: the historical result</span></td>
             </tr>
-            <tr data-zone="same" tabindex="0">
-              <td class="end">3</td>
+            <tr>
               <td class="claim" data-head="Claim"><strong>The same person is recognised across photo sources</strong><span class="set">Pool, 32 pairs from 9 people, LFW photos against Wikimedia photos</span></td>
-              <td class="before none" data-head="Written before the run">None logged</td>
+              <td class="before none" data-head="Predicted before the run">Not written down beforehand</td>
               <td class="measured" data-head="Measured"><span class="fig">30 of 32</span> pairs reach Same person, median score 0.538; both misses are Bruce Springsteen</td>
               <td class="src" data-head="Source"><a href="https://github.com/esst-prog2/AlterEgo_Finder/blob/main/PLANNING_LOG.md">Planning log, 2 Nov 2026</a></td>
-              <td class="check" data-head="Check it"><span class="record">Record only</span></td>
             </tr>
-            <tr data-zone="same" tabindex="0">
-              <td class="end">4</td>
+            <tr>
               <td class="claim" data-head="Claim"><strong>Photos on their side or upside down still match</strong><span class="set">LFW, 150 people</span></td>
-              <td class="before" data-head="Written before the run">At least 120 of 150 at 90, 180 and 270 degrees, against 148 upright</td>
+              <td class="before" data-head="Predicted before the run">At least 120 of 150 at 90, 180 and 270 degrees, against 148 upright</td>
               <td class="measured" data-head="Measured">At each of 90, 180 and 270 degrees: <span class="fig">0 of 150</span> before the fix, <span class="fig">148 of 150</span> after</td>
               <td class="src" data-head="Source"><a href="https://github.com/esst-prog2/AlterEgo_Finder/blob/main/PLANNING_LOG.md">Planning log, 3 Nov 2026</a></td>
-              <td class="check" data-head="Check it"><span class="record">Record only</span></td>
             </tr>
-            <tr data-zone="none" tabindex="0">
-              <td class="end">5</td>
+            <tr>
               <td class="claim" data-head="Claim"><strong>A wrong first version, caught</strong><span class="set">LFW, all 13,233 photos</span></td>
-              <td class="before" data-head="Written before the run">No image turns in the datasets, the calibration set or the test fixtures</td>
+              <td class="before" data-head="Predicted before the run">No image turns in the datasets, the calibration set or the test fixtures</td>
               <td class="measured" data-head="Measured">The first version turned <span class="fig">2</span> upright group photos; a 300-photo sample had missed them. Fixed: none turn</td>
               <td class="src" data-head="Source"><a href="https://github.com/esst-prog2/AlterEgo_Finder/blob/main/PLANNING_LOG.md">Planning log, 3 Nov 2026</a></td>
-              <td class="check" data-head="Check it"><span class="record">Record only</span></td>
             </tr>
-            <tr data-zone="same" tabindex="0">
-              <td class="end">6</td>
+            <tr>
               <td class="claim" data-head="Claim"><strong>More photos per person did not earn a place</strong><span class="set">Pool, 50 people, 142 same-person queries</span></td>
-              <td class="before" data-head="Written before the run">Build it only if one method fixes at least half of the one-photo misses, keeps strangers at 2% or below, and keeps the test photo's top match out of Same person</td>
+              <td class="before" data-head="Predicted before the run">Build it only if one method fixes at least half of the one-photo misses, keeps strangers at 2% or below, and keeps the test photo's top match out of Same person</td>
               <td class="measured" data-head="Measured">Each method fixed <span class="fig">1 of 4</span> misses and broke 1 or 2. Not built</td>
               <td class="src" data-head="Source"><a href="https://github.com/esst-prog2/AlterEgo_Finder/blob/main/PLANNING_LOG.md">Planning log, 3 Nov 2026</a>; <a href="https://github.com/esst-prog2/AlterEgo_Finder/blob/main/data/spike_multiphoto_results.json">spike_multiphoto_results.json</a></td>
-              <td class="check" data-head="Check it"><span class="record">Record only</span></td>
             </tr>
-            <tr data-zone="none" tabindex="0">
-              <td class="end">7</td>
+            <tr>
               <td class="claim" data-head="Claim"><strong>The automated tests pass</strong><span class="set">The whole program</span></td>
-              <td class="before none" data-head="Written before the run">None logged</td>
+              <td class="before none" data-head="Predicted before the run">Not written down beforehand</td>
               <td class="measured" data-head="Measured"><span class="fig">271</span> tests</td>
               <td class="src" data-head="Source"><a href="https://github.com/esst-prog2/AlterEgo_Finder/blob/main/PLANNING_LOG.md">Planning log, 3 Nov 2026</a></td>
-              <td class="check" data-head="Check it"><code>pip install -r requirements-dev.txt -r requirements-ui.txt</code> <code>python -m pytest tests/</code></td>
             </tr>
           </tbody>
         </table>
-        <p class="ledger-note">After each fix, the results that should not move were checked byte for byte: 16,461 images read identically, and embeddings and calibration unchanged. Those were one-off measurements in the log, not part of the test suite.</p>
+        <div class="ledger-foot">
+          <p>These are records: each measurement was run once and written down in the log. The byte-for-byte checks after each fix (16,461 images read identically, embeddings and calibration unchanged) are records too. What you can run yourself is the test suite:</p>
+          <code>pip install -r requirements-dev.txt -r requirements-ui.txt
+python -m pytest tests/</code>
+        </div>
       </div>
     </section>
 
@@ -362,8 +377,10 @@ streamlit run app.py</pre>
       <div class="panel card" id="try-full">
         <h2>Run it at home</h2>
         <ol class="steps">
-          <li><span>You need Python 3.10 or newer and about 750 MB of disk. Create a virtual environment in a clone of the repository:<code>python -m venv .venv
-.venv\Scripts\activate</code></span></li>
+          <li><span>You need Python 3.10 or newer and about 750 MB of disk. Get the code and create a virtual environment:<code>git clone https://github.com/esst-prog2/AlterEgo_Finder
+cd AlterEgo_Finder
+python -m venv .venv</code></span></li>
+          <li><span>Activate it. On Windows:<code>.venv\Scripts\activate</code>On macOS or Linux:<code>source .venv/bin/activate</code></span></li>
           <li><span>Install and set up the default dataset, 500 LFW faces (about 3.5 minutes):<code>pip install -r requirements-ui.txt
 python setup_data.py</code></span></li>
           <li><span>Start the page and open <code style="display:inline;padding:0 .3rem">http://localhost:8501</code>:<code>streamlit run app.py</code></span></li>
@@ -460,7 +477,7 @@ python setup_data.py</code></span></li>
     for (const p of state.named) {
       const node = nodes.get(p.person);
       shown.add(p.person);
-      node.g.setAttribute("class", `hit ${p.label}${p.rank === 1 ? " lead" : ""}`);
+      node.g.setAttribute("class", `hit ${p.label} r${p.rank}${p.rank === 1 ? " lead" : ""}`);
       // A new hit starts beyond the rings and travels in.
       if (entering === p.person) {
         const f = 1.25 / Math.max(p.r, 0.01);
@@ -503,20 +520,20 @@ python setup_data.py</code></span></li>
     show(on ? data.with_second_photo : data.pool, on ? data.with_second_photo.top[0].person : null);
   });
 
-  // A scorecard end lights its zone on the target.
-  const face = document.querySelector("#target svg");
-  document.querySelectorAll(".ledger tbody tr").forEach(row => {
-    const zone = row.dataset.zone;
-    const on = () => { if (zone !== "none") face.classList.add(`lit-${zone}`); row.classList.add("lit"); };
-    const off = () => { face.classList.remove("lit-same", "lit-alter"); row.classList.remove("lit"); };
-    row.addEventListener("mouseenter", on); row.addEventListener("mouseleave", off);
-    row.addEventListener("focus", on); row.addEventListener("blur", off);
+  // Windows or macOS/Linux: the activate line shown is the one Copy copies.
+  document.querySelectorAll(".os-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const unix = btn.dataset.os === "unix";
+      document.querySelectorAll(".os-btn").forEach(b => b.setAttribute("aria-pressed", String(b === btn)));
+      document.querySelectorAll(".os-win").forEach(s => { s.hidden = unix; });
+      document.querySelectorAll(".os-unix").forEach(s => { s.hidden = !unix; });
+    });
   });
 
   // Copy the quickstart commands.
   document.querySelectorAll(".copy").forEach(btn => {
     btn.addEventListener("click", async () => {
-      const text = document.getElementById(btn.dataset.copy).innerText.replace(/\s+#.*$/gm, "");
+      const text = document.getElementById(btn.dataset.copy).innerText;
       try {
         await navigator.clipboard.writeText(text);
         btn.textContent = "Copied"; btn.dataset.state = "done";

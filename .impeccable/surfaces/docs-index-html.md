@@ -21,6 +21,6 @@ STORY: The visitor sees a real query land in the gold band, adds that person's s
 
 FIRST VIEWPORT: Left, the target face at full height with Lennox Lewis's ten nearest public figures named and the switch "add his second photo" beneath it. Right, the scorecard header: the name, what it does, who it is for, "your photo never leaves your machine", and the Try it locally entry box with the copyable commands as the primary action.
 
-FORM: The Scoresheet, an archery target face and competition scorecard; the roll's assigned direction, 4th of 7 grounded candidates. seed:8e6a59af0615c870. Signature interaction: the second-photo switch moves one hit from outside the rings to inside the green ring; hovering or focusing a scorecard end lights its zone on the target. Motion: one authored move, the hit travelling to its new radius.
+FORM: The Scoresheet, an archery target face and competition scorecard; the roll's assigned direction, 4th of 7 grounded candidates. seed:8e6a59af0615c870. Signature interaction: the second-photo switch moves one hit from outside the rings to inside the green ring. (The scorecard's hover link to the target was dropped after the critique.) Motion: one authored move, the hit travelling to its new radius.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
