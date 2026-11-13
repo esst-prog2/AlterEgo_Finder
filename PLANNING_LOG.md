@@ -200,3 +200,5 @@ One line per decision: date, what was decided, who decided it. Append-only — n
 - 2026-11-13: The design doc's repo copy goes to design-docs/, not gstack's default docs/designs/, because GitHub Pages will publish docs/. Decided by agent.
 - 2026-11-13: Promo page stack: plain static HTML/CSS, one hand-written page with no build step, served by GitHub Pages from docs/. Proposed by agent, accepted by user.
 - 2026-11-13: PRODUCT.md written by Impeccable's init, with the product record as proposed (users, purpose, positioning, evidence, principles). Proposed by agent, accepted by user.
+- 2026-11-13: Promo page visual direction: The Scoresheet (an archery target face and a competition scorecard; the target is the real similarity rings, the receipts are the scorecard's ends), the label colours reserved for the labels only, no photographs, no hype or gamification. Chosen by the user on Impeccable's decision page from the roll's assigned direction. Decided by user.
+- 2026-11-13: Promo page design brief confirmed (design-docs/promo-page-brief.md). Proposed by agent, accepted by user.
