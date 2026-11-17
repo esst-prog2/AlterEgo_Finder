@@ -220,3 +220,4 @@ One line per decision: date, what was decided, who decided it. Append-only — n
 - 2026-11-17: Both videos are 16:9, silent, in the promo page's look (scorecard grid, Barlow, label colours only for labels), about 32 s each because the end cards need time to read; HyperFrames sources live in video/tour and video/explainer, rendered files stay out of git until one is chosen. Decided by agent.
 - 2026-11-17: The README links the promo page on its own line under the title, above section 1 (which stays as submitted). Proposed by user.
 - 2026-11-17: Correction to the previous line's attribution: linking the promo page from the README was decided by the user (the label "Proposed by user" is not one of the log's three). Decided by user.
+- 2026-11-17: The GitHub repository's About box links the promo page as its website, with the description "Find which public figures a face resembles, with calibrated confidence labels. Runs locally." Proposed by agent, accepted by user.
