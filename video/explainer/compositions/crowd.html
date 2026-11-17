@@ -1,0 +1,75 @@
+<template>
+  <style>
+    @font-face { font-family: "Barlow Condensed"; font-weight: 700; src: url("assets/fonts/barlow-condensed-latin-700-normal.woff2") format("woff2"); }
+    @font-face { font-family: "Barlow"; font-weight: 500; src: url("assets/fonts/barlow-latin-500-normal.woff2") format("woff2"); }
+    #root { position: absolute; inset: 0; background-color: #f4f7fb;
+      background-image: linear-gradient(rgba(29,60,120,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(29,60,120,.09) 1px, transparent 1px);
+      background-size: 40px 40px; overflow: hidden; }
+    .layer { position: absolute; inset: 0; }
+    .line { position: absolute; left: 160px; font-family: "Barlow Condensed"; font-weight: 700; text-transform: uppercase; color: #1d3c78; line-height: 1; letter-spacing: .01em; }
+    .w { display: inline-block; }
+    #c-title { top: 140px; font-size: 84px; width: 1600px; }
+    svg { position: absolute; inset: 0; }
+    .num { position: absolute; left: 1160px; font-family: "Barlow Condensed"; font-weight: 700; text-transform: uppercase; }
+    .faces { top: 320px; font-size: 76px; color: #1d3c78; }
+    .pct { top: 400px; font-size: 220px; line-height: 1; color: #1a7f37; }
+    .sub { position: absolute; left: 1160px; top: 640px; width: 660px; font: 500 38px/1.3 "Barlow"; color: #1f2328; }
+    .avg { position: absolute; left: 1160px; top: 700px; width: 660px; font: 500 38px/1.3 "Barlow"; color: #1f2328; }
+    .avg b { font-family: "Barlow Condensed"; font-weight: 700; font-size: 48px; color: #1d3c78; }
+    #c-source { position: absolute; left: 160px; top: 980px; font: 500 28px "Barlow"; color: #46505d; }
+  </style>
+  <div id="root" data-composition-id="crowd" data-width="1920" data-height="1080">
+    <div id="c-title" class="line clip" data-start="0" data-duration="10.5">
+      <span class="w">200</span> <span class="w">strangers.</span> <span class="w">None</span> <span class="w">is</span> <span class="w">in</span> <span class="w">the</span> <span class="w">dataset.</span>
+    </div>
+    <div id="c-grid" class="clip layer" data-start="0" data-duration="10.5">
+      <svg id="c-svg" viewBox="0 0 1920 1080"><g id="c-dots"></g></svg>
+    </div>
+    <div id="c-step1" class="clip layer" data-start="1.9" data-duration="2.8">
+      <div class="num faces">With 50 faces</div><div class="num pct">33%</div>
+      <div class="sub">66 of 200 wrongly called Same person</div>
+      <div class="avg">Average best match: <b>0.18</b></div>
+    </div>
+    <div id="c-step2" class="clip layer" data-start="4.7" data-duration="2.9">
+      <div class="num faces">With 500 faces</div><div class="num pct">99%</div>
+      <div class="sub">198 of 200 wrongly called Same person</div>
+      <div class="avg">Average best match: <b>0.25</b>, like yours</div>
+    </div>
+    <div id="c-step3" class="clip layer" data-start="7.6" data-duration="2.9">
+      <div class="num faces">With 5,000 faces</div><div class="num pct">100%</div>
+      <div class="sub">200 of 200 wrongly called Same person</div>
+      <div class="avg">Average best match: <b>0.32</b></div>
+    </div>
+    <div id="c-source" class="clip" data-start="0" data-duration="10.5">Measured: LFW, 200 people left out of the dataset, fixed bar 0.2017 (1 October 2026).</div>
+  </div>
+  <script>
+    // 200 dots, 20 x 10. Which dots turn green follows a fixed shuffled order (seeded); only the counts are data.
+    const g = document.getElementById("c-dots");
+    const NS = "http://www.w3.org/2000/svg";
+    for (let i = 0; i < 200; i++) {
+      const c = document.createElementNS(NS, "circle");
+      c.setAttribute("cx", 180 + (i % 20) * 44); c.setAttribute("cy", 360 + Math.floor(i / 20) * 50);
+      c.setAttribute("r", 16); c.setAttribute("fill", "#c3ccd8"); c.setAttribute("class", "d");
+      g.appendChild(c);
+    }
+    let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const order = [...Array(200).keys()];
+    for (let i = 199; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+    const dots = order.map(i => g.children[i]);
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#c-title .w", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.13, stagger: 0.067, ease: "power4.out" }, 0.1);
+    tl.fromTo(g.children, { opacity: 0, scale: 0.4, transformOrigin: "50% 50%" }, { opacity: 1, scale: 1, duration: 0.3, stagger: 0.004, ease: "expo.out" }, 0.3);
+    tl.fromTo("#c-source", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0.8);
+    const green = (from, to, at, span) => tl.to(dots.slice(from, to), { attr: { fill: "#1a7f37" }, duration: 0.2, stagger: span / Math.max(1, to - from), ease: "power2.out" }, at);
+    green(0, 66, 2.0, 0.8);
+    green(66, 198, 4.8, 0.9);
+    green(198, 200, 7.7, 0.2);
+    for (const s of ["#c-step1", "#c-step2", "#c-step3"]) {
+      tl.fromTo(s + " .num, " + s + " .sub, " + s + " .avg", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, stagger: 0.08, ease: "power4.out" },
+        { "#c-step1": 1.95, "#c-step2": 4.75, "#c-step3": 7.65 }[s]);
+    }
+    tl.to("#c-step1 > *", { opacity: 0, duration: 0.15, ease: "power3.in" }, 4.5);
+    tl.to("#c-step2 > *", { opacity: 0, duration: 0.15, ease: "power3.in" }, 7.4);
+    window.__timelines["crowd"] = tl;
+  </script>
+</template>

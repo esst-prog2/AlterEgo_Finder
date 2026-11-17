@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AlterEgo Finder: a lookalike finder that says Not You</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <meta name="description" content="Find the public figures closest to a face, labelled Same person, Alter Ego or Not You by thresholds calibrated on held-out strangers. Runs on your own machine.">
 <style>
 @font-face { font-family: "Barlow Condensed"; font-weight: 600; font-style: normal; font-display: swap; src: url("fonts/barlow-condensed-latin-600-normal.woff2") format("woff2"); }
@@ -81,7 +82,9 @@ code, .cmd { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; fo
 /* ---------- First viewport: a masthead across the card, then the target beside Try it locally ---------- */
 .round { display: grid; grid-template-columns: minmax(0, 1fr); margin: clamp(1rem, 3vw, 2.25rem) auto 0; }
 .mast { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 1.25rem 2.5rem; align-items: end; padding: 1.6rem 2.2rem; border-bottom: 2px solid var(--rule); }
-.mast h1 { font-size: clamp(3rem, 7vw, 6rem); text-transform: uppercase; color: var(--ink); letter-spacing: -0.01em; }
+.mast h1 { font-size: clamp(3rem, 7vw, 6rem); text-transform: uppercase; color: var(--ink); letter-spacing: -0.01em; display: flex; align-items: center; gap: 0.22em; }
+/* The logo: the target in miniature, the one place the label colours appear outside a label. */
+.mast h1 .logo { width: 1.3em; height: 1.3em; flex: none; }
 .mast .lead { display: grid; gap: 0.7rem; }
 .mast .what { font-size: clamp(1.15rem, 1.7vw, 1.35rem); line-height: 1.4; font-weight: 500; }
 .mast .who { color: var(--ink-soft); }
@@ -131,6 +134,9 @@ code, .cmd { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; fo
 section.block { margin: clamp(2.5rem, 6vw, 4.5rem) auto 0; }
 .block-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 0.75rem 2rem; margin-bottom: 1.1rem; }
 .block-head p { color: var(--ink-soft); max-width: 60ch; }
+.film { margin: 0; overflow: hidden; }
+.film video { display: block; width: 100%; height: auto; background: var(--card); }
+.film figcaption { padding: 0.8rem clamp(1rem, 3vw, 1.4rem); color: var(--ink-soft); font-size: 0.95rem; border-top: 1.5px dashed var(--grid-line-strong); }
 
 .how { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); }
 .how .prose { padding: clamp(1.25rem, 3vw, 2rem); display: grid; gap: 1rem; border-right: 2px solid var(--rule); }
@@ -231,7 +237,7 @@ footer { margin: clamp(2.5rem, 6vw, 4rem) auto 0; padding: 1.5rem var(--gutter) 
   <main>
     <div class="round card">
       <div class="mast">
-        <h1>AlterEgo Finder</h1>
+        <h1><svg class="logo" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="-55 -55 110 110"><circle r="50" fill="rgba(212,167,44,.24)" stroke="#d4a72c" stroke-width="5"/><circle r="28" fill="rgba(26,127,55,.16)" stroke="#1a7f37" stroke-width="5"/><path d="M-9 0H9M0 -9V9" stroke="#1d3c78" stroke-width="5" stroke-linecap="round"/><circle cx="17" cy="-12" r="7" fill="#1a7f37"/></svg><span>AlterEgo Finder</span></h1>
         <div class="lead">
           <p class="what">Drop a face photo, and it finds the ten closest public figures, each labelled <span class="label same">Same person</span>, <span class="label alter">Alter Ego</span> or <span class="label notyou">Not You</span>.</p>
           <p class="who">For anyone curious who they resemble, and for data scientists who want to know how much to believe the answer: the labels come from thresholds calibrated on held-out strangers.</p>
@@ -285,6 +291,20 @@ streamlit run app.py</pre>
         </div>
       </div>
     </div>
+
+    <section class="block" aria-labelledby="film-title">
+      <div class="block-head">
+        <h2 id="film-title">See it run</h2>
+        <p>30 seconds, one photo through the real program. It starts muted and works without sound.</p>
+      </div>
+      <figure class="film card">
+        <video controls muted playsinline preload="metadata" width="1920" height="1080" poster="video/tour-poster.jpg"
+               aria-describedby="film-caption">
+          <source src="video/tour.mp4" type="video/mp4" />
+        </video>
+        <figcaption id="film-caption">A second photo of Leonardo DiCaprio (Presidencia de la Rep&uacute;blica Mexicana, 2017, CC BY 2.0) on the real page, against the pool of 500 public figures: he comes first at 0.6867, labelled Same person, and Brad Pitt is one of four Alter Egos. The photo landing on the page is re-enacted over screenshots; the rest is the program's own screens, with each photo credited. Music: &ldquo;Carefree&rdquo;, Kevin MacLeod (incompetech.com), CC BY 4.0.</figcaption>
+      </figure>
+    </section>
 
     <section class="block" aria-labelledby="how-title">
       <div class="block-head">

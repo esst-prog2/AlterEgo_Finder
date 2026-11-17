@@ -44,6 +44,10 @@ from face_pipeline.target import (
 )
 
 MAX_CANDIDATES = 20
+# The shared logo (DESIGN.md): the target in miniature, and the lockup with the name.
+STATIC_DIR = Path(__file__).resolve().parent / "static"
+LOGO_MARK = STATIC_DIR / "logo-mark.svg"
+LOGO_LOCKUP = STATIC_DIR / "logo-lockup.png"
 CARDS_PER_ROW = 5
 CARD_AUTHOR_CHARS = 60
 _LABEL_COLORS = {HIGH_CONFIDENCE: "green", LOW_CONFIDENCE: "orange"}  # NO_MATCH: gray
@@ -63,7 +67,7 @@ _TARGET_COLORS = {"domain": [PLAIN_NAMES[HIGH_CONFIDENCE], PLAIN_NAMES[LOW_CONFI
 # and the names, "muted" the ring labels and rays, "faint" the rings and the
 # unnamed faces. None (theme not reported yet) uses one gray that reads on both.
 _TARGET_PALETTES = {
-    "light": {"ink": "#1f2328", "muted": "#57606a", "faint": "#8c959f"},
+    "light": {"ink": "#1f2328", "muted": "#46505d", "faint": "#8c959f"},
     "dark": {"ink": "#f0f6fc", "muted": "#9198a1", "faint": "#6e7681"},
     None: {"ink": "#8c959f", "muted": "#8c959f", "faint": "#8c959f"},
 }
@@ -153,7 +157,9 @@ def _show_cards(labeled, top: int, credits: Optional[dict] = None) -> None:
                 # st.text shows them literally, with no Markdown or HTML.
                 st.text(f"#{row_start + offset + 1} {entry.person}")
                 color = _LABEL_COLORS.get(label, "gray")
-                st.markdown(f"`{score:.4f}` :{color}[**{PLAIN_NAMES[label]}**]")
+                # The label word stays ink on a wash of its label colour: gold
+                # text on the paper would be too faint to read.
+                st.markdown(f"`{score:.4f}` :{color}-background[**{PLAIN_NAMES[label]}**]")
                 credit = credit_for(credits, entry.filepath)
                 if credit:
                     # Credits are text from strangers: st.text shows them literally,
@@ -251,11 +257,14 @@ def _target_spec(labeled, top: int, low: float, high: float, theme: Optional[str
                      "fontSize": 12, "color": colors["muted"]},
             "encoding": xy,
         })
-    for threshold in (low, high):
+    # Each ring in the colour of the zone it closes: gold for Alter Ego (low),
+    # green for Same person (high), as on the promo page and in the video.
+    ring_colors = dict(zip(_TARGET_COLORS["domain"], _TARGET_COLORS["range"]))
+    for threshold, zone in ((low, PLAIN_NAMES[LOW_CONFIDENCE]), (high, PLAIN_NAMES[HIGH_CONFIDENCE])):
         xs, ys = ring(threshold)
         layers.append({
             "data": {"values": [{"x": x, "y": y, "i": i} for i, (x, y) in enumerate(zip(xs, ys))]},
-            "mark": {"type": "line", "strokeDash": [4, 4], "color": colors["faint"]},
+            "mark": {"type": "line", "strokeWidth": 2, "color": ring_colors[zone]},
             "encoding": {**xy, "order": {"field": "i", "type": "quantitative"}},
         })
     layers.append({
@@ -313,7 +322,8 @@ def _target_spec(labeled, top: int, low: float, high: float, theme: Optional[str
 
 
 def main() -> None:
-    st.set_page_config(page_title="AlterEgo Finder", layout="wide")
+    st.set_page_config(page_title="AlterEgo Finder", layout="wide", page_icon=str(LOGO_MARK))
+    st.logo(str(LOGO_LOCKUP), size="large", icon_image=str(LOGO_MARK))
     st.title("AlterEgo Finder")
     st.caption("Runs on this machine only. Your photo is never uploaded anywhere.")
 

@@ -1,0 +1,40 @@
+<template>
+  <style>
+    @font-face { font-family: "Barlow Condensed"; font-weight: 700; src: url("assets/fonts/barlow-condensed-latin-700-normal.woff2") format("woff2"); }
+    #root { position: absolute; inset: 0; background-color: #eef3f8;
+      background-image: linear-gradient(rgba(29,60,120,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(29,60,120,.09) 1px, transparent 1px);
+      background-size: 40px 40px; overflow: hidden; }
+    .layer { position: absolute; inset: 0; }
+    #cd-window { position: absolute; left: 60px; top: 118px; width: 1800px; height: 822px; background: #fff; border: 3px solid #1d3c78; overflow: hidden; }
+    #cd-strip { position: absolute; left: 0; top: 0; width: 2646px; height: 837px; }
+    #cd-strip img { display: block; width: 2646px; height: 837px; }
+    .line { position: absolute; left: 60px; top: 958px; width: 1800px; font-family: "Barlow Condensed"; font-weight: 700; text-transform: uppercase; color: #1d3c78; font-size: 66px; line-height: 1; letter-spacing: .01em; }
+    .w { display: inline-block; }
+  </style>
+  <div id="root" data-composition-id="cards" data-width="1920" data-height="1080">
+    <div id="cd-clip" class="clip layer" data-start="0" data-duration="6.5">
+      <div id="cd-window">
+        <div id="cd-strip" data-layout-allow-overflow><img id="cd-img" src="assets/cards-row1.jpg" alt="The first five result cards: Leonardo DiCaprio labelled Same person at 0.6867; Matt Damon, Keke Rosberg, Oliver Kahn and Brad Pitt labelled Alter Ego; each with its photo credit" /></div>
+      </div>
+    </div>
+    <div id="cd-cap1" class="line clip" data-start="0" data-duration="3.3">
+      <span class="w">A</span> <span class="w">different</span> <span class="w">photo,</span> <span class="w">and</span> <span class="w">it</span> <span class="w">still</span> <span class="w">finds</span> <span class="w">him.</span>
+    </div>
+    <div id="cd-cap2" class="line clip" data-start="3.3" data-duration="3.2">
+      <span class="w">Brad</span> <span class="w">Pitt</span> <span class="w">and</span> <span class="w">three</span> <span class="w">others:</span> <span class="w">only</span> <span class="w">lookalikes.</span>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const words = (sel, at) => tl.fromTo(sel + " .w", { opacity: 0, filter: "blur(6px)" },
+      { opacity: 1, filter: "blur(0px)", duration: 0.13, stagger: 0.067, ease: "power4.out" }, at);
+    const out = (sel, at) => tl.to(sel + " .w", { opacity: 0, filter: "blur(8px)", duration: 0.18, stagger: 0.03, ease: "power3.in" }, at);
+    // the cards populate left to right, then the camera pans along the row
+    tl.fromTo("#cd-img", { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 1.2, ease: "power2.out" }, 0.1);
+    words("#cd-cap1", 0.4);
+    tl.fromTo("#cd-strip", { x: 0 }, { x: -846, duration: 1.1, ease: "power2.inOut" }, 2.9);
+    out("#cd-cap1", 3.05);
+    words("#cd-cap2", 3.35);
+    window.__timelines["cards"] = tl;
+  </script>
+</template>
