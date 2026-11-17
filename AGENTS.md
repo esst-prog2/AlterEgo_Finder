@@ -75,6 +75,14 @@ fallback. Branch `shorten-demo-description` cuts section 1 to six sentences, as 
 asks; it is the demo description submitted on Canvas. Branch `multi-photo-spike` measured
 several photos per person and a lookalike walk: no full build, see PLANNING_LOG.md.
 
+Promo page (HW9): `docs/` on GitHub Pages, https://esst-prog2.github.io/AlterEgo_Finder/.
+Homework 10's video is built with HyperFrames in `video/` (`video/tour` goes on the page,
+`video/explainer` is kept for the slides). DESIGN.md ("The Scoresheet", written with
+Impeccable) is the one design system for the app, the promo page, the video and the report.
+Branch `shared-design` applies it (`apply-shared-design`): Streamlit's theme in
+`.streamlit/config.toml`, fonts and the logo served from `static/` on localhost, green and
+gold target rings, a restyled self-contained report, the logo on the page. 278 tests passing.
+
 ## Workflow
 
 This repo uses OpenSpec for spec-driven changes (openspec/):
