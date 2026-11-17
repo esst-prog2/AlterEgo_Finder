@@ -59,7 +59,7 @@ THUMBNAIL_PX = 128  # longest side of the tooltip face thumbnails (top N only)
 CARD_PHOTO_PX = 320  # side of the square card photos
 # Readable dataset names; the folder name stays visible because README section 1
 # names folders. Any other folder is shown as it is.
-DATASET_LABELS = {"wikidata": "Public figures", "celebrities": "LFW faces"}
+DATASET_LABELS = {"wikidata": "Public figures", "celebrities": "LFW faces"}  # in list order
 DEFAULT_DATASET = "wikidata"
 _LABEL_HEX = {HIGH_CONFIDENCE: "#1a7f37", LOW_CONFIDENCE: "#d4a72c", NO_MATCH: "#8c959f"}
 # DESIGN.md beyond what Streamlit's theme can set: the paper's grid, navy frames,
@@ -76,6 +76,7 @@ STYLESHEET = """<style>
 [data-testid="stHeading"] h1, [data-testid="stHeading"] h2 { text-transform: uppercase; letter-spacing: 0.005em; }
 [data-testid="stCaptionContainer"] { color: #46505d; opacity: 1; }
 [data-testid="stFileUploaderDropzone"] { border: 2px solid #1d3c78; border-radius: 0; }
+[data-testid="stFileUploaderDropzoneInstructions"] *, [data-testid="stFileChip"] * { color: #46505d; opacity: 1; }
 [data-testid="stAlertContentInfo"], [data-testid="stAlertContainer"] { color: #1d3c78; }
 [class*="st-key-ae-card-"] {
   border: 2px solid #1d3c78 !important; border-radius: 0 !important; background: #f8fbfd;
@@ -131,9 +132,12 @@ def list_datasets(data_dir: Path) -> List[Path]:
     """
     if not data_dir.is_dir():
         return []
+    # The public datasets first (the pool, then LFW), then any other folder by name.
+    public = list(DATASET_LABELS)
     return sorted(
-        p for p in data_dir.iterdir()
-        if p.is_dir() and (p / CACHE_DIRNAME / EMBEDDINGS_FILENAME).exists()
+        (p for p in data_dir.iterdir()
+         if p.is_dir() and (p / CACHE_DIRNAME / EMBEDDINGS_FILENAME).exists()),
+        key=lambda p: (public.index(p.name) if p.name in public else len(public), p.name),
     )
 
 
@@ -152,6 +156,15 @@ def _embed_upload(image_bytes: bytes) -> Optional[QueryFace]:
         return embed_query(decode_image(image_bytes))
     except NoFaceDetectedError:
         return None
+
+
+def _display_name(person: str) -> str:
+    """A dataset folder name as a person's name: "Leonardo_DiCaprio" -> "Leonardo DiCaprio".
+
+    Display only: matching, the CLI and the report keep the folder names. The
+    result is still untrusted text and is escaped wherever it is shown.
+    """
+    return person.replace("_", " ")
 
 
 def _dataset_label(path: Path) -> str:
@@ -187,7 +200,7 @@ def _chip(label: str) -> str:
 def _verdict_html(labeled) -> str:
     """The verdict line. Person names are dataset folder names, i.e. untrusted: escaped."""
     kind, person, score = _verdict(labeled)
-    name = f'<span class="ae-name">{html.escape(person)}</span>'
+    name = f'<span class="ae-name">{html.escape(_display_name(person))}</span>'
     figure = f'<span class="ae-score">{score:.4f}</span>'
     if kind == "same":
         text = f"Closest: {name} &middot; {figure} &middot; {_chip(HIGH_CONFIDENCE)}"
@@ -244,11 +257,11 @@ def _show_cards(labeled, top: int, credits: Optional[dict] = None) -> None:
                 if photo:
                     # st.image has no alt text; the name is escaped (untrusted).
                     st.html(f'<img class="ae-photo" src="{photo}" '
-                            f'alt="Photo of {html.escape(entry.person, quote=True)}">')
+                            f'alt="Photo of {html.escape(_display_name(entry.person), quote=True)}">')
                 # Person names are dataset folder names, i.e. untrusted input:
                 # st.text shows them literally, with no Markdown or HTML.
                 with st.container(key=f"ae-name-{rank}"):
-                    st.text(f"#{rank} {entry.person}")
+                    st.text(f"#{rank} {_display_name(entry.person)}")
                 color = _LABEL_COLORS.get(label, "gray")
                 # The label word stays ink on a wash of its label colour: gold
                 # text on the paper would be too faint to read.
@@ -317,7 +330,7 @@ def _target_spec(labeled, top: int, low: float, high: float, theme: Optional[str
         for p in points:
             if p.named != named:
                 continue
-            row = {"x": p.x, "y": p.y, "person": p.person, "score": p.score,
+            row = {"x": p.x, "y": p.y, "person": _display_name(p.person), "score": p.score,
                    "distance": p.radius, "zone": PLAIN_NAMES[p.label],
                    "named": p.named, "rank": p.rank}
             if named and (thumbnail := _thumbnail(p.filepath)):
@@ -386,7 +399,8 @@ def _target_spec(labeled, top: int, low: float, high: float, theme: Optional[str
     legend_box = (legend_left, chart_y(0.95 * half_y) - LINE_PX / 2,
                   legend_left + max(map(len, legend)) * CHAR_PX, chart_y(0.8 * half_y) + LINE_PX / 2)
     named = sorted((p for p in points if p.named), key=lambda p: p.rank)
-    name_texts = [f"#{p.rank} {p.person}" + (f" ({p.score:.4f})" if p.rank == 1 else "") for p in named]
+    name_texts = [f"#{p.rank} {_display_name(p.person)}" + (f" ({p.score:.4f})" if p.rank == 1 else "")
+                  for p in named]
     places = place_names([(chart_x(p.x), chart_y(p.y), text) for p, text in zip(named, name_texts)],
                          TARGET_WIDTH, TARGET_HEIGHT, legend_box)
     for place, (align, dx, dy) in NAME_PLACES.items():
@@ -508,7 +522,7 @@ def main() -> None:
     report_html = report_path.read_text(encoding="utf-8")
     st.download_button(
         "Download report (summary.html)", data=report_html,
-        file_name="summary.html", mime="text/html",
+        file_name="summary.html", mime="text/html", type="primary",
     )
     with st.expander("Report preview"):
         # Our own report, with dataset folder names HTML-escaped by

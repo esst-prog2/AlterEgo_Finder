@@ -122,8 +122,9 @@ def test_report_header_carries_the_logo_inline(tmp_path):
 
 def test_each_classification_has_its_shared_dot_colour(tmp_path):
     content = _three_labels_report(tmp_path)
-    dots = re.findall(r'<span class="dot" style="background: (#[0-9a-f]{6})"></span>(\w+)</div>', content)
-    assert dots == [("#1a7f37", "HIGH_CONFIDENCE"), ("#d4a72c", "LOW_CONFIDENCE"), ("#8c959f", "NO_MATCH")]
+    dots = re.findall(r'<span class="dot" style="background: (#[0-9a-f]{6})"></span>([^<]+)</div>', content)
+    assert dots == [("#1a7f37", "Same person (HIGH_CONFIDENCE)"), ("#d4a72c", "Alter Ego (LOW_CONFIDENCE)"),
+                    ("#8c959f", "Not You (NO_MATCH)")]
 
 
 def test_report_loads_nothing_from_the_network(tmp_path):

@@ -115,7 +115,7 @@ def test_readable_dataset_names_and_the_pool_by_default(indexed_data_dir, tmp_pa
     at = _app(data_dir, monkeypatch)
 
     assert at.selectbox(key="dataset").options == [
-        "LFW faces (celebrities)", "twelve", "Public figures (wikidata)"]
+        "Public figures (wikidata)", "LFW faces (celebrities)", "twelve"]
     assert at.selectbox(key="dataset").value.name == "wikidata"
 
 
@@ -206,7 +206,9 @@ def test_ten_cards_matching_the_cli(indexed_data_dir, monkeypatch, tmp_path):
     cli_lines = cli.stdout.strip().splitlines()
 
     assert len(cards) == 10
-    assert [f"{n}: {s:.4f} {lbl}" for n, s, lbl in cards] == cli_lines
+    # The page shows readable names; the CLI keeps folder names.
+    readable_cli = [f"{n.replace('_', ' ')}: {rest}" for n, rest in (l.split(": ", 1) for l in cli_lines)]
+    assert [f"{n}: {s:.4f} {lbl}" for n, s, lbl in cards] == readable_cli
 
 
 def test_candidates_shown_control(indexed_data_dir, monkeypatch):
@@ -259,8 +261,8 @@ def test_person_names_are_shown_as_plain_text(tmp_path, monkeypatch):
 
     at = _upload(_app(data_dir, monkeypatch), (FIXTURES / "biden_1.jpg").read_bytes())
 
-    assert _cards(at)[0][0] == name
-    assert not any(name in m.value for m in at.markdown)
+    assert _cards(at)[0][0] == name.replace("_", " ")
+    assert not any(name.replace("_", " ") in m.value for m in at.markdown)
 
 
 # --- 3.4 report ----------------------------------------------------------------
@@ -704,11 +706,12 @@ def test_verdict_for_each_outcome():
 
     same = _verdict_html(_labeled(("Leonardo_DiCaprio", 0.6867, "HIGH_CONFIDENCE"),
                                   ("Matt_Damon", 0.2678, "LOW_CONFIDENCE")))
-    assert "Closest:" in same and "Leonardo_DiCaprio" in same and "0.6867" in same and "Same person" in same
+    assert "Closest:" in same and "Leonardo DiCaprio" in same and "0.6867" in same and "Same person" in same
+    assert "Leonardo_DiCaprio" not in same
 
     alter = _verdict_html(_labeled(("Matt_Damon", 0.2678, "LOW_CONFIDENCE"), ("X", 0.1, "NO_MATCH")))
     assert "Nobody here is the same person" in alter
-    assert "Matt_Damon" in alter and "0.2678" in alter and "Alter Ego" in alter
+    assert "Matt Damon" in alter and "0.2678" in alter and "Alter Ego" in alter
 
     none = _verdict_html(_labeled(("Someone", 0.1522, "NO_MATCH")))
     assert "Nobody in this dataset is close" in none and "Not You" in none
@@ -740,9 +743,50 @@ def test_stylesheet_targets_only_known_ids_and_our_classes():
 
     ids = set(_re.findall(r'data-testid="([^"]+)"', STYLESHEET))
     assert ids == {"stApp", "stHeading", "stCaptionContainer", "stFileUploaderDropzone",
+                   "stFileUploaderDropzoneInstructions", "stFileChip",
                    "stAlertContentInfo", "stAlertContainer", "stText", "stVegaLiteChart"}
     classes = set(_re.findall(r"\.([a-z][a-z-]+)", STYLESHEET))
     assert all(c.startswith("ae-") for c in classes), classes
     assert set(_re.findall(r'class\*="([^"]+)"', STYLESHEET)) == {"st-key-ae-card-", "st-key-ae-name-"}
     assert "http" not in STYLESHEET
+
+
+# --- readable names and the primary download (readable-names-and-labels) -------
+
+
+def test_folder_names_read_as_person_names(tmp_path, monkeypatch):
+    data_dir = tmp_path / "data"
+    _twelve_faces(data_dir / "pool", first_person="Leonardo_DiCaprio")
+    get_or_build_index(data_dir / "pool")
+    _write_config(data_dir, 0.0, 0.0)
+
+    at = _upload(_app(data_dir, monkeypatch), (FIXTURES / "biden_1.jpg").read_bytes())
+
+    assert _cards(at)[0][0] == "Leonardo DiCaprio"
+    verdict = _verdict_bodies(at)[0]
+    assert "Leonardo DiCaprio" in verdict and "Leonardo_DiCaprio" not in verdict
+    assert any('alt="Photo of Leonardo DiCaprio"' in h.proto.body for h in at.html)
+    spec_text = at.get("vega_lite_chart")[0].proto.spec
+    assert "Leonardo DiCaprio" in spec_text and "Leonardo_DiCaprio" not in spec_text
+
+
+def test_public_datasets_come_first(indexed_data_dir, tmp_path, monkeypatch):
+    data_dir = tmp_path / "data"
+    shutil.copytree(indexed_data_dir, data_dir)
+    for name in ("celebrities", "wikidata", "celebrities_plus_me", "wikidata_plus_me"):
+        shutil.copytree(data_dir / "twelve", data_dir / name)
+        get_or_build_index(data_dir / name)
+
+    at = _app(data_dir, monkeypatch)
+
+    assert at.selectbox(key="dataset").options[:5] == [
+        "Public figures (wikidata)", "LFW faces (celebrities)", "celebrities_plus_me", "twelve",
+        "wikidata_plus_me"]
+
+
+def test_report_download_is_the_primary_button(indexed_data_dir, monkeypatch):
+    at = _upload(_app(indexed_data_dir, monkeypatch), QUERY.read_bytes())
+    buttons = at.get("download_button")
+    assert len(buttons) == 1
+    assert buttons[0].proto.type == "primary"
 
