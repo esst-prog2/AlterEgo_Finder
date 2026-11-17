@@ -44,3 +44,4 @@ photo_face_problem/
 # HyperFrames: rendered videos and working files (the chosen video is copied into docs/)
 video/*/renders/
 video/*/.hyperframes/
+video/*/.thumbnails/
