@@ -12,15 +12,15 @@
     .w { display: inline-block; }
   </style>
   <div id="root" data-composition-id="cards" data-width="1920" data-height="1080">
-    <div id="cd-clip" class="clip layer" data-start="0" data-duration="7.5">
+    <div id="cd-clip" class="clip layer" data-start="0" data-duration="6.5">
       <div id="cd-window">
         <div id="cd-strip" data-layout-allow-overflow><img id="cd-img" src="assets/cards-row1.jpg" alt="The first five result cards: Leonardo DiCaprio labelled Same person at 0.6867; Matt Damon, Keke Rosberg, Oliver Kahn and Brad Pitt labelled Alter Ego; each with its photo credit" /></div>
       </div>
     </div>
-    <div id="cd-cap1" class="line clip" data-start="0" data-duration="3.9">
+    <div id="cd-cap1" class="line clip" data-start="0" data-duration="3.3">
       <span class="w">A</span> <span class="w">different</span> <span class="w">photo,</span> <span class="w">and</span> <span class="w">it</span> <span class="w">still</span> <span class="w">finds</span> <span class="w">him.</span>
     </div>
-    <div id="cd-cap2" class="line clip" data-start="3.9" data-duration="3.6">
+    <div id="cd-cap2" class="line clip" data-start="3.3" data-duration="3.2">
       <span class="w">Brad</span> <span class="w">Pitt</span> <span class="w">and</span> <span class="w">three</span> <span class="w">others:</span> <span class="w">only</span> <span class="w">lookalikes.</span>
     </div>
   </div>
@@ -32,9 +32,9 @@
     // the cards populate left to right, then the camera pans along the row
     tl.fromTo("#cd-img", { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 1.2, ease: "power2.out" }, 0.1);
     words("#cd-cap1", 0.4);
-    tl.fromTo("#cd-strip", { x: 0 }, { x: -846, duration: 1.6, ease: "power2.inOut" }, 2.4);
-    out("#cd-cap1", 3.65);
-    words("#cd-cap2", 3.95);
+    tl.fromTo("#cd-strip", { x: 0 }, { x: -846, duration: 1.4, ease: "power2.inOut" }, 2.0);
+    out("#cd-cap1", 3.05);
+    words("#cd-cap2", 3.35);
     window.__timelines["cards"] = tl;
   </script>
 </template>

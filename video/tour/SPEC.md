@@ -3,7 +3,7 @@
 GOAL:    a viewer who has never heard of the program knows what it does (drop a face, get the closest
          public figures with honest labels) and that it runs on their own computer.
 OUTPUT:  HyperFrames, 1920 x 1080, 30 fps, silent (it plays muted on the promo page).
-TIME:    32.5 s x 30 fps = 975 frames.
+TIME:    30 s x 30 fps = 900 frames.
 LOOK:    the promo page's scorecard world. Ground #f4f7fb with a printed grid (40 px, rgba(29,60,120,.09));
          ink #1f2328; rule navy #1d3c78 for every display line and frame. Label colours appear only on
          labels: #1a7f37 Same person, #d4a72c Alter Ego, #8c959f Not You.
@@ -17,16 +17,16 @@ MOTION:  enter expo.out, camera power2.inOut, exit power3.in. Titles per word: b
          opacity 0 -> 1 in 0.13 s, 0.067 s apart. Exits 40-50% of entrances. Landed text holds still.
 SHOTS:
   0-3 s     drop   "Brad Pitt or Leonardo DiCaprio?" beside a 2017 photo of DiCaprio and its credit.
-  3-9 s     drop   the app slides in; the photo is carried into the query box; the result replaces the
+  3-8 s     drop   the app slides in; the photo is carried into the query box; the result replaces the
                    empty app. "Ask AlterEgo Finder: drop the photo." -> "It compares him with 500 public figures."
-  9-16 s    target camera pushes into the similarity target (2.4x). A ring draws round the one green dot:
+  8-15 s    target camera pushes into the similarity target (2.4x). A ring draws round the one green dot:
                    "DiCaprio: inside the ring. Same person, 0.6867" -> round Brad Pitt's gold dot:
                    "Brad Pitt: 0.2109. Only an Alter Ego."
-  16-23.5 s cards  the five real cards reveal, then pan to Brad Pitt. "A different photo, and it still finds
+  15-21.5 s cards  the five real cards reveal, then pan to Brad Pitt. "A different photo, and it still finds
                    him." -> "Brad Pitt and three others: only lookalikes."
-  23.5-27.5 s local push into the app's own line "Runs on this machine only..." "Try your own photo. It
+  21.5-25.5 s local push into the app's own line "Runs on this machine only..." "Try your own photo. It
                    never leaves your computer."
-  27.5-32.5 s end  wordmark, the action (commands on this page), address, photo credits.
+  25.5-30 s end  wordmark, the action (commands on this page), address, photo credits.
 BANNED:  dark void; glow; gradients; glass; everything centred; everything fading in at once;
          text moving while read; three cards in a row as a feature list; a title over a dimmed
          screenshot; invented UI; logo docked in a corner.

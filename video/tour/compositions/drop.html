@@ -17,7 +17,7 @@
     #drop-cap1, #drop-cap2 { left: 90px; top: 360px; width: 360px; font-size: 76px; }
   </style>
   <div id="root" data-composition-id="drop" data-width="1920" data-height="1080">
-    <div id="drop-app-clip" class="clip layer" data-start="2.6" data-duration="6.4">
+    <div id="drop-app-clip" class="clip layer" data-start="2.6" data-duration="5.4">
       <div id="drop-app">
         <img id="drop-empty" src="assets/app-empty.jpg" alt="The AlterEgo Finder page, empty, pool of 500 chosen" />
         <img id="drop-result" src="assets/app-result.jpg" alt="The AlterEgo Finder page with the result for the photo" />
@@ -27,13 +27,13 @@
       <span class="w">Brad</span> <span class="w">Pitt</span> <span class="w">or</span><br /><span class="w">Leonardo</span><br /><span class="w">DiCaprio?</span>
     </div>
     <div id="drop-credit" class="clip" data-start="0" data-duration="3.2">Photo: Presidencia de la Rep&uacute;blica Mexicana, 2017, CC BY 2.0 (Wikimedia Commons).</div>
-    <div id="drop-photo-clip" class="clip layer" data-start="0" data-duration="5.2">
+    <div id="drop-photo-clip" class="clip layer" data-start="0" data-duration="4.9">
       <div id="drop-photo"><img id="drop-photo-img" src="assets/leonardo.jpg" alt="A photo of Leonardo DiCaprio, 2017" /></div>
     </div>
-    <div id="drop-cap1" class="line clip" data-start="3.2" data-duration="2.6">
+    <div id="drop-cap1" class="line clip" data-start="3.2" data-duration="2.3">
       <span class="w">Ask</span> <span class="w">AlterEgo</span> <span class="w">Finder:</span> <span class="w">drop</span> <span class="w">the</span> <span class="w">photo.</span>
     </div>
-    <div id="drop-cap2" class="line clip" data-start="5.8" data-duration="3.2">
+    <div id="drop-cap2" class="line clip" data-start="5.5" data-duration="2.5">
       <span class="w">It</span> <span class="w">compares</span> <span class="w">him</span> <span class="w">with</span> <span class="w">500</span> <span class="w">public</span> <span class="w">figures.</span>
     </div>
   </div>
@@ -51,12 +51,12 @@
     // the app arrives from the right; the photo is carried into the query box (800,335), 52 px wide
     tl.fromTo("#drop-app", { opacity: 0, x: 220 }, { opacity: 1, x: 0, duration: 0.6, ease: "expo.out" }, 2.6);
     tl.fromTo("#drop-photo", { x: 0, y: 0, scale: 1 }, { x: -380, y: 215, scale: 0.093, duration: 0.9, ease: "power2.inOut" }, 3.3);
-    tl.to("#drop-photo", { opacity: 0, duration: 0.15, ease: "power3.in" }, 4.75);
+    tl.to("#drop-photo", { opacity: 0, duration: 0.15, ease: "power3.in" }, 4.7);
     words("#drop-cap1", 3.3);
     // the result replaces the empty page (blur swap on one stage)
-    tl.fromTo("#drop-result", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.35, ease: "power2.out" }, 5.2);
-    out("#drop-cap1", 5.55);
-    words("#drop-cap2", 5.85);
+    tl.fromTo("#drop-result", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.35, ease: "power2.out" }, 4.9);
+    out("#drop-cap1", 5.25);
+    words("#drop-cap2", 5.55);
     window.__timelines["drop"] = tl;
   </script>
 </template>

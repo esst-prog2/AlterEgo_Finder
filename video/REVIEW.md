@@ -4,7 +4,7 @@ Both: 1920 x 1080, 30 fps, silent on purpose (the course asks for a video that w
 sound, and it plays muted on the page). `hyperframes check` passes for both; the kept warnings are
 `film_silent` (on purpose) and `timeline_track_too_dense` (a few timed lines per scene).
 
-## Tour (video/tour, 32.5 s), second version
+## Tour (video/tour, 30 s), second version
 - Story: "Brad Pitt or Leonardo DiCaprio?" The query is a second photo of DiCaprio (Presidencia de la
   Republica Mexicana, 2017, CC BY 2.0, Wikimedia Commons), not the pool's own photo of him. The real
   result: DiCaprio first at 0.6867 (Same person, the one face inside the ring), then Matt Damon
