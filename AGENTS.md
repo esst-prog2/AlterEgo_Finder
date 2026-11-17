@@ -81,7 +81,7 @@ Homework 10's video is built with HyperFrames in `video/` (`video/tour` goes on 
 Impeccable) is the one design system for the app, the promo page, the video and the report.
 Branch `shared-design` applies it (`apply-shared-design`): Streamlit's theme in
 `.streamlit/config.toml`, fonts and the logo served from `static/` on localhost, green and
-gold target rings, a restyled self-contained report, the logo on the page. Branch `app-critique` fixes what Impeccable's critique of the app found (`app-critique-fixes`): a verdict line, the Scoresheet's grid and frames, readable on a phone, readable dataset names, and no threshold slider on the page (calibrated values only; the CLI keeps the override). 285 tests passing.
+gold target rings, a restyled self-contained report, the logo on the page. Branch `app-critique` fixes what Impeccable's critique of the app found (`app-critique-fixes`): a verdict line, the Scoresheet's grid and frames, readable on a phone, readable dataset names, and no threshold slider on the page (calibrated values only; the CLI keeps the override). A second critique (26/40) led to `readable-names-and-labels`: person names without underscores on the page, public datasets first, the navy download, report labels such as "Alter Ego (LOW_CONFIDENCE)". 288 tests passing.
 
 ## Workflow
 
