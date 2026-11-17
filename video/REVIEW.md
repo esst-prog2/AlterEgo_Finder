@@ -4,15 +4,20 @@ Both: 1920 x 1080, 30 fps, silent on purpose (the course asks for a video that w
 sound, and it plays muted on the page). `hyperframes check` passes for both; the kept warnings are
 `film_silent` (on purpose) and `timeline_track_too_dense` (a few timed lines per scene).
 
-## Tour (video/tour, 32 s)
-- Real screens: the running Streamlit app with the pool of 500 and a public-domain photo of Marie
-  Curie (Henri Manuel, about 1920, Wikimedia Commons). Her result is real: Marco van Basten 0.2097,
-  four Alter Egos, nobody at Same person. The cards' photos keep the app's own credits.
-- Checked: frames at 1.5, 3.8, 4.6, 7.5, 12.5, 14.5, 17.5, 21, 25.5 and 30 s, and five frames of the
-  rendered MP4.
-- Weakest shot: the target's own labels stay small even at 2.4x (the app draws them at 11 px).
-- The photo landing in the query box is drawn over a screenshot: dropping a file there is a real
-  feature of the page, but this is a re-enactment, not a screen recording.
+## Tour (video/tour, 32.5 s), second version
+- Story: "Brad Pitt or Leonardo DiCaprio?" The query is a second photo of DiCaprio (Presidencia de la
+  Republica Mexicana, 2017, CC BY 2.0, Wikimedia Commons), not the pool's own photo of him. The real
+  result: DiCaprio first at 0.6867 (Same person, the one face inside the ring), then Matt Damon
+  0.2678, Keke Rosberg 0.2672, Oliver Kahn 0.2286 and Brad Pitt 0.2109 (Alter Ego). The cards keep
+  the app's own photo credits.
+- Chosen from 13 well-known pool members tested with other openly licensed Commons photos; a photo
+  with private people in the background was ruled out.
+- The first version (Marie Curie, nobody at Same person) was replaced because it could not show all
+  three labels.
+- Checked: snapshots at 1.5, 4.6, 7.5, 12, 15, 18, 21.5, 26 and 30.5 s, and six frames of the MP4.
+- Kept warnings: the two credit lines are on screen shorter than a full read; they are credits.
+- The photo landing in the query box is re-enacted over screenshots: dropping a file there is a
+  real feature of the page, but that moment is not a screen recording.
 
 ## Explainer (video/explainer, 32.5 s)
 - Every number is measured: the fixed bar 0.2017 and 66 / 198 / 200 of 200 strangers at

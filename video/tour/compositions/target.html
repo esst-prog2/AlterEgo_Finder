@@ -8,25 +8,26 @@
     #tg-cam { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; background: #fff; outline: 3px solid #1d3c78; }
     #tg-cam img { display: block; width: 1920px; height: 1080px; }
     #tg-ring { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
-    #tg-panel { position: absolute; left: 60px; top: 330px; width: 660px; height: 300px; background: #f4f7fb; border: 3px solid #1d3c78; padding: 36px 40px; }
+    #tg-panel { position: absolute; left: 60px; top: 330px; width: 660px; height: 380px; background: #f4f7fb; border: 3px solid #1d3c78; padding: 36px 40px; }
     .line { position: absolute; left: 40px; top: 36px; width: 580px; font-family: "Barlow Condensed"; font-weight: 700; text-transform: uppercase; color: #1d3c78; font-size: 72px; line-height: 1; letter-spacing: .01em; }
     .w { display: inline-block; }
     .gold { color: #b8901c; }
   </style>
   <div id="root" data-composition-id="target" data-width="1920" data-height="1080">
     <div id="tg-cam-clip" class="clip layer" data-start="0" data-duration="7">
-      <div id="tg-cam" data-layout-allow-overflow><img src="assets/app-result.jpg" alt="AlterEgo Finder's similarity target for Marie Curie" /></div>
+      <div id="tg-cam" data-layout-allow-overflow><img src="assets/app-result.jpg" alt="AlterEgo Finder's similarity target for the photo" /></div>
       <svg id="tg-ring" viewBox="0 0 1920 1080" data-layout-ignore>
-        <circle id="tg-circle" cx="1300" cy="307" r="44" fill="none" stroke="#1d3c78" stroke-width="5" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" />
+        <circle id="tg-circle" cx="1300" cy="449" r="44" fill="none" stroke="#1d3c78" stroke-width="5" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" />
+        <circle id="tg-circle2" cx="1442" cy="722" r="44" fill="none" stroke="#1d3c78" stroke-width="5" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" />
       </svg>
     </div>
     <div id="tg-panel-clip" class="clip layer" data-start="0" data-duration="7">
       <div id="tg-panel">
         <div id="tg-cap1" class="line">
-          <span class="w">Closest:</span> <span class="w">Marco</span> <span class="w">van</span> <span class="w">Basten,</span> <span class="w">0.2097</span>
+          <span class="w">DiCaprio:</span> <span class="w">inside</span> <span class="w">the</span> <span class="w">ring.</span> <span class="w">Same</span> <span class="w">person,</span> <span class="w">0.6867</span>
         </div>
         <div id="tg-cap2" class="line">
-          <span class="w">Gold</span> <span class="w">means</span> <span class="w">Alter</span> <span class="w">Ego:</span> <span class="w">close,</span> <span class="w">but</span> <span class="w">not</span> <span class="w">her.</span>
+          <span class="w">Brad</span> <span class="w">Pitt:</span> <span class="w">0.2109.</span> <span class="w">Only</span> <span class="w">an</span> <span class="w">Alter</span> <span class="w">Ego.</span>
         </div>
       </div>
     </div>
@@ -43,6 +44,8 @@
     words("#tg-cap1", 1.15);
     tl.to("#tg-circle", { strokeDashoffset: 0, duration: 0.5, ease: "power2.out" }, 1.5);
     out("#tg-cap1", 3.75);
+    tl.to("#tg-circle", { opacity: 0, duration: 0.15, ease: "power3.in" }, 3.75);
+    tl.to("#tg-circle2", { strokeDashoffset: 0, duration: 0.5, ease: "power2.out" }, 4.1);
     words("#tg-cap2", 4.05);
     window.__timelines["target"] = tl;
   </script>
