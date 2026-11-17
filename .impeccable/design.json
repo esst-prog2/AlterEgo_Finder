@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-17T10:40:00Z",
+  "title": "Design System: AlterEgo Finder",
+  "extensions": {
+    "colorMeta": {
+      "scorecard-navy": { "role": "primary", "displayName": "Scorecard Navy", "tonalRamp": ["#0b1830", "#122649", "#1d3c78", "#2c539b", "#4c71b6", "#7b97cb", "#b2c3e2", "#e3eaf6"] },
+      "scorecard-navy-deep": { "role": "primary", "displayName": "Scorecard Navy Deep", "tonalRamp": ["#080f1f", "#0e1d3d", "#142c5a", "#22417c", "#3a5c9b", "#6582b8", "#a3b5d8", "#dfe6f3"] },
+      "paper": { "role": "neutral", "displayName": "Paper", "tonalRamp": ["#1b2430", "#36414f", "#5a6676", "#8592a3", "#b3bfcc", "#d6dee8", "#eef3f8", "#f8fbfd"] },
+      "paper-raised": { "role": "neutral", "displayName": "Paper Raised", "tonalRamp": ["#1d252e", "#39434e", "#5e6875", "#8b95a2", "#b9c2cc", "#dde4ea", "#f0f5f9", "#f8fbfd"] },
+      "ink": { "role": "neutral", "displayName": "Ink", "tonalRamp": ["#0d0f12", "#1f2328", "#363c44", "#535b66", "#77808b", "#9fa7b1", "#c9ced4", "#eef0f2"] },
+      "ink-soft": { "role": "neutral", "displayName": "Ink Soft", "tonalRamp": ["#1a1e23", "#2f3640", "#46505d", "#626d7b", "#838e9b", "#a8b1bc", "#cdd3da", "#eef1f4"] },
+      "pencil": { "role": "neutral", "displayName": "Pencil", "tonalRamp": ["#15181d", "#272c34", "#3d4450", "#59616e", "#7c8491", "#a3aab5", "#cbd0d7", "#eff1f3"] },
+      "same-person-green": { "role": "label", "displayName": "Same Person Green", "tonalRamp": ["#082a12", "#10471f", "#1a7f37", "#2e9a4c", "#58b56f", "#8ccf9b", "#c2e6ca", "#eef8f0"] },
+      "alter-ego-gold": { "role": "label", "displayName": "Alter Ego Gold", "tonalRamp": ["#3b2c05", "#6a500c", "#a8811c", "#d4a72c", "#e0bd5a", "#ebd38d", "#f4e7c2", "#fcf8ec"] },
+      "not-you-grey": { "role": "label", "displayName": "Not You Grey", "tonalRamp": ["#22262a", "#3c4248", "#5d656d", "#8c959f", "#a9b0b8", "#c5cad0", "#e0e3e7", "#f6f7f8"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "The product name in a masthead or end card." },
+      "headline": { "displayName": "Headline", "purpose": "Section titles, uppercase navy." },
+      "title": { "displayName": "Title", "purpose": "Sub-sections, panel heads, step names." },
+      "body": { "displayName": "Body", "purpose": "Reading text with tabular figures, at most 68 characters a line." },
+      "label": { "displayName": "Label", "purpose": "Label chips, buttons, table heads, toggles." },
+      "hand": { "displayName": "Hand", "purpose": "Only for predictions written down before a run." },
+      "mono": { "displayName": "Mono", "purpose": "Commands and code." }
+    },
+    "shadows": [
+      { "name": "card-drop", "value": "0 1px 0 #1d3c78, 0 10px 28px -18px rgba(29, 60, 120, 0.45)", "purpose": "The one faint drop that lifts a card off the grid." }
+    ],
+    "motion": [
+      { "name": "hit-travel", "value": "transform 900ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "A hit moving to its new radius on the target." },
+      { "name": "button-state", "value": "background-color 180ms ease-out, color 180ms ease-out", "purpose": "Button and toggle state changes." }
+    ],
+    "breakpoints": [
+      { "name": "stack", "value": "900px" },
+      { "name": "phone", "value": "600px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Navy square button in label type; colours invert when toggled.",
+      "html": "<button class=\"ds-btn\">Copy</button>",
+      "css": ".ds-btn { font: 600 0.95rem/1 'Barlow Condensed', 'Arial Narrow', sans-serif; text-transform: uppercase; letter-spacing: 0.04em; color: #f8fbfd; background: #1d3c78; border: 2px solid #1d3c78; border-radius: 0; padding: 0.55rem 0.9rem; cursor: pointer; transition: background-color 180ms ease-out, color 180ms ease-out; } .ds-btn:hover { background: #142c5a; } .ds-btn:focus-visible { outline: 3px solid #1d3c78; outline-offset: 3px; } .ds-btn:active { background: #f8fbfd; color: #1d3c78; }"
+    },
+    {
+      "name": "Label Chips",
+      "kind": "chip",
+      "refersTo": "label-chip",
+      "description": "The three labels: a coloured dot with an ink outline, then the name in label type.",
+      "html": "<span class=\"ds-label ds-same\">Same person</span> <span class=\"ds-label ds-alter\">Alter Ego</span> <span class=\"ds-label ds-notyou\">Not You</span>",
+      "css": ".ds-label { display: inline-flex; align-items: center; gap: 0.4em; font: 600 0.95rem/1 'Barlow Condensed', 'Arial Narrow', sans-serif; text-transform: uppercase; letter-spacing: 0.03em; color: #1f2328; margin-right: 0.8rem; } .ds-label::before { content: ''; width: 0.75em; height: 0.75em; border-radius: 50%; border: 1.5px solid #1f2328; } .ds-same::before { background: #1a7f37; } .ds-alter::before { background: #d4a72c; } .ds-notyou::before { background: #8c959f; }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Raised paper framed by a 2 px navy rule, square, one faint drop.",
+      "html": "<div class=\"ds-card\"><h3 class=\"ds-card-title\">How it works</h3><p>A face becomes 512 numbers and is compared with every face in the dataset.</p></div>",
+      "css": ".ds-card { background: #f8fbfd; border: 2px solid #1d3c78; box-shadow: 0 1px 0 #1d3c78, 0 10px 28px -18px rgba(29, 60, 120, 0.45); padding: 1.5rem; font: 400 1.0625rem/1.55 Barlow, system-ui, sans-serif; color: #1f2328; max-width: 28rem; } .ds-card-title { font: 700 1.25rem/1.02 'Barlow Condensed', 'Arial Narrow', sans-serif; text-transform: uppercase; color: #1d3c78; margin: 0 0 0.6rem; }"
+    },
+    {
+      "name": "Entry Box",
+      "kind": "input",
+      "refersTo": "entry-box",
+      "description": "A framed box for commands or an upload: navy head, paper well, mono content.",
+      "html": "<div class=\"ds-entry\"><div class=\"ds-entry-head\">Try it locally</div><pre class=\"ds-entry-body\">python setup_data.py\nstreamlit run app.py</pre></div>",
+      "css": ".ds-entry { border: 2px solid #1d3c78; background: #eef3f8; max-width: 26rem; } .ds-entry-head { font: 700 1.35rem/1 'Barlow Condensed', 'Arial Narrow', sans-serif; text-transform: uppercase; color: #1d3c78; padding: 0.55rem 0.85rem; border-bottom: 2px solid #1d3c78; } .ds-entry-body { margin: 0; padding: 0.85rem; font: 400 0.92rem/1.6 ui-monospace, 'Cascadia Mono', Consolas, monospace; color: #1f2328; }"
+    },
+    {
+      "name": "Logo",
+      "kind": "custom",
+      "refersTo": "logo",
+      "description": "The target in miniature beside the name; the one place label colours appear outside labels.",
+      "html": "<div class=\"ds-logo\"><svg viewBox=\"-55 -55 110 110\" width=\"56\" height=\"56\" aria-hidden=\"true\"><circle r=\"50\" fill=\"rgba(212,167,44,.24)\" stroke=\"#d4a72c\" stroke-width=\"5\"/><circle r=\"28\" fill=\"rgba(26,127,55,.16)\" stroke=\"#1a7f37\" stroke-width=\"5\"/><path d=\"M-9 0H9M0 -9V9\" stroke=\"#1d3c78\" stroke-width=\"5\" stroke-linecap=\"round\"/><circle cx=\"17\" cy=\"-12\" r=\"7\" fill=\"#1a7f37\"/></svg><span>AlterEgo<br>Finder</span></div>",
+      "css": ".ds-logo { display: inline-flex; align-items: center; gap: 0.7rem; } .ds-logo span { font: 700 1.6rem/0.9 'Barlow Condensed', 'Arial Narrow', sans-serif; text-transform: uppercase; color: #1f2328; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Scoresheet",
+    "overview": "AlterEgo Finder looks like the card an archery judge fills in: pale blue-white paper ruled in printed blue lines, every section framed by a navy rule, figures set in a condensed sports-form grotesk with tabular numbers, and a pencil hand for what was written down before a run. A face search is scored like a round: the similarity target is the target face, each candidate is a hit at its exact distance, and each claim about the program is an end on the scorecard, misses included.\n\nThe system serves four surfaces with one look: the promo page (docs/index.html), the local Streamlit app (app.py), the 30-second tour video (video/tour) and the downloadable report (summary.html). Density is moderate and print-like: generous paper, firm rules, no ornament that does not carry information. The only colour besides navy and ink belongs to the three labels, so a reader learns once that green, gold and grey mean Same person, Alter Ego and Not You, and can trust it everywhere.\n\nRejected: a dark \"AI\" void, glows and neon, purple or blue gradients, glass cards, rounded pill chips, and any colour used as decoration.",
+    "keyCharacteristics": [
+      "Paper and printed rules: a 24 px blue grid on the page ground, 2 px navy frames on every card.",
+      "Condensed uppercase display type for names, headings, labels and figures; a plain grotesk for reading.",
+      "Three label colours with one meaning each, plus the logo that contains them.",
+      "Square corners throughout; depth by rules, not shadows.",
+      "Numbers are tabular and exact, never rounded for effect."
+    ],
+    "rules": [
+      { "name": "The Label Colour Rule", "body": "Green, gold and grey mean Same person, Alter Ego and Not You, and appear nowhere else, with one named exception: the logo mark, which is the target in miniature.", "section": "colors" },
+      { "name": "The One Navy Rule", "body": "Navy is the only accent. No second brand colour, no gradients.", "section": "colors" },
+      { "name": "The Figures Rule", "body": "Every number is set with tabular figures and shown at the precision it was measured (scores to four decimals); a figure that matters is set in the display face.", "section": "typography" },
+      { "name": "The Ruled Frame Rule", "body": "If something needs separating, rule it. Never a shadow, a glow or a blur for depth.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do put every surface on the same paper (#eef3f8) and grid, framed by 2 px navy rules.",
+      "Do use the label colours only for Same person, Alter Ego and Not You, and inside the logo.",
+      "Do show scores to four decimals with tabular figures, next to the label they produce.",
+      "Do credit every photograph where it appears (author and licence).",
+      "Do ship the fonts with the project (docs/fonts, the app's static folder, video/tour/assets/fonts)."
+    ],
+    "donts": [
+      "Don't use rounded corners, pill chips or shadows for depth.",
+      "Don't introduce a second accent colour or a gradient.",
+      "Don't colour a whole label word in its label colour on a light ground when the gold would fail contrast: the dot carries the colour.",
+      "Don't place a title over a dimmed screenshot or a dark void behind the product."
+    ]
+  }
+}
