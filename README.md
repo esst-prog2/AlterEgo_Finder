@@ -59,10 +59,10 @@ To run it yourself, see section 6.
 
 ## 6. Getting started
 
-You need Python 3.10 or newer (tested on 3.13) and about 750 MB of free disk space. From a clone of this repository:
+You need Python 3.10 or newer (tested on 3.13, on Windows; the macOS and Linux commands have not been tried yet) and about 750 MB of free disk space. From a clone of this repository:
 
 ```
-python -m venv .venv
+python -m venv .venv               (on macOS or Linux: python3 -m venv .venv)
 .venv\Scripts\activate            (on macOS or Linux: source .venv/bin/activate)
 pip install -r requirements-ui.txt
 python setup_data.py

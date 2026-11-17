@@ -236,7 +236,7 @@ footer { margin: clamp(2.5rem, 6vw, 4rem) auto 0; padding: 1.5rem var(--gutter) 
           <p class="what">Drop a face photo, and it finds the ten closest public figures, each labelled <span class="label same">Same person</span>, <span class="label alter">Alter Ego</span> or <span class="label notyou">Not You</span>.</p>
           <p class="who">For anyone curious who they resemble, and for data scientists who want to know how much to believe the answer: the labels come from thresholds calibrated on held-out strangers.</p>
         </div>
-        <p class="promise">Your photo never leaves your machine. <a class="jump" href="#try">Run it on your computer: three commands</a></p>
+        <p class="promise">Your photo never leaves your machine. <a class="jump" href="#try">Run it on your computer: seven commands</a></p>
       </div>
       <div class="play">
         <div class="target-face" id="target">
@@ -275,12 +275,12 @@ footer { margin: clamp(2.5rem, 6vw, 4rem) auto 0; padding: 1.5rem var(--gutter) 
           </div>
 <pre id="quickstart">git clone https://github.com/esst-prog2/AlterEgo_Finder
 cd AlterEgo_Finder
-python -m venv .venv
+<span class="os-win">python</span><span class="os-unix" hidden>python3</span> -m venv .venv
 <span class="os-win">.venv\Scripts\activate</span><span class="os-unix" hidden>source .venv/bin/activate</span>
 pip install -r requirements-ui.txt
 python setup_data.py
 streamlit run app.py</pre>
-          <p class="entry-foot">Setup takes about 3.5 minutes. Then open <code>http://localhost:8501</code> and drop a photo. Python 3.10 or newer, about 750 MB of disk. <a href="#try-full">All steps, and the public-figure pool</a>.</p>
+          <p class="entry-foot">Setup takes about 3.5 minutes. Then open <code>http://localhost:8501</code> and drop a photo. Python 3.10 or newer, about 750 MB of disk. Tested on Windows only<span class="os-unix" hidden>: these commands have not yet been run on a Mac or a Linux machine</span>. <a href="#try-full">All steps, and the public-figure pool</a>.</p>
         </div>
         </div>
       </div>
@@ -377,10 +377,11 @@ python -m pytest tests/</code>
       <div class="panel card" id="try-full">
         <h2>Run it at home</h2>
         <ol class="steps">
-          <li><span>You need Python 3.10 or newer and about 750 MB of disk. Get the code and create a virtual environment:<code>git clone https://github.com/esst-prog2/AlterEgo_Finder
-cd AlterEgo_Finder
-python -m venv .venv</code></span></li>
-          <li><span>Activate it. On Windows:<code>.venv\Scripts\activate</code>On macOS or Linux:<code>source .venv/bin/activate</code></span></li>
+          <li><span>You need Python 3.10 or newer and about 750 MB of disk. Get the code:<code>git clone https://github.com/esst-prog2/AlterEgo_Finder
+cd AlterEgo_Finder</code></span></li>
+          <li><span>Create and activate a virtual environment. On Windows:<code>python -m venv .venv
+.venv\Scripts\activate</code>On macOS or Linux, where <code style="display:inline;padding:0 .3rem">python</code> is often only <code style="display:inline;padding:0 .3rem">python3</code> until the environment is active (not yet tried on either system):<code>python3 -m venv .venv
+source .venv/bin/activate</code></span></li>
           <li><span>Install and set up the default dataset, 500 LFW faces (about 3.5 minutes):<code>pip install -r requirements-ui.txt
 python setup_data.py</code></span></li>
           <li><span>Start the page and open <code style="display:inline;padding:0 .3rem">http://localhost:8501</code>:<code>streamlit run app.py</code></span></li>
