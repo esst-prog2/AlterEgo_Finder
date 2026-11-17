@@ -175,6 +175,7 @@ Square corners everywhere (0 px): cards, buttons, inputs, code wells, video fram
 
 ### Label chips
 - **Style:** a dot in the label's colour with a 1.5 px ink outline, then the label's name in label type, uppercase. The dot carries the colour; the text stays ink.
+- **In the Streamlit app**, where a drawn dot is not available, the name sits in bold ink on a light wash of its label colour (Streamlit's own highlight). The text never takes the label colour itself.
 
 ### Cards / Containers
 - **Corner Style:** square.

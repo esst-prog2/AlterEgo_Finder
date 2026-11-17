@@ -3,6 +3,56 @@
 [server]
 address = "localhost"
 maxUploadSize = 10
+# Serves static/ (the shared fonts and the logo) from this same local server,
+# so the page loads nothing from the network.
+enableStaticServing = true
 
 [browser]
 gatherUsageStats = false
+
+# The shared design system (DESIGN.md, "The Scoresheet"): paper, navy rules,
+# square corners, Barlow, and the three label colours, the same as the promo
+# page, the tour video and the report.
+[theme]
+base = "light"
+primaryColor = "#1d3c78"
+backgroundColor = "#eef3f8"
+secondaryBackgroundColor = "#f8fbfd"
+textColor = "#1f2328"
+linkColor = "#1d3c78"
+borderColor = "rgba(29, 60, 120, 0.22)"
+codeBackgroundColor = "#f8fbfd"
+baseRadius = "none"
+buttonRadius = "none"
+font = "Barlow, system-ui, sans-serif"
+headingFont = "Barlow Condensed, Arial Narrow, sans-serif"
+headingFontWeights = 700
+# Streamlit's own green, orange and gray are the three label colours:
+# Same person, Alter Ego and Not You.
+greenColor = "#1a7f37"
+orangeColor = "#d4a72c"
+grayColor = "#8c959f"
+
+[[theme.fontFaces]]
+family = "Barlow"
+url = "app/static/fonts/barlow-latin-400-normal.woff2"
+weight = 400
+style = "normal"
+
+[[theme.fontFaces]]
+family = "Barlow"
+url = "app/static/fonts/barlow-latin-600-normal.woff2"
+weight = 600
+style = "normal"
+
+[[theme.fontFaces]]
+family = "Barlow Condensed"
+url = "app/static/fonts/barlow-condensed-latin-600-normal.woff2"
+weight = 600
+style = "normal"
+
+[[theme.fontFaces]]
+family = "Barlow Condensed"
+url = "app/static/fonts/barlow-condensed-latin-700-normal.woff2"
+weight = 700
+style = "normal"

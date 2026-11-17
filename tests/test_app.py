@@ -26,9 +26,9 @@ REPO_ROOT = Path(__file__).parent.parent
 FIXTURES = REPO_ROOT / "tests" / "fixtures"
 APP = REPO_ROOT / "app.py"
 QUERY = FIXTURES / "obama_query.jpg"
-# A card's score line, e.g. "`0.2146` :orange[**Alter Ego**]". The page shows
+# A card's score line, e.g. "`0.2146` :orange-background[**Alter Ego**]". The page shows
 # only the plain names; tests map them back to the CLI's technical labels.
-CARD_LINE = re.compile(r"`(-?\d+\.\d{4})` :\w+\[\*\*(.+?)\*\*\]")
+CARD_LINE = re.compile(r"`(-?\d+\.\d{4})` :\w+-background\[\*\*(.+?)\*\*\]")
 PLAIN_NAMES = {"HIGH_CONFIDENCE": "Same person", "LOW_CONFIDENCE": "Alter Ego",
                "NO_MATCH": "Not You"}
 LABEL_OF = {plain: label for label, plain in PLAIN_NAMES.items()}
@@ -349,7 +349,7 @@ def test_target_text_follows_the_light_or_dark_theme():
         return {layer["mark"].get("color") for layer in spec["layer"]
                 if layer["mark"]["type"] in ("text", "point")}
 
-    assert text_colours("light") == {"#1f2328", "#57606a"}
+    assert text_colours("light") == {"#1f2328", "#46505d"}
     assert text_colours("dark") == {"#f0f6fc", "#9198a1"}
     assert text_colours(None) == {"#8c959f"}
 

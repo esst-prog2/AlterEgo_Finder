@@ -95,3 +95,42 @@ def test_render_report_accepts_query_as_image_array(tmp_path):
     render_report(read_image(QUERY_IMAGE), results, from_array)
 
     assert from_array.read_text(encoding="utf-8") == from_path.read_text(encoding="utf-8")
+
+
+# --- shared design (apply-shared-design) -------------------------------------
+
+def _three_labels_report(tmp_path, attribution=None):
+    output_path = tmp_path / "report.html"
+    results = [
+        (IndexEntry(person="Barack_Obama", filepath=FIXTURES / "obama_1.jpg"), 0.80, "HIGH_CONFIDENCE"),
+        (IndexEntry(person="Joe_Biden", filepath=FIXTURES / "biden_1.jpg"), 0.25, "LOW_CONFIDENCE"),
+        (IndexEntry(person="Someone", filepath=FIXTURES / "biden_1.jpg"), 0.05, "NO_MATCH"),
+    ]
+    render_report(QUERY_IMAGE, results, output_path, attribution=attribution)
+    return output_path.read_text(encoding="utf-8")
+
+
+def test_report_header_carries_the_logo_inline(tmp_path):
+    content = _three_labels_report(tmp_path)
+    header = re.search(r"<header>(.*?)</header>", content, re.S).group(1)
+    # The logo is the target in miniature, inline SVG: both rings and the navy cross.
+    assert '<svg class="mark"' in header
+    for colour in ("#d4a72c", "#1a7f37", "#1d3c78"):
+        assert colour in header
+    assert "AlterEgo Finder" in header
+
+
+def test_each_classification_has_its_shared_dot_colour(tmp_path):
+    content = _three_labels_report(tmp_path)
+    dots = re.findall(r'<span class="dot" style="background: (#[0-9a-f]{6})"></span>(\w+)</div>', content)
+    assert dots == [("#1a7f37", "HIGH_CONFIDENCE"), ("#d4a72c", "LOW_CONFIDENCE"), ("#8c959f", "NO_MATCH")]
+
+
+def test_report_loads_nothing_from_the_network(tmp_path):
+    source = "https://commons.wikimedia.org/wiki/File:Barack_Obama.jpg"
+    attribution = {"fixtures/obama_1.jpg": {"author": "A", "license": "CC0", "source": source}}
+    content = _three_labels_report(tmp_path, attribution)
+    # Fonts are embedded; the only URLs are the credits' source links and the SVG namespace.
+    assert "data:font/woff2;base64," in content
+    urls = set(re.findall(r"https?://[^\s\"')<>]+", content))
+    assert urls <= {source, "http://www.w3.org/2000/svg"}, urls
