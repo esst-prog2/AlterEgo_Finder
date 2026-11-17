@@ -16,6 +16,7 @@ The music was measured (music, onset 0.17 s, fades out by 29.9 s), not heard. `h
 - The first version (Marie Curie, nobody at Same person) was replaced because it could not show all
   three labels.
 - Checked: snapshots at 1.5, 4.6, 7.5, 12, 15, 18, 21.5, 26 and 30.5 s, and six frames of the MP4.
+- Fourth pass: screens captured again from the page after the critique fixes (verdict line, framed cards, readable names); the page no longer scrolls in the drop scene, since the verdict is at the top; camera and rings re-measured from the page.
 - Third pass: a logo (the app's target in miniature) on every scene, a score key under the target,
   music.
 - Kept warnings: the two credit lines are on screen shorter than a full read; they are credits.
