@@ -1,7 +1,7 @@
 <template>
   <style>
     @font-face { font-family: "Barlow Condensed"; font-weight: 700; src: url("assets/fonts/barlow-condensed-latin-700-normal.woff2") format("woff2"); }
-    #root { position: absolute; inset: 0; background-color: #f4f7fb;
+    #root { position: absolute; inset: 0; background-color: #eef3f8;
       background-image: linear-gradient(rgba(29,60,120,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(29,60,120,.09) 1px, transparent 1px);
       background-size: 40px 40px; overflow: hidden; }
     .layer { position: absolute; inset: 0; }
@@ -32,7 +32,7 @@
     // the cards populate left to right, then the camera pans along the row
     tl.fromTo("#cd-img", { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 1.2, ease: "power2.out" }, 0.1);
     words("#cd-cap1", 0.4);
-    tl.fromTo("#cd-strip", { x: 0 }, { x: -846, duration: 1.4, ease: "power2.inOut" }, 2.0);
+    tl.fromTo("#cd-strip", { x: 0 }, { x: -846, duration: 1.1, ease: "power2.inOut" }, 2.9);
     out("#cd-cap1", 3.05);
     words("#cd-cap2", 3.35);
     window.__timelines["cards"] = tl;

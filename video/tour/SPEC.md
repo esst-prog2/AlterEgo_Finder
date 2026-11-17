@@ -5,7 +5,7 @@ GOAL:    a viewer who has never heard of the program knows what it does (drop a 
 OUTPUT:  HyperFrames, 1920 x 1080, 30 fps. Music: "Carefree", Kevin MacLeod (incompetech.com), CC BY 4.0,
          first 30 s, 0.4 s fade-in, 2.5 s fade-out, -18 LUFS. It starts muted on the page and works without sound.
 TIME:    30 s x 30 fps = 900 frames.
-LOOK:    the promo page's scorecard world. Ground #f4f7fb with a printed grid (40 px, rgba(29,60,120,.09));
+LOOK:    the promo page's scorecard world. Ground #eef3f8 (DESIGN.md paper) with a printed grid (40 px, rgba(29,60,120,.09));
          ink #1f2328; rule navy #1d3c78 for every display line and frame. Label colours appear only on
          labels: #1a7f37 Same person, #d4a72c Alter Ego, #8c959f Not You.
          Display: Barlow Condensed 700, uppercase, 72-150 px, tracking 0.01em. Body: Barlow 500, 30-34 px.
