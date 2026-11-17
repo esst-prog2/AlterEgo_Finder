@@ -104,6 +104,21 @@ def test_lists_only_indexed_datasets(indexed_data_dir, monkeypatch):
     assert at.selectbox(key="dataset").options == ["twelve"]
 
 
+def test_readable_dataset_names_and_the_pool_by_default(indexed_data_dir, tmp_path, monkeypatch):
+    # The folder name stays visible: README section 1 names folders.
+    data_dir = tmp_path / "data"
+    shutil.copytree(indexed_data_dir, data_dir)
+    for name in ("celebrities", "wikidata"):
+        shutil.copytree(data_dir / "twelve", data_dir / name)
+        get_or_build_index(data_dir / name)
+
+    at = _app(data_dir, monkeypatch)
+
+    assert at.selectbox(key="dataset").options == [
+        "Public figures (wikidata)", "LFW faces (celebrities)", "twelve"]
+    assert at.selectbox(key="dataset").value.name == "wikidata"
+
+
 def test_no_indexed_dataset_tells_user_to_index_one(tmp_path, monkeypatch):
     data_dir = tmp_path / "data"
     shutil.copytree(FIXTURES / "dataset", data_dir / "unindexed")
@@ -134,23 +149,30 @@ def test_switching_dataset_keeps_the_uploaded_photo(indexed_data_dir, tmp_path, 
     assert _cards(at)[0][0] == "Me"
 
 
-# --- 3.2 thresholds ----------------------------------------------------------
+# --- 3.2 thresholds: calibrated only (app-critique-fixes) ----------------------
 
 
-def test_thresholds_preset_from_config_without_notice(indexed_data_dir, monkeypatch):
+def _with_config(indexed_data_dir, tmp_path, low, high) -> Path:
+    """A copy of data/ whose calibrated thresholds are (low, high)."""
+    data_dir = tmp_path / "data"
+    shutil.copytree(indexed_data_dir, data_dir)
+    _write_config(data_dir, low, high)
+    return data_dir
+
+
+def test_no_threshold_control_on_the_page(indexed_data_dir, monkeypatch):
+    # The page always uses the calibrated thresholds; overrides stay in the CLI.
     at = _app(indexed_data_dir, monkeypatch)
-    assert at.slider(key="thresholds::twelve").value == (0.2, 0.4)
+    assert [s.key for s in at.slider] == ["top"]
     assert len(at.warning) == 0
 
 
-def test_moving_thresholds_relabels_and_shows_notice(indexed_data_dir, monkeypatch):
-    at = _upload(_app(indexed_data_dir, monkeypatch), QUERY.read_bytes())
-
-    at.slider(key="thresholds::twelve").set_value((0.0, 0.0)).run()
+def test_labels_follow_the_calibrated_thresholds(indexed_data_dir, tmp_path, monkeypatch):
+    data_dir = _with_config(indexed_data_dir, tmp_path, 0.0, 0.0)
+    at = _upload(_app(data_dir, monkeypatch), QUERY.read_bytes())
 
     assert {label for _, _, label in _cards(at)} <= {"HIGH_CONFIDENCE", "NO_MATCH"}
     assert any(label == "HIGH_CONFIDENCE" for _, _, label in _cards(at))
-    assert any("calibrated" in w.value for w in at.warning)
 
 
 def test_missing_config_shows_calibrate_error(indexed_data_dir, tmp_path, monkeypatch):
@@ -184,7 +206,9 @@ def test_ten_cards_matching_the_cli(indexed_data_dir, monkeypatch, tmp_path):
     cli_lines = cli.stdout.strip().splitlines()
 
     assert len(cards) == 10
-    assert [f"{n}: {s:.4f} {lbl}" for n, s, lbl in cards] == cli_lines
+    # The page shows readable names; the CLI keeps folder names.
+    readable_cli = [f"{n.replace('_', ' ')}: {rest}" for n, rest in (l.split(": ", 1) for l in cli_lines)]
+    assert [f"{n}: {s:.4f} {lbl}" for n, s, lbl in cards] == readable_cli
 
 
 def test_candidates_shown_control(indexed_data_dir, monkeypatch):
@@ -196,9 +220,12 @@ def test_candidates_shown_control(indexed_data_dir, monkeypatch):
 def test_face_crop_shown_next_to_photo(indexed_data_dir, monkeypatch):
     at = _upload(_app(indexed_data_dir, monkeypatch), QUERY.read_bytes())
     captions = [img.proto.imgs[0].caption for img in at.image]
-    assert captions[:2] == ["Your photo", "Face used for matching"]
-    # The photo, the crop, then one image per card.
-    assert len(at.image) == 2 + 10
+    assert captions == ["Your photo", "Face used for matching"]
+    # One photo per card, each with a text alternative naming the person.
+    alts = [h.proto.body for h in at.html if 'class="ae-photo"' in h.proto.body]
+    assert len(alts) == 10
+    for (name, _, _), body in zip(_cards(at), alts):
+        assert f'alt="Photo of {name}"' in body
 
 
 def test_no_face_shows_error_and_nothing_else(indexed_data_dir, tmp_path, monkeypatch):
@@ -210,7 +237,8 @@ def test_no_face_shows_error_and_nothing_else(indexed_data_dir, tmp_path, monkey
         _app(data_dir, monkeypatch), (REPO_ROOT / "data" / "demo" / "no_face.jpg").read_bytes()
     )
 
-    assert any(e.value == "No face detected" for e in at.error)
+    errors = [e.value for e in at.error]
+    assert any(e.startswith("No face detected") and "front-facing" in e for e in errors)
     assert _cards(at) == []
     assert len(at.get("download_button")) == 0
     assert not (data_dir / "results" / "summary.html").exists()
@@ -233,16 +261,20 @@ def test_person_names_are_shown_as_plain_text(tmp_path, monkeypatch):
 
     at = _upload(_app(data_dir, monkeypatch), (FIXTURES / "biden_1.jpg").read_bytes())
 
-    assert _cards(at)[0][0] == name
-    assert not any(name in m.value for m in at.markdown)
+    assert _cards(at)[0][0] == name.replace("_", " ")
+    assert not any(name.replace("_", " ") in m.value for m in at.markdown)
 
 
 # --- 3.4 report ----------------------------------------------------------------
 
 
-def test_report_written_offered_and_follows_thresholds(indexed_data_dir, tmp_path, monkeypatch):
+def test_report_written_offered_and_follows_the_dataset(indexed_data_dir, tmp_path, monkeypatch):
     data_dir = tmp_path / "data"
     shutil.copytree(indexed_data_dir, data_dir)
+    shutil.copytree(data_dir / "twelve", data_dir / "with_me")
+    (data_dir / "with_me" / "Me").mkdir()
+    shutil.copy(QUERY, data_dir / "with_me" / "Me" / "me.jpg")
+    get_or_build_index(data_dir / "with_me")
     report = data_dir / "results" / "summary.html"
     report.unlink(missing_ok=True)
 
@@ -254,13 +286,11 @@ def test_report_written_offered_and_follows_thresholds(indexed_data_dir, tmp_pat
     assert 'src="http' not in html
     for _, _, label in _cards(at):
         assert label in html
+    assert ">Me<" not in html
 
-    at.slider(key="thresholds::twelve").set_value((1.0, 1.0)).run()
+    at.selectbox(key="dataset").select(data_dir / "with_me").run()
 
-    html = report.read_text(encoding="utf-8")
-    assert "HIGH_CONFIDENCE" not in html
-    assert "LOW_CONFIDENCE" not in html
-    assert "NO_MATCH" in html
+    assert ">Me<" in report.read_text(encoding="utf-8")
 
 
 # --- similarity target ---------------------------------------------------------
@@ -292,15 +322,26 @@ def test_target_places_every_face_at_exactly_one_minus_score(indexed_data_dir, m
     assert sum(row["named"] for row in faces) == 10
 
 
-def test_target_rings_follow_the_threshold_slider(indexed_data_dir, monkeypatch):
+def test_target_rings_at_the_calibrated_thresholds(indexed_data_dir, tmp_path, monkeypatch):
     at = _upload(_app(indexed_data_dir, monkeypatch), QUERY.read_bytes())
     spec_text = at.get("vega_lite_chart")[0].proto.spec
     assert "high 0.4000" in spec_text and "low 0.2000" in spec_text
 
-    at.slider(key="thresholds::twelve").set_value((0.0, 0.0)).run()
+    data_dir = _with_config(indexed_data_dir, tmp_path, 0.1, 0.3)
+    at = _upload(_app(data_dir, monkeypatch), QUERY.read_bytes())
 
     spec_text = at.get("vega_lite_chart")[0].proto.spec
-    assert "high 0.0000" in spec_text and "low 0.0000" in spec_text
+    assert "high 0.3000" in spec_text and "low 0.1000" in spec_text
+
+
+def test_target_has_a_text_description(indexed_data_dir, monkeypatch):
+    at = _upload(_app(indexed_data_dir, monkeypatch), QUERY.read_bytes())
+    spec, faces = _target_faces(at)
+    named = [f for f in faces if f["named"]]
+    counts = {z: sum(f["zone"] == z for f in named) for z in ("Same person", "Alter Ego", "Not You")}
+    assert spec["description"] == (
+        f"Similarity target: {len(named)} faces shown; {counts['Same person']} inside the Same person ring, "
+        f"{counts['Alter Ego']} between the rings (Alter Ego), {counts['Not You']} outside (Not You).")
 
 
 def test_no_target_on_error_pages(indexed_data_dir, monkeypatch):
@@ -416,14 +457,15 @@ def test_target_tooltips_show_thumbnails_for_named_faces_only(indexed_data_dir, 
 
 
 
-def test_page_never_shows_the_technical_label_names(indexed_data_dir, monkeypatch):
+def test_page_never_shows_the_technical_label_names(indexed_data_dir, tmp_path, monkeypatch):
     # The page uses plain names only; HIGH_CONFIDENCE etc. are for developers
     # (CLI, report, specs) - decided 2026-10-20.
-    at = _upload(_app(indexed_data_dir, monkeypatch), QUERY.read_bytes())
-    at.slider(key="thresholds::twelve").set_value((0.0, 0.3)).run()  # some of each band
+    data_dir = _with_config(indexed_data_dir, tmp_path, 0.0, 0.3)  # some of each band
+    at = _upload(_app(data_dir, monkeypatch), QUERY.read_bytes())
 
     shown = [e.value for kind in (at.markdown, at.text, at.caption, at.warning, at.info,
-                                  at.error, at.subheader, at.title) for e in kind]
+                                  at.error, at.header, at.subheader, at.title) for e in kind]
+    shown += [h.proto.body for h in at.html if "<style>" not in h.proto.body]
     shown += [s.proto.help for s in at.slider]
     shown += [c.proto.spec for c in at.get("vega_lite_chart")]
     page = "\n".join(shown)
@@ -644,3 +686,107 @@ def test_every_name_is_still_drawn_when_they_cannot_all_fit():
     crowded = [(f"Quite_A_Long_Person_Name_{i}", 0.5 - i / 80) for i in range(20)]
     names, _ = _chart_problems(_pool_chart(crowded, top=20))
     assert len(names) == 20
+
+
+# --- the verdict line (app-critique-fixes) --------------------------------------
+
+
+def _verdict_bodies(at: AppTest):
+    return [h.proto.body for h in at.html if 'class="ae-verdict"' in h.proto.body]
+
+
+def _labeled(*rows):
+    from face_pipeline.index import IndexEntry
+    return [(IndexEntry(person=name, filepath="p.jpg"), score, label) for name, score, label in rows]
+
+
+def test_verdict_for_each_outcome():
+    sys.path.insert(0, str(REPO_ROOT))
+    from app import _verdict_html
+
+    same = _verdict_html(_labeled(("Leonardo_DiCaprio", 0.6867, "HIGH_CONFIDENCE"),
+                                  ("Matt_Damon", 0.2678, "LOW_CONFIDENCE")))
+    assert "Closest:" in same and "Leonardo DiCaprio" in same and "0.6867" in same and "Same person" in same
+    assert "Leonardo_DiCaprio" not in same
+
+    alter = _verdict_html(_labeled(("Matt_Damon", 0.2678, "LOW_CONFIDENCE"), ("X", 0.1, "NO_MATCH")))
+    assert "Nobody here is the same person" in alter
+    assert "Matt Damon" in alter and "0.2678" in alter and "Alter Ego" in alter
+
+    none = _verdict_html(_labeled(("Someone", 0.1522, "NO_MATCH")))
+    assert "Nobody in this dataset is close" in none and "Not You" in none
+    for text in (same, alter, none):
+        assert "_CONFIDENCE" not in text and "NO_MATCH" not in text
+
+
+def test_verdict_shows_markup_in_a_name_as_text():
+    sys.path.insert(0, str(REPO_ROOT))
+    from app import _verdict_html
+
+    body = _verdict_html(_labeled(('<img src=x onerror=alert(1)>"', 0.5, "HIGH_CONFIDENCE")))
+    assert "<img" not in body
+    assert "&lt;img src=x onerror=alert(1)&gt;&quot;" in body
+
+
+def test_verdict_line_on_the_page(indexed_data_dir, monkeypatch):
+    at = _upload(_app(indexed_data_dir, monkeypatch), QUERY.read_bytes())
+    bodies = _verdict_bodies(at)
+    assert len(bodies) == 1
+    top_name, top_score, _ = _cards(at)[0]
+    assert top_name in bodies[0] and f"{top_score:.4f}" in bodies[0]
+
+
+def test_stylesheet_targets_only_known_ids_and_our_classes():
+    sys.path.insert(0, str(REPO_ROOT))
+    import re as _re
+    from app import STYLESHEET
+
+    ids = set(_re.findall(r'data-testid="([^"]+)"', STYLESHEET))
+    assert ids == {"stApp", "stHeading", "stCaptionContainer", "stFileUploaderDropzone",
+                   "stFileUploaderDropzoneInstructions", "stFileChip",
+                   "stAlertContentInfo", "stAlertContainer", "stText", "stVegaLiteChart"}
+    classes = set(_re.findall(r"\.([a-z][a-z-]+)", STYLESHEET))
+    assert all(c.startswith("ae-") for c in classes), classes
+    assert set(_re.findall(r'class\*="([^"]+)"', STYLESHEET)) == {"st-key-ae-card-", "st-key-ae-name-"}
+    assert "http" not in STYLESHEET
+
+
+# --- readable names and the primary download (readable-names-and-labels) -------
+
+
+def test_folder_names_read_as_person_names(tmp_path, monkeypatch):
+    data_dir = tmp_path / "data"
+    _twelve_faces(data_dir / "pool", first_person="Leonardo_DiCaprio")
+    get_or_build_index(data_dir / "pool")
+    _write_config(data_dir, 0.0, 0.0)
+
+    at = _upload(_app(data_dir, monkeypatch), (FIXTURES / "biden_1.jpg").read_bytes())
+
+    assert _cards(at)[0][0] == "Leonardo DiCaprio"
+    verdict = _verdict_bodies(at)[0]
+    assert "Leonardo DiCaprio" in verdict and "Leonardo_DiCaprio" not in verdict
+    assert any('alt="Photo of Leonardo DiCaprio"' in h.proto.body for h in at.html)
+    spec_text = at.get("vega_lite_chart")[0].proto.spec
+    assert "Leonardo DiCaprio" in spec_text and "Leonardo_DiCaprio" not in spec_text
+
+
+def test_public_datasets_come_first(indexed_data_dir, tmp_path, monkeypatch):
+    data_dir = tmp_path / "data"
+    shutil.copytree(indexed_data_dir, data_dir)
+    for name in ("celebrities", "wikidata", "celebrities_plus_me", "wikidata_plus_me"):
+        shutil.copytree(data_dir / "twelve", data_dir / name)
+        get_or_build_index(data_dir / name)
+
+    at = _app(data_dir, monkeypatch)
+
+    assert at.selectbox(key="dataset").options[:5] == [
+        "Public figures (wikidata)", "LFW faces (celebrities)", "celebrities_plus_me", "twelve",
+        "wikidata_plus_me"]
+
+
+def test_report_download_is_the_primary_button(indexed_data_dir, monkeypatch):
+    at = _upload(_app(indexed_data_dir, monkeypatch), QUERY.read_bytes())
+    buttons = at.get("download_button")
+    assert len(buttons) == 1
+    assert buttons[0].proto.type == "primary"
+

@@ -22,8 +22,8 @@
     <div id="tg-cam-clip" class="clip layer" data-start="0" data-duration="7">
       <div id="tg-clipper" data-layout-allow-overflow><div id="tg-cam" data-layout-allow-overflow><img src="assets/app-result-tall.jpg" alt="AlterEgo Finder's similarity target for the photo" /></div></div>
       <svg id="tg-ring" viewBox="0 0 1920 1080" data-layout-ignore>
-        <circle id="tg-circle" cx="1300" cy="449" r="44" fill="none" stroke="#1d3c78" stroke-width="5" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" />
-        <circle id="tg-circle2" cx="1442" cy="722" r="44" fill="none" stroke="#1d3c78" stroke-width="5" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" />
+        <circle id="tg-circle" cx="1299" cy="452" r="44" fill="none" stroke="#1d3c78" stroke-width="5" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" />
+        <circle id="tg-circle2" cx="1438" cy="726" r="44" fill="none" stroke="#1d3c78" stroke-width="5" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" />
       </svg>
     </div>
     <div id="tg-key-clip" class="clip layer" data-start="0" data-duration="7">
@@ -46,7 +46,7 @@
       { opacity: 1, filter: "blur(0px)", duration: 0.13, stagger: 0.067, ease: "power4.out" }, at);
     const out = (sel, at) => tl.to(sel + " .w", { opacity: 0, filter: "blur(8px)", duration: 0.18, stagger: 0.03, ease: "power3.in" }, at);
     // camera: from the whole app (where the last scene left it) into the target at 2.4x
-    tl.fromTo("#tg-cam", { x: 493, y: -106, scale: 0.7167 }, { x: -1863, y: -792, scale: 2.4, duration: 1.1, ease: "power2.inOut" }, 0.1);
+    tl.fromTo("#tg-cam", { x: 493, y: 154, scale: 0.7167 }, { x: -1196, y: -1075, scale: 2.4, duration: 1.1, ease: "power2.inOut" }, 0.1);
     tl.fromTo("#tg-clipper", { clipPath: "inset(154px 51px 154px 493px)" }, { clipPath: "inset(0px 0px 0px 0px)", duration: 1.1, ease: "power2.inOut" }, 0.1);
     tl.fromTo("#tg-panel", { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.5, ease: "expo.out" }, 0.9);
     tl.set("#tg-cap1 .w, #tg-cap2 .w", { opacity: 0 }, 0);

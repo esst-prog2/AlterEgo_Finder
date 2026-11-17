@@ -63,3 +63,8 @@ def test_logo_files_ship_with_the_app():
         assert colour in mark
     assert "http" not in mark.replace("http://www.w3.org/2000/svg", "")
     assert (REPO_ROOT / "static" / "logo-lockup.png").stat().st_size > 1000
+
+
+def test_no_deploy_toolbar():
+    # The page is a local tool: Streamlit's Deploy button and developer menu stay hidden.
+    assert _config()["client"]["toolbarMode"] == "viewer"

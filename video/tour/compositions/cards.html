@@ -6,8 +6,8 @@
       background-size: 40px 40px; overflow: hidden; }
     .layer { position: absolute; inset: 0; }
     #cd-window { position: absolute; left: 60px; top: 118px; width: 1800px; height: 822px; background: #fff; border: 3px solid #1d3c78; overflow: hidden; }
-    #cd-strip { position: absolute; left: 0; top: 0; width: 2646px; height: 837px; }
-    #cd-strip img { display: block; width: 2646px; height: 837px; }
+    #cd-strip { position: absolute; left: 0; top: 0; width: 2482px; height: 818px; }
+    #cd-strip img { display: block; width: 2482px; height: 818px; }
     .line { position: absolute; left: 60px; top: 958px; width: 1800px; font-family: "Barlow Condensed"; font-weight: 700; text-transform: uppercase; color: #1d3c78; font-size: 66px; line-height: 1; letter-spacing: .01em; }
     .w { display: inline-block; }
   </style>
@@ -32,7 +32,7 @@
     // the cards populate left to right, then the camera pans along the row
     tl.fromTo("#cd-img", { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 1.2, ease: "power2.out" }, 0.1);
     words("#cd-cap1", 0.4);
-    tl.fromTo("#cd-strip", { x: 0 }, { x: -846, duration: 1.1, ease: "power2.inOut" }, 2.9);
+    tl.fromTo("#cd-strip", { x: 0 }, { x: -682, duration: 1.1, ease: "power2.inOut" }, 2.9);
     out("#cd-cap1", 3.05);
     words("#cd-cap2", 3.35);
     window.__timelines["cards"] = tl;

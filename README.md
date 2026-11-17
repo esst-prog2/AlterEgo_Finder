@@ -33,7 +33,7 @@ in between    detect + align face -> extract a fixed-length embedding vector ->
 
 ### Final demo version
 
-- Local web UI (Streamlit, `app.py`) over the same pipeline as the CLI, served on localhost only: drag-and-drop photo upload, a dataset dropdown over the folders under `data/`, one range slider for the two thresholds (preset to the calibrated values, so the low boundary cannot be dragged above the high one), the query's aligned face crop, the top 10 candidates as cards with score and label, a similarity target (each face at exactly one minus its score from the query, with the two threshold rings; direction means nothing), and the `summary.html` report previewed and downloadable. The CLI keeps working as before.
+- Local web UI (Streamlit, `app.py`) over the same pipeline as the CLI, served on localhost only: drag-and-drop photo upload, a dataset dropdown over the folders under `data/` (readable names, the public-figure pool first), a verdict line that states the answer, the dataset's calibrated thresholds (overriding them is a CLI option: `--threshold-low/--threshold-high`), the query's aligned face crop, the top 10 candidates as cards with score and label, a similarity target (each face at exactly one minus its score from the query, with the two threshold rings; direction means nothing), and the `summary.html` report previewed and downloadable. The CLI keeps working as before.
 
 ### Not this term
 
@@ -49,7 +49,7 @@ in between    detect + align face -> extract a fixed-length embedding vector ->
 - Given a query face whose closest match in the dataset scores below the calibrated low threshold, the report explicitly flags the outcome as `NO_MATCH` rather than presenting a low-confidence candidate as a match.
 - Given the same photo, dataset and thresholds, the web UI shows the same top 10 candidates and scores, in the same order, as `match.py` prints, with each label as its plain-language name (*Same person* for `HIGH_CONFIDENCE`, *Alter Ego* for `LOW_CONFIDENCE`, *Not You* for `NO_MATCH`); the technical names do not appear on the page.
 - Given an image with no detectable face, the web UI shows "No face detected" and no candidates or report.
-- Given a match, the web UI's similarity target places every indexed face at exactly one minus its similarity score from the centre, with rings at one minus each threshold that move with the slider, so the faces inside the inner ring are exactly the `HIGH_CONFIDENCE` ones.
+- Given a match, the web UI's similarity target places every indexed face at exactly one minus its similarity score from the centre, with rings at one minus each of the dataset's calibrated thresholds, so the faces inside the inner ring are exactly the `HIGH_CONFIDENCE` ones.
 - While the web UI runs, it listens on `127.0.0.1:8501` only (not reachable from other devices), with Streamlit's usage statistics turned off.
 
 To run it yourself, see section 6.

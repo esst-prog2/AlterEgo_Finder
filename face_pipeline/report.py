@@ -35,6 +35,14 @@ _FONTS = (("Barlow", 400, "barlow-latin-400-normal.woff2"),
           ("Barlow Condensed", 700, "barlow-condensed-latin-700-normal.woff2"))
 
 
+# The plain name first, the technical label for developers in parentheses.
+_LABEL_TEXT = {
+    "HIGH_CONFIDENCE": "Same person (HIGH_CONFIDENCE)",
+    "LOW_CONFIDENCE": "Alter Ego (LOW_CONFIDENCE)",
+    "NO_MATCH": "Not You (NO_MATCH)",
+}
+
+
 def _font_faces() -> str:
     faces = []
     for family, weight, filename in _FONTS:
@@ -78,7 +86,7 @@ def _candidate_card(entry: IndexEntry, score: float, label: str, credit: Optiona
     color = _LABEL_COLORS.get(label, "#8c959f")
     # Person names are dataset folder names, i.e. untrusted input.
     person = html.escape(entry.person)
-    label = html.escape(label)
+    label = html.escape(_LABEL_TEXT.get(label, label))
     return f"""    <div class="candidate">
       <img src="{data_uri}" alt="{person}">
       <div class="candidate-info">
