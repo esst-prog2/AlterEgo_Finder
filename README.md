@@ -1,5 +1,7 @@
 # AlterEgo Finder
 
+**Project page: [esst-prog2.github.io/AlterEgo_Finder](https://esst-prog2.github.io/AlterEgo_Finder/)**: what it does, who it is for, and how to try it.
+
 ## 1. The demo
 
 I run `streamlit run app.py`, open `http://localhost:8501`, pick the `wikidata` dataset (500 well-known people, one licensed Wikimedia Commons photo each) and drop `data/my_photo/PK.jpg` on the page, which never leaves my machine. The page shows the ten closest public figures as cards with scores and plain labels, next to a similarity target with me at the centre and every face at a distance of exactly one minus its score. The top card is Psy at 0.2702, labelled *Alter Ego*, and nobody reaches the inner *Same person* ring at 0.3706. I switch the dropdown to `wikidata_plus_me`, which adds a second photo of me from another day, and `Me_PK` jumps to first at 0.4322, labelled *Same person*, the one face inside that ring. It is one self-match, at a threshold about 1 in 100 people absent from the dataset would still reach: evidence that the labels mean something, not proof of identity. Finally I drop `data/demo/no_face.jpg`, and the page shows "No face detected" instead of cards.
