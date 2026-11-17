@@ -40,3 +40,7 @@ photo_face_problem/
 # a tool, not part of the program, so each person installs it themselves.
 .claude/skills/impeccable/
 .claude/agents/impeccable-*.md
+
+# HyperFrames: rendered videos and working files (the chosen video is copied into docs/)
+video/*/renders/
+video/*/.hyperframes/

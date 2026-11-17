@@ -1,0 +1,32 @@
+<template>
+  <style>
+    @font-face { font-family: "Barlow Condensed"; font-weight: 700; src: url("assets/fonts/barlow-condensed-latin-700-normal.woff2") format("woff2"); }
+    #root { position: absolute; inset: 0; background-color: #f4f7fb;
+      background-image: linear-gradient(rgba(29,60,120,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(29,60,120,.09) 1px, transparent 1px);
+      background-size: 40px 40px; overflow: hidden; }
+    .layer { position: absolute; inset: 0; }
+    #lc-window { position: absolute; left: 60px; top: 60px; width: 1800px; height: 560px; background: #fff; border: 3px solid #1d3c78; overflow: hidden; }
+    #lc-cam { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
+    #lc-cam img { display: block; width: 1920px; height: 1080px; }
+    .line { position: absolute; left: 60px; top: 700px; width: 1800px; font-family: "Barlow Condensed"; font-weight: 700; text-transform: uppercase; color: #1d3c78; font-size: 110px; line-height: 1; letter-spacing: .01em; }
+    .w { display: inline-block; }
+  </style>
+  <div id="root" data-composition-id="local" data-width="1920" data-height="1080">
+    <div id="lc-clip" class="clip layer" data-start="0" data-duration="3.5">
+      <div id="lc-window">
+        <div id="lc-cam" data-layout-allow-overflow><img src="assets/app-result.jpg" alt="The app's own line: Runs on this machine only. Your photo is never uploaded anywhere." /></div>
+      </div>
+    </div>
+    <div id="lc-cap" class="line clip" data-start="0" data-duration="3.5">
+      <span class="w">Nothing</span> <span class="w">leaves</span> <span class="w">your</span> <span class="w">computer.</span>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    // camera settles on the app's header: title and "Runs on this machine only..." (window-local coords)
+    tl.fromTo("#lc-cam", { x: -400, y: -120, scale: 2.2 }, { x: -943, y: -394, scale: 3.2, duration: 1.0, ease: "power2.inOut" }, 0);
+    tl.fromTo("#lc-cap .w", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.13, stagger: 0.067, ease: "power4.out" }, 0.7);
+    tl.to("#lc-cap .w", { opacity: 0, filter: "blur(8px)", duration: 0.18, stagger: 0.03, ease: "power3.in" }, 3.2);
+    window.__timelines["local"] = tl;
+  </script>
+</template>

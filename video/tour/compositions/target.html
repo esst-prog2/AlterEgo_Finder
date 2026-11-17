@@ -1,0 +1,49 @@
+<template>
+  <style>
+    @font-face { font-family: "Barlow Condensed"; font-weight: 700; src: url("assets/fonts/barlow-condensed-latin-700-normal.woff2") format("woff2"); }
+    #root { position: absolute; inset: 0; background-color: #f4f7fb;
+      background-image: linear-gradient(rgba(29,60,120,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(29,60,120,.09) 1px, transparent 1px);
+      background-size: 40px 40px; overflow: hidden; }
+    .layer { position: absolute; inset: 0; }
+    #tg-cam { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; background: #fff; outline: 3px solid #1d3c78; }
+    #tg-cam img { display: block; width: 1920px; height: 1080px; }
+    #tg-ring { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+    #tg-panel { position: absolute; left: 60px; top: 330px; width: 660px; height: 300px; background: #f4f7fb; border: 3px solid #1d3c78; padding: 36px 40px; }
+    .line { position: absolute; left: 40px; top: 36px; width: 580px; font-family: "Barlow Condensed"; font-weight: 700; text-transform: uppercase; color: #1d3c78; font-size: 72px; line-height: 1; letter-spacing: .01em; }
+    .w { display: inline-block; }
+    .gold { color: #b8901c; }
+  </style>
+  <div id="root" data-composition-id="target" data-width="1920" data-height="1080">
+    <div id="tg-cam-clip" class="clip layer" data-start="0" data-duration="7">
+      <div id="tg-cam" data-layout-allow-overflow><img src="assets/app-result.jpg" alt="AlterEgo Finder's similarity target for Marie Curie" /></div>
+      <svg id="tg-ring" viewBox="0 0 1920 1080" data-layout-ignore>
+        <circle id="tg-circle" cx="1300" cy="307" r="44" fill="none" stroke="#1d3c78" stroke-width="5" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" />
+      </svg>
+    </div>
+    <div id="tg-panel-clip" class="clip layer" data-start="0" data-duration="7">
+      <div id="tg-panel">
+        <div id="tg-cap1" class="line">
+          <span class="w">Closest:</span> <span class="w">Marco</span> <span class="w">van</span> <span class="w">Basten,</span> <span class="w">0.2097</span>
+        </div>
+        <div id="tg-cap2" class="line">
+          <span class="w">Gold</span> <span class="w">means</span> <span class="w">Alter</span> <span class="w">Ego:</span> <span class="w">close,</span> <span class="w">but</span> <span class="w">not</span> <span class="w">her.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const words = (sel, at) => tl.fromTo(sel + " .w", { opacity: 0, filter: "blur(6px)" },
+      { opacity: 1, filter: "blur(0px)", duration: 0.13, stagger: 0.067, ease: "power4.out" }, at);
+    const out = (sel, at) => tl.to(sel + " .w", { opacity: 0, filter: "blur(8px)", duration: 0.18, stagger: 0.03, ease: "power3.in" }, at);
+    // camera: from the whole app (where the last scene left it) into the target at 2.4x
+    tl.fromTo("#tg-cam", { x: 493, y: 154, scale: 0.7167 }, { x: -1863, y: -792, scale: 2.4, duration: 1.1, ease: "power2.inOut" }, 0.1);
+    tl.fromTo("#tg-panel", { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.5, ease: "expo.out" }, 0.9);
+    tl.set("#tg-cap1 .w, #tg-cap2 .w", { opacity: 0 }, 0);
+    words("#tg-cap1", 1.15);
+    tl.to("#tg-circle", { strokeDashoffset: 0, duration: 0.5, ease: "power2.out" }, 1.5);
+    out("#tg-cap1", 3.75);
+    words("#tg-cap2", 4.05);
+    window.__timelines["target"] = tl;
+  </script>
+</template>

@@ -1,0 +1,55 @@
+<template>
+  <style>
+    @font-face { font-family: "Barlow Condensed"; font-weight: 700; src: url("assets/fonts/barlow-condensed-latin-700-normal.woff2") format("woff2"); }
+    @font-face { font-family: "Barlow"; font-weight: 500; src: url("assets/fonts/barlow-latin-500-normal.woff2") format("woff2"); }
+    #root { position: absolute; inset: 0; background-color: #f4f7fb;
+      background-image: linear-gradient(rgba(29,60,120,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(29,60,120,.09) 1px, transparent 1px);
+      background-size: 40px 40px; overflow: hidden; }
+    .layer { position: absolute; inset: 0; }
+    .line { position: absolute; left: 160px; font-family: "Barlow Condensed"; font-weight: 700; text-transform: uppercase; color: #1d3c78; line-height: 1; letter-spacing: .01em; }
+    .w { display: inline-block; }
+    #f-l1 { top: 150px; font-size: 84px; width: 1600px; }
+    #f-l2 { top: 880px; font-size: 60px; color: #1f2328; width: 1600px; }
+    svg { position: absolute; inset: 0; }
+    .tick text { font: 500 34px "Barlow"; fill: #46505d; }
+    .zl { font: 700 40px "Barlow Condensed"; text-transform: uppercase; letter-spacing: .02em; fill: #1f2328; }
+    #f-source { position: absolute; left: 160px; top: 980px; font: 500 28px "Barlow"; color: #46505d; }
+  </style>
+  <div id="root" data-composition-id="fix" data-width="1920" data-height="1080">
+    <div id="f-ruler" class="clip layer" data-start="0" data-duration="6.5">
+      <svg viewBox="0 0 1920 1080">
+        <g id="f-zones">
+          <rect x="160" y="560" width="596" height="140" fill="rgba(140,149,159,0.16)" />
+          <rect x="756" y="560" width="590" height="140" fill="rgba(212,167,44,0.24)" />
+          <rect x="1346" y="560" width="414" height="140" fill="rgba(26,127,55,0.13)" />
+          <circle cx="190" cy="530" r="12" fill="#8c959f" /><text class="zl" x="212" y="544">Not You</text>
+          <circle cx="786" cy="530" r="12" fill="#d4a72c" /><text class="zl" x="808" y="544">Alter Ego</text>
+          <circle cx="1376" cy="530" r="12" fill="#1a7f37" /><text class="zl" x="1398" y="544">Same person</text>
+          <rect x="752" y="560" width="8" height="180" fill="#1d3c78" /><text x="756" y="800" text-anchor="middle" style="font: 700 44px 'Barlow Condensed'; fill: #1d3c78">0.1864</text>
+          <rect x="1342" y="560" width="8" height="180" fill="#1d3c78" /><text x="1346" y="800" text-anchor="middle" style="font: 700 44px 'Barlow Condensed'; fill: #1d3c78">0.3706</text>
+        </g>
+        <line x1="160" y1="700" x2="1760" y2="700" stroke="#1d3c78" stroke-width="4" />
+        <g class="tick"><line x1="160" y1="700" x2="160" y2="722" stroke="#1d3c78" stroke-width="3"/><text x="160" y="764" text-anchor="middle">0</text></g>
+        <g class="tick"><line x1="1760" y1="700" x2="1760" y2="722" stroke="#1d3c78" stroke-width="3"/><text x="1760" y="764" text-anchor="middle">0.5</text></g>
+        <circle id="f-dot" cx="960" cy="700" r="22" fill="#1d3c78" />
+        <text x="960" y="650" text-anchor="middle" style="font: 700 48px 'Barlow Condensed'; fill: #1d3c78">0.25</text>
+      </svg>
+    </div>
+    <div id="f-l1" class="line clip" data-start="0" data-duration="6.5">
+      <span class="w">So</span> <span class="w">AlterEgo</span> <span class="w">Finder</span> <span class="w">sets</span> <span class="w">its</span> <span class="w">bars</span> <span class="w">for</span> <span class="w">its</span> <span class="w">dataset's</span> <span class="w">size.</span>
+    </div>
+    <div id="f-l2" class="line clip" data-start="2.6" data-duration="3.9">
+      <span class="w">567</span> <span class="w">strangers:</span> <span class="w">0.9%</span> <span class="w">reach</span> <span class="w">Same</span> <span class="w">person,</span> <span class="w">97%</span> <span class="w">land</span> <span class="w">in</span> <span class="w">Alter</span> <span class="w">Ego.</span>
+    </div>
+    <div id="f-source" class="clip" data-start="2.6" data-duration="3.9">Measured on the pool of 500 public figures (2 November 2026).</div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#f-l1 .w", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.13, stagger: 0.067, ease: "power4.out" }, 0.1);
+    tl.fromTo("#f-zones > *", { opacity: 0 }, { opacity: 1, duration: 0.35, stagger: 0.05, ease: "power2.inOut" }, 0.5);
+    tl.to("#f-dot", { attr: { fill: "#d4a72c" }, duration: 0.3, ease: "power2.inOut" }, 1.6);
+    tl.fromTo("#f-l2 .w", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.13, stagger: 0.067, ease: "power4.out" }, 2.65);
+    tl.fromTo("#f-source", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 2.9);
+    window.__timelines["fix"] = tl;
+  </script>
+</template>

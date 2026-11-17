@@ -1,0 +1,31 @@
+<template>
+  <style>
+    @font-face { font-family: "Barlow Condensed"; font-weight: 700; src: url("assets/fonts/barlow-condensed-latin-700-normal.woff2") format("woff2"); }
+    @font-face { font-family: "Barlow"; font-weight: 500; src: url("assets/fonts/barlow-latin-500-normal.woff2") format("woff2"); }
+    #root { position: absolute; inset: 0; background-color: #f4f7fb;
+      background-image: linear-gradient(rgba(29,60,120,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(29,60,120,.09) 1px, transparent 1px);
+      background-size: 40px 40px; overflow: hidden; }
+    .layer { position: absolute; inset: 0; }
+    #e-line { position: absolute; left: 160px; top: 220px; width: 1600px; font-family: "Barlow Condensed"; font-weight: 700; text-transform: uppercase; color: #1d3c78; font-size: 120px; line-height: 1; }
+    #e-line .w { display: inline-block; }
+    #e-rule { position: absolute; left: 160px; top: 640px; width: 1600px; height: 4px; background: #1d3c78; transform-origin: 0 50%; }
+    #e-mark { position: absolute; left: 160px; top: 680px; font: 700 84px "Barlow Condensed"; text-transform: uppercase; color: #1f2328; }
+    #e-url { position: absolute; left: 160px; top: 790px; font: 500 46px "Barlow"; color: #1f2328; }
+  </style>
+  <div id="root" data-composition-id="end" data-width="1920" data-height="1080">
+    <div id="e-clip" class="clip layer" data-start="0" data-duration="5">
+      <div id="e-line"><span class="w">A</span> <span class="w">score</span> <span class="w">means</span> <span class="w">little</span> <span class="w">without</span> <span class="w">the</span> <span class="w">size</span> <span class="w">of</span> <span class="w">the</span> <span class="w">crowd.</span></div>
+      <div id="e-rule"></div>
+      <div id="e-mark">AlterEgo Finder</div>
+      <div id="e-url">esst-prog2.github.io/AlterEgo_Finder</div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#e-line .w", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.13, stagger: 0.067, ease: "power4.out" }, 0.1);
+    tl.fromTo("#e-rule", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "expo.out" }, 1.0);
+    tl.fromTo("#e-mark", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power4.out" }, 1.2);
+    tl.fromTo("#e-url", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power4.out" }, 1.35);
+    window.__timelines["end"] = tl;
+  </script>
+</template>

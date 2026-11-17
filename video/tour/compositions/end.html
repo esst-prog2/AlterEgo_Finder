@@ -1,0 +1,35 @@
+<template>
+  <style>
+    @font-face { font-family: "Barlow Condensed"; font-weight: 700; src: url("assets/fonts/barlow-condensed-latin-700-normal.woff2") format("woff2"); }
+    @font-face { font-family: "Barlow"; font-weight: 500; src: url("assets/fonts/barlow-latin-500-normal.woff2") format("woff2"); }
+    @font-face { font-family: "Barlow"; font-weight: 600; src: url("assets/fonts/barlow-latin-600-normal.woff2") format("woff2"); }
+    #root { position: absolute; inset: 0; background-color: #f4f7fb;
+      background-image: linear-gradient(rgba(29,60,120,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(29,60,120,.09) 1px, transparent 1px);
+      background-size: 40px 40px; overflow: hidden; }
+    .layer { position: absolute; inset: 0; }
+    #en-mark { position: absolute; left: 150px; top: 250px; font-family: "Barlow Condensed"; font-weight: 700; font-size: 190px; line-height: .9; text-transform: uppercase; color: #1f2328; letter-spacing: -.005em; }
+    #en-mark span { display: inline-block; }
+    #en-rule { position: absolute; left: 150px; top: 540px; width: 1620px; height: 4px; background: #1d3c78; transform-origin: 0 50%; }
+    #en-act { position: absolute; left: 150px; top: 580px; font: 600 54px/1.2 "Barlow"; color: #1d3c78; }
+    #en-url { position: absolute; left: 150px; top: 660px; font: 500 46px/1.2 "Barlow"; color: #1f2328; }
+    #en-credit { position: absolute; left: 150px; top: 900px; width: 1620px; font: 500 28px/1.35 "Barlow"; color: #46505d; }
+  </style>
+  <div id="root" data-composition-id="end" data-width="1920" data-height="1080">
+    <div id="en-clip" class="clip layer" data-start="0" data-duration="5">
+      <div id="en-mark"><span>A</span><span>l</span><span>t</span><span>e</span><span>r</span><span>E</span><span>g</span><span>o</span>&nbsp;<span>F</span><span>i</span><span>n</span><span>d</span><span>e</span><span>r</span></div>
+      <div id="en-rule"></div>
+      <div id="en-act">Run it at home: the commands are on this page.</div>
+      <div id="en-url">esst-prog2.github.io/AlterEgo_Finder</div>
+      <div id="en-credit">Photos: Curie by Henri Manuel, public domain; the others from Wikimedia Commons, credited in the app.</div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#en-mark span", { opacity: 0.3, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.12, stagger: 0.03, ease: "power4.out" }, 0);
+    tl.fromTo("#en-rule", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "expo.out" }, 0.35);
+    tl.fromTo("#en-act", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power4.out" }, 0.55);
+    tl.fromTo("#en-url", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power4.out" }, 0.7);
+    tl.fromTo("#en-credit", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 0.85);
+    window.__timelines["end"] = tl;
+  </script>
+</template>
