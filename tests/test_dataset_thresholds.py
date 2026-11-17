@@ -65,8 +65,14 @@ def test_page_uses_the_datasets_own_thresholds(tmp_path, monkeypatch):
 
     at = AppTest.from_file(str(REPO_ROOT / "app.py"), default_timeout=120)
     at.run()
+    query = FIXTURES / "obama_query.jpg"
+    at.file_uploader[0].upload("query.jpg", query.read_bytes(), "image/jpeg").run()
 
-    assert at.slider(key="thresholds::dataset").value == (0.3, 0.6)
+    # The page has no threshold control (app-critique-fixes): the dataset's own
+    # thresholds show in the target's rings and the zones line.
+    spec_text = at.get("vega_lite_chart")[0].proto.spec
+    assert "high 0.6000" in spec_text and "low 0.3000" in spec_text
+    assert any("0.6000 or more" in c.value for c in at.caption)
 
 
 @pytest.mark.parametrize("a, b", [

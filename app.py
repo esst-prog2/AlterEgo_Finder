@@ -11,6 +11,7 @@ is served on localhost only):
 from __future__ import annotations
 
 import base64
+import html
 import os
 from pathlib import Path
 from typing import List, Optional
@@ -55,6 +56,49 @@ _LABEL_COLORS = {HIGH_CONFIDENCE: "green", LOW_CONFIDENCE: "orange"}  # NO_MATCH
 # developers: they stay in the CLI, the HTML report and the specs.
 PLAIN_NAMES = {HIGH_CONFIDENCE: "Same person", LOW_CONFIDENCE: "Alter Ego", NO_MATCH: "Not You"}
 THUMBNAIL_PX = 128  # longest side of the tooltip face thumbnails (top N only)
+CARD_PHOTO_PX = 320  # side of the square card photos
+# Readable dataset names; the folder name stays visible because README section 1
+# names folders. Any other folder is shown as it is.
+DATASET_LABELS = {"wikidata": "Public figures", "celebrities": "LFW faces"}
+DEFAULT_DATASET = "wikidata"
+_LABEL_HEX = {HIGH_CONFIDENCE: "#1a7f37", LOW_CONFIDENCE: "#d4a72c", NO_MATCH: "#8c959f"}
+# DESIGN.md beyond what Streamlit's theme can set: the paper's grid, navy frames,
+# capitals in the display face, ink score figures, readable captions, a target
+# that shrinks with its column. Selectors are Streamlit's test ids and our own
+# classes only (tests/test_app.py checks the list); keyed containers carry the
+# class st-key-<key>.
+STYLESHEET = """<style>
+[data-testid="stApp"] {
+  background-image: linear-gradient(rgba(29, 60, 120, 0.09) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(29, 60, 120, 0.09) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+[data-testid="stHeading"] h1, [data-testid="stHeading"] h2 { text-transform: uppercase; letter-spacing: 0.005em; }
+[data-testid="stCaptionContainer"] { color: #46505d; opacity: 1; }
+[data-testid="stFileUploaderDropzone"] { border: 2px solid #1d3c78; border-radius: 0; }
+[data-testid="stAlertContentInfo"], [data-testid="stAlertContainer"] { color: #1d3c78; }
+[class*="st-key-ae-card-"] {
+  border: 2px solid #1d3c78 !important; border-radius: 0 !important; background: #f8fbfd;
+  box-shadow: 0 1px 0 #1d3c78, 0 10px 28px -18px rgba(29, 60, 120, 0.45);
+}
+[class*="st-key-ae-name-"] [data-testid="stText"] {
+  font-family: "Barlow Condensed", "Arial Narrow", sans-serif; font-weight: 700;
+  font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.02em; color: #1f2328;
+}
+[class*="st-key-ae-card-"] code {
+  font-family: "Barlow Condensed", "Arial Narrow", sans-serif; font-weight: 700; font-size: 1.35rem;
+  color: #1f2328; background: transparent; padding: 0; font-variant-numeric: tabular-nums;
+}
+[data-testid="stVegaLiteChart"] canvas, [data-testid="stVegaLiteChart"] svg { max-width: 100%; height: auto; }
+.ae-photo { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; }
+.ae-verdict { margin: 0.2rem 0 0; padding: 0.7rem 0.9rem; border: 2px solid #1d3c78; background: #f8fbfd;
+  font-size: 1.15rem; line-height: 1.5; color: #1f2328; }
+.ae-verdict .ae-name, .ae-verdict .ae-score { font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
+  font-weight: 700; font-size: 1.45rem; text-transform: uppercase; font-variant-numeric: tabular-nums; }
+.ae-chip { display: inline-flex; align-items: center; gap: 0.4em; font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
+  font-weight: 700; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; }
+.ae-dot { display: inline-block; width: 0.8em; height: 0.8em; border-radius: 50%; border: 1.5px solid #1f2328; }
+</style>"""
 # Wider than tall, so names beside the outer dots fit; the x range is scaled
 # by the same ratio, so one unit is as many pixels across as up and the rings
 # stay round.
@@ -110,24 +154,56 @@ def _embed_upload(image_bytes: bytes) -> Optional[QueryFace]:
         return None
 
 
-def _threshold_slider(dataset: Path, low: float, high: float):
-    selected = st.sidebar.slider(
-        "Thresholds (low, high)",
-        min_value=min(0.0, low),
-        max_value=max(1.0, high),
-        value=(low, high),
-        step=0.0001,
-        format="%.4f",
-        # One key per dataset: switching dataset starts from its calibrated values.
-        key=f"thresholds::{dataset.name}",
-        help=(f"Below low: {PLAIN_NAMES[NO_MATCH]}. From low: {PLAIN_NAMES[LOW_CONFIDENCE]}. "
-              f"From high: {PLAIN_NAMES[HIGH_CONFIDENCE]}."),
-    )
-    if (round(selected[0], 4), round(selected[1], 4)) != (round(low, 4), round(high, 4)):
-        st.sidebar.warning(
-            f"Thresholds overridden: the calibrated values are low {low:.4f}, high {high:.4f}."
-        )
-    return selected
+def _dataset_label(path: Path) -> str:
+    """A readable name that keeps the folder name visible, e.g. "Public figures (wikidata)"."""
+    readable = DATASET_LABELS.get(path.name)
+    return f"{readable} ({path.name})" if readable else path.name
+
+
+def _default_dataset_index(datasets: List[Path]) -> int:
+    names = [p.name for p in datasets]
+    return names.index(DEFAULT_DATASET) if DEFAULT_DATASET in names else 0
+
+
+def _verdict(labeled):
+    """(kind, person, score) of the answer in one line.
+
+    kind is "same" (the top face is Same person), "alter" (nobody is the same
+    person; the closest Alter Ego) or "none" (nobody is close).
+    """
+    entry, score, label = labeled[0]
+    if label == HIGH_CONFIDENCE:
+        return "same", entry.person, score
+    if label == LOW_CONFIDENCE:
+        return "alter", entry.person, score
+    return "none", entry.person, score
+
+
+def _chip(label: str) -> str:
+    return (f'<span class="ae-chip"><i class="ae-dot" style="background: {_LABEL_HEX[label]}"></i>'
+            f'{PLAIN_NAMES[label]}</span>')
+
+
+def _verdict_html(labeled) -> str:
+    """The verdict line. Person names are dataset folder names, i.e. untrusted: escaped."""
+    kind, person, score = _verdict(labeled)
+    name = f'<span class="ae-name">{html.escape(person)}</span>'
+    figure = f'<span class="ae-score">{score:.4f}</span>'
+    if kind == "same":
+        text = f"Closest: {name} &middot; {figure} &middot; {_chip(HIGH_CONFIDENCE)}"
+    elif kind == "alter":
+        text = (f"Nobody here is the same person. Closest Alter Ego: {name} &middot; {figure} "
+                f"&middot; {_chip(LOW_CONFIDENCE)}")
+    else:
+        text = (f"Nobody in this dataset is close. {_chip(NO_MATCH)} "
+                f"(the closest, {name}, scores {figure})")
+    return f'<p class="ae-verdict">{text}</p>'
+
+
+def _zones_line(low: float, high: float) -> str:
+    return (f"{PLAIN_NAMES[HIGH_CONFIDENCE]}: {high:.4f} or more. "
+            f"{PLAIN_NAMES[LOW_CONFIDENCE]}: from {low:.4f}, one of the closest public figures, but not you. "
+            f"{PLAIN_NAMES[NO_MATCH]}: below {low:.4f}.")
 
 
 def _square_crop(image: np.ndarray) -> np.ndarray:
@@ -144,18 +220,35 @@ def _short_author(credit: dict) -> str:
     return author if len(author) <= CARD_AUTHOR_CHARS else author[:CARD_AUTHOR_CHARS - 3].rstrip() + "..."
 
 
+@st.cache_data(show_spinner=False, max_entries=1024)
+def _card_photo(path: str) -> str:
+    """The square card photo of the image at ``path`` as a JPEG data URI, or "" if unreadable."""
+    image = read_image(path)
+    if image is None:
+        return ""
+    square = cv2.resize(_square_crop(image), (CARD_PHOTO_PX, CARD_PHOTO_PX), interpolation=cv2.INTER_AREA)
+    ok, buffer = cv2.imencode(".jpg", square, [cv2.IMWRITE_JPEG_QUALITY, 85])
+    return "data:image/jpeg;base64," + base64.b64encode(buffer).decode("ascii") if ok else ""
+
+
 def _show_cards(labeled, top: int, credits: Optional[dict] = None) -> None:
     shown = labeled[:top]
     for row_start in range(0, len(shown), CARDS_PER_ROW):
         columns = st.columns(CARDS_PER_ROW)
         for offset, (entry, score, label) in enumerate(shown[row_start: row_start + CARDS_PER_ROW]):
-            with columns[offset]:
-                image = read_image(entry.filepath)
-                if image is not None:
-                    st.image(_square_crop(image), channels="BGR", width="stretch")
+            rank = row_start + offset + 1
+            # A keyed container carries the class st-key-<key>, which the
+            # stylesheet frames in navy.
+            with columns[offset], st.container(border=True, key=f"ae-card-{rank}"):
+                photo = _card_photo(str(entry.filepath))
+                if photo:
+                    # st.image has no alt text; the name is escaped (untrusted).
+                    st.html(f'<img class="ae-photo" src="{photo}" '
+                            f'alt="Photo of {html.escape(entry.person, quote=True)}">')
                 # Person names are dataset folder names, i.e. untrusted input:
                 # st.text shows them literally, with no Markdown or HTML.
-                st.text(f"#{row_start + offset + 1} {entry.person}")
+                with st.container(key=f"ae-name-{rank}"):
+                    st.text(f"#{rank} {entry.person}")
                 color = _LABEL_COLORS.get(label, "gray")
                 # The label word stays ink on a wash of its label colour: gold
                 # text on the paper would be too faint to read.
@@ -317,13 +410,20 @@ def _target_spec(labeled, top: int, low: float, high: float, theme: Optional[str
                  "fontWeight": "bold", "color": colors["ink"]},
         "encoding": xy,
     })
-    return {"width": TARGET_WIDTH, "height": TARGET_HEIGHT, "layer": layers,
+    shown = [p for p in points if p.named]
+    counts = {label: sum(p.label == label for p in shown) for label in PLAIN_NAMES}
+    description = (f"Similarity target: {len(shown)} faces shown; "
+                   f"{counts[HIGH_CONFIDENCE]} inside the {PLAIN_NAMES[HIGH_CONFIDENCE]} ring, "
+                   f"{counts[LOW_CONFIDENCE]} between the rings ({PLAIN_NAMES[LOW_CONFIDENCE]}), "
+                   f"{counts[NO_MATCH]} outside ({PLAIN_NAMES[NO_MATCH]}).")
+    return {"width": TARGET_WIDTH, "height": TARGET_HEIGHT, "layer": layers, "description": description,
             "config": {"view": {"stroke": None}}}
 
 
 def main() -> None:
     st.set_page_config(page_title="AlterEgo Finder", layout="wide", page_icon=str(LOGO_MARK))
     st.logo(str(LOGO_LOCKUP), size="large", icon_image=str(LOGO_MARK))
+    st.html(STYLESHEET)
     st.title("AlterEgo Finder")
     st.caption("Runs on this machine only. Your photo is never uploaded anywhere.")
 
@@ -338,7 +438,8 @@ def main() -> None:
         return
 
     dataset = st.sidebar.selectbox(
-        "Dataset", datasets, format_func=lambda p: p.name, key="dataset"
+        "Dataset", datasets, index=_default_dataset_index(datasets), format_func=_dataset_label,
+        key="dataset",
     )
     config_path = config_path_for(dataset)
     low, high = load_thresholds(config_path)
@@ -351,7 +452,8 @@ def main() -> None:
     if low > high:
         st.error(f"config.json has threshold_low ({low}) above threshold_high ({high}).")
         return
-    selected_low, selected_high = _threshold_slider(dataset, low, high)
+    # The page always uses the calibrated thresholds; overrides stay in the CLI
+    # (match.py --threshold-low/--threshold-high).
     top = st.sidebar.slider(
         "Candidates shown", min_value=1, max_value=MAX_CANDIDATES, value=REPORT_TOP_K, key="top"
     )
@@ -368,21 +470,29 @@ def main() -> None:
         return
     query = _embed_upload(image_bytes)
     if query is None:
-        st.error("No face detected")
+        st.error(
+            "No face detected. It is usually found when one face looks roughly at the camera and "
+            "fills a good part of the photo: try a sharper, front-facing photo, or crop it closer "
+            "to the face."
+        )
         return
 
     with st.spinner(f"Loading the {dataset.name} index..."):
         index = get_or_build_index(dataset)
-    labeled = label_results(rank_matches(index, query.embedding), selected_low, selected_high)
+    labeled = label_results(rank_matches(index, query.embedding), low, high)
     credits = load_attribution(dataset)
 
-    photo_col, crop_col, target_col = st.columns([1.6, 0.9, 3.5])
-    photo_col.image(image, channels="BGR", caption="Your photo", width="stretch")
-    crop_col.image(query.aligned_face, channels="BGR", caption="Face used for matching")
+    # The answer first, in one sentence, then the evidence.
+    st.html(_verdict_html(labeled))
+    st.caption(_zones_line(low, high))
+
+    photo_col, target_col = st.columns([1, 3.4])
+    with photo_col:
+        st.image(image, channels="BGR", caption="Your photo", width=160)
+        st.image(query.aligned_face, channels="BGR", caption="Face used for matching", width=112)
     with target_col:
         st.vega_lite_chart(
-            spec=_target_spec(labeled, top, selected_low, selected_high,
-                              theme=st.context.theme.type, credits=credits),
+            spec=_target_spec(labeled, top, low, high, theme=st.context.theme.type, credits=credits),
             width="content",
         )
         st.caption(
@@ -390,7 +500,7 @@ def main() -> None:
             "(exact); direction means nothing. Hover a named face to see it."
         )
 
-    st.subheader(f"Top {min(top, len(labeled))} of {len(labeled)} faces in {dataset.name}")
+    st.header(f"Top {min(top, len(labeled))} of {len(labeled)} faces in {_dataset_label(dataset)}")
     _show_cards(labeled, top, credits)
 
     report_path = data_dir / "results" / "summary.html"

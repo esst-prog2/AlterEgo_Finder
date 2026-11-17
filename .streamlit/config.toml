@@ -10,6 +10,10 @@ enableStaticServing = true
 [browser]
 gatherUsageStats = false
 
+# No Deploy button or developer menu: the page is a local tool, not an app to publish.
+[client]
+toolbarMode = "viewer"
+
 # The shared design system (DESIGN.md, "The Scoresheet"): paper, navy rules,
 # square corners, Barlow, and the three label colours, the same as the promo
 # page, the tour video and the report.
