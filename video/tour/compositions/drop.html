@@ -14,13 +14,14 @@
     #drop-credit { position: absolute; left: 1180px; top: 902px; width: 600px; font: 500 28px/1.3 "Barlow"; color: #46505d; }
     #drop-app { position: absolute; left: 490px; top: 151px; width: 1382px; height: 778px; border: 3px solid #1d3c78; background: #fff; overflow: hidden; }
     #drop-app img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+    #drop-app #drop-result { height: auto; }
     #drop-cap1, #drop-cap2 { left: 90px; top: 360px; width: 360px; font-size: 76px; }
   </style>
   <div id="root" data-composition-id="drop" data-width="1920" data-height="1080">
     <div id="drop-app-clip" class="clip layer" data-start="2.6" data-duration="5.4">
       <div id="drop-app">
         <img id="drop-empty" src="assets/app-empty.jpg" alt="The AlterEgo Finder page, empty, pool of 500 chosen" />
-        <img id="drop-result" src="assets/app-result.jpg" alt="The AlterEgo Finder page with the result for the photo" />
+        <img id="drop-result" src="assets/app-result-tall.jpg" alt="The AlterEgo Finder page with the result for the photo" />
       </div>
     </div>
     <div id="drop-hook" class="line clip" data-start="0" data-duration="3.2">
@@ -55,6 +56,8 @@
     words("#drop-cap1", 3.3);
     // the result replaces the empty page (blur swap on one stage)
     tl.fromTo("#drop-result", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.35, ease: "power2.out" }, 4.9);
+    // the page scrolls down so the first row of result cards shows whole faces
+    tl.fromTo("#drop-result", { y: 0 }, { y: -260, duration: 1.3, ease: "power2.inOut" }, 5.9);
     out("#drop-cap1", 5.25);
     words("#drop-cap2", 5.55);
     window.__timelines["drop"] = tl;
