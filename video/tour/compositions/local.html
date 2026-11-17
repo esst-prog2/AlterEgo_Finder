@@ -5,7 +5,7 @@
       background-image: linear-gradient(rgba(29,60,120,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(29,60,120,.09) 1px, transparent 1px);
       background-size: 40px 40px; overflow: hidden; }
     .layer { position: absolute; inset: 0; }
-    #lc-window { position: absolute; left: 60px; top: 60px; width: 1800px; height: 560px; background: #fff; border: 3px solid #1d3c78; overflow: hidden; }
+    #lc-window { position: absolute; left: 60px; top: 120px; width: 1800px; height: 500px; background: #fff; border: 3px solid #1d3c78; overflow: hidden; }
     #lc-cam { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
     #lc-cam img { display: block; width: 1920px; height: 1080px; }
     .line { position: absolute; left: 60px; top: 680px; width: 1800px; font-family: "Barlow Condensed"; font-weight: 700; text-transform: uppercase; color: #1d3c78; font-size: 96px; line-height: 1; letter-spacing: .01em; }
@@ -24,7 +24,7 @@
   <script>
     const tl = gsap.timeline({ paused: true });
     // camera settles on the app's header: title and "Runs on this machine only..." (window-local coords)
-    tl.fromTo("#lc-cam", { x: -400, y: -120, scale: 2.2 }, { x: -943, y: -394, scale: 3.2, duration: 1.0, ease: "power2.inOut" }, 0);
+    tl.fromTo("#lc-cam", { x: -400, y: -120, scale: 2.2 }, { x: -943, y: -404, scale: 3.2, duration: 1.0, ease: "power2.inOut" }, 0);
     tl.fromTo("#lc-cap .w", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.13, stagger: 0.067, ease: "power4.out" }, 0.7);
     tl.to("#lc-cap .w", { opacity: 0, filter: "blur(8px)", duration: 0.18, stagger: 0.03, ease: "power3.in" }, 3.7);
     window.__timelines["local"] = tl;

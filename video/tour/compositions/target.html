@@ -12,6 +12,10 @@
     .line { position: absolute; left: 40px; top: 36px; width: 580px; font-family: "Barlow Condensed"; font-weight: 700; text-transform: uppercase; color: #1d3c78; font-size: 72px; line-height: 1; letter-spacing: .01em; }
     .w { display: inline-block; }
     .gold { color: #b8901c; }
+    #tg-key { position: absolute; left: 60px; width: 1800px; top: 890px; height: 80px; background: #f4f7fb; border: 3px solid #1d3c78;
+      display: flex; align-items: center; gap: 46px; padding: 0 30px; font: 700 38px "Barlow Condensed"; text-transform: uppercase; color: #1f2328; }
+    #tg-key .k-title { color: #1d3c78; }
+    #tg-key .dot { display: inline-block; width: 22px; height: 22px; border-radius: 50%; margin-right: 10px; vertical-align: -1px; }
   </style>
   <div id="root" data-composition-id="target" data-width="1920" data-height="1080">
     <div id="tg-cam-clip" class="clip layer" data-start="0" data-duration="7">
@@ -20,6 +24,9 @@
         <circle id="tg-circle" cx="1300" cy="449" r="44" fill="none" stroke="#1d3c78" stroke-width="5" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" />
         <circle id="tg-circle2" cx="1442" cy="722" r="44" fill="none" stroke="#1d3c78" stroke-width="5" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" />
       </svg>
+    </div>
+    <div id="tg-key-clip" class="clip layer" data-start="0" data-duration="7">
+      <div id="tg-key"><span class="k-title">Score = how alike, 0 to 1</span><span><i class="dot" style="background:#1a7f37"></i>Same person: 0.37 and up</span><span><i class="dot" style="background:#d4a72c"></i>Alter Ego: 0.19 to 0.37</span><span><i class="dot" style="background:#8c959f"></i>Not you: under 0.19</span></div>
     </div>
     <div id="tg-panel-clip" class="clip layer" data-start="0" data-duration="7">
       <div id="tg-panel">
@@ -41,6 +48,7 @@
     tl.fromTo("#tg-cam", { x: 493, y: 154, scale: 0.7167 }, { x: -1863, y: -792, scale: 2.4, duration: 1.1, ease: "power2.inOut" }, 0.1);
     tl.fromTo("#tg-panel", { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.5, ease: "expo.out" }, 0.9);
     tl.set("#tg-cap1 .w, #tg-cap2 .w", { opacity: 0 }, 0);
+    tl.fromTo("#tg-key", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "expo.out" }, 0.95);
     words("#tg-cap1", 1.15);
     tl.to("#tg-circle", { strokeDashoffset: 0, duration: 0.5, ease: "power2.out" }, 1.5);
     out("#tg-cap1", 3.75);

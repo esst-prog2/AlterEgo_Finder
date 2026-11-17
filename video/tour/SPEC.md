@@ -2,7 +2,8 @@
 
 GOAL:    a viewer who has never heard of the program knows what it does (drop a face, get the closest
          public figures with honest labels) and that it runs on their own computer.
-OUTPUT:  HyperFrames, 1920 x 1080, 30 fps, silent (it plays muted on the promo page).
+OUTPUT:  HyperFrames, 1920 x 1080, 30 fps. Music: "Carefree", Kevin MacLeod (incompetech.com), CC BY 4.0,
+         first 30 s, 0.4 s fade-in, 2.5 s fade-out, -18 LUFS. It starts muted on the page and works without sound.
 TIME:    30 s x 30 fps = 900 frames.
 LOOK:    the promo page's scorecard world. Ground #f4f7fb with a printed grid (40 px, rgba(29,60,120,.09));
          ink #1f2328; rule navy #1d3c78 for every display line and frame. Label colours appear only on
@@ -30,5 +31,10 @@ SHOTS:
 BANNED:  dark void; glow; gradients; glass; everything centred; everything fading in at once;
          text moving while read; three cards in a row as a feature list; a title over a dimmed
          screenshot; invented UI; logo docked in a corner.
+BRAND:   the logo is the app's target in miniature (gold ring, green ring, navy cross, green dot) with
+         "AlterEgo Finder" in Barlow Condensed, top right on every scene, beside the name on the end card.
+         It uses the label colours on purpose: the mark is the target.
+KEY:     during the target scene a key explains the numbers: score = how alike, 0 to 1; Same person
+         0.37 and up; Alter Ego 0.19 to 0.37; Not you under 0.19.
 QA:      t=1.5 (hook readable), 5.0 (photo in the query box), 8.0, 12.5 (target labels readable),
          20.0 (card labels and credits readable), 25.5, 29.0 (address held).
