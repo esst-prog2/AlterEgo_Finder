@@ -39,7 +39,7 @@ body { font-family: var(--body); color: var(--ink); font-variant-numeric: tabula
 h1, h2 { font-family: var(--display); font-weight: 700; text-transform: uppercase; margin: 0; line-height: 0.98; letter-spacing: 0.005em; }
 h1 { font-size: 116px; color: var(--ink); }
 h2 { font-size: 88px; color: var(--navy); max-width: 1500px; }
-p { margin: 0; }
+p { margin: 0; text-wrap: pretty; }
 .big { font-size: 46px; line-height: 1.3; font-weight: 500; }
 .mid { font-size: 36px; line-height: 1.35; }
 .small { font-size: 28px; color: var(--soft); line-height: 1.4; }
@@ -77,10 +77,10 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
 .s2 .target text { font-family: var(--display); font-weight: 700; font-size: 30px; fill: var(--ink); paint-order: stroke; stroke: var(--paper); stroke-width: 7px; stroke-linejoin: round; }
 .s2 .target .sc { fill: var(--navy); }
 .s2 .target .out { fill: var(--soft); }
-.s2 .target .tag text { stroke: none; font-size: 25px; fill: var(--ink); text-transform: uppercase; letter-spacing: 0.03em; }
-.s2 .matches { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 22px; }
+.s2 .mcap { font-size: 26px; color: var(--soft); margin-top: 12px; }
+.s2 .matches { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 8px; }
 .s2 .match { display: flex; align-items: center; gap: 24px; padding: 10px; }
-.s2 .match img { display: block; width: 156px; height: 156px; }
+.s2 .match img { display: block; width: 140px; height: 140px; }
 .s2 .match b { display: block; font-family: var(--display); font-weight: 700; font-size: 42px; text-transform: uppercase; line-height: 1; }
 .s2 .match .sc { display: block; font-family: var(--display); font-weight: 700; font-size: 38px; color: var(--navy); margin: 6px 0 8px; }
 .s2 .match .chip { font-size: 30px; margin-top: 12px; }
@@ -94,7 +94,7 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
 .s3 .step + .step { margin-top: 22px; }
 .s3 .step code { display: block; font-size: 30px; background: var(--paper); border: 2px solid var(--grid-strong); padding: 8px 18px; }
 .s3 .step p { font-size: 32px; margin-top: 10px; line-height: 1.25; }
-.s3 .step .note { font-size: 28px; margin-top: 4px; line-height: 1.3; }
+.s3 .step .note { font-size: 30px; margin-top: 4px; line-height: 1.3; color: var(--ink); }
 .s3 .score { margin-top: 40px; padding: 22px 36px 26px; }
 .s3 .score-title { font-size: 34px; font-weight: 500; }
 .s3 .cells { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 14px; }
@@ -113,7 +113,7 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
 /* 5 */
 .s5 ol { list-style: none; margin: 48px 0 0; padding: 0; display: grid; gap: 22px; counter-reset: n; }
 .s5 li { counter-increment: n; display: grid; grid-template-columns: 110px 1fr; align-items: baseline; padding: 22px 36px; }
-.s5 .dropped { margin-top: 30px; padding: 18px 36px; border: 2px dashed var(--grid-strong); font-size: 32px; line-height: 1.3; color: var(--soft); }
+.s5 .dropped { margin-top: 30px; padding: 18px 36px; border: 2px dashed var(--navy); font-size: 32px; line-height: 1.3; color: var(--ink); }
 .s5 .dropped b { display: inline; font-size: 32px; color: var(--ink); }
 .s5 li::before { content: counter(n); font-family: var(--display); font-weight: 700; font-size: 72px; color: var(--navy); line-height: 0.8; }
 .s5 b { font-family: var(--display); font-weight: 700; font-size: 54px; text-transform: uppercase; display: block; line-height: 1.05; }
@@ -126,7 +126,8 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
 .s6 .lock span { font-family: var(--display); font-weight: 700; font-size: 150px; line-height: 0.88; text-transform: uppercase; }
 .s6 .end { display: grid; grid-template-columns: 1fr 300px; gap: 80px; align-items: center; margin-top: 56px; }
 .s6 .url { font-family: var(--display); font-weight: 700; font-size: 80px; color: var(--navy); line-height: 1; }
-.s6 .recap { font-size: 46px; line-height: 1.3; margin-top: 30px; font-weight: 500; }
+.s6 .recap { font-size: 42px; line-height: 1.3; margin-top: 30px; font-weight: 500; }
+.s6 .src { font-size: 26px; color: var(--soft); margin-top: 8px; }
 .s6 .qr { width: 300px; height: 300px; display: block; background: #fff; border: 3px solid var(--navy); }
 .s6 .qr-cap { font-family: var(--display); font-weight: 700; font-size: 28px; text-transform: uppercase; color: var(--navy); margin-top: 12px; text-align: center; letter-spacing: 0.03em; }
 .s6 .rule { height: 4px; background: var(--navy); margin-top: 60px; width: 1680px; }
@@ -176,8 +177,6 @@ body.show-notes .slide.on .notes { display: block; }
         <g id="crowd" fill="#8c959f" opacity="0.35"></g>
         <circle cx="520" cy="250" r="200" fill="rgba(212,167,44,.10)" stroke="#d4a72c" stroke-width="5"/>
         <circle cx="520" cy="250" r="154.7" fill="rgba(26,127,55,.08)" stroke="#1a7f37" stroke-width="5"/>
-        <g class="tag"><rect x="424" y="33" width="192" height="34" fill="#f8fbfd" stroke="#d4a72c" stroke-width="3"/><text x="520" y="58" text-anchor="middle">Threshold 0.1864</text></g>
-        <g class="tag"><rect x="424" y="76" width="192" height="34" fill="#f8fbfd" stroke="#1a7f37" stroke-width="3"/><text x="520" y="101" text-anchor="middle">Threshold 0.3706</text></g>
         <path d="M506 250H534M520 236V264" stroke="#1d3c78" stroke-width="6"/>
         <text class="nm" x="520" y="298" text-anchor="middle">You</text>
         <g class="dots" stroke="#1f2328" stroke-width="2">
@@ -185,7 +184,7 @@ body.show-notes .slide.on .notes { display: block; }
           <circle cx="629" cy="107" r="11" fill="#d4a72c"/><circle cx="692" cy="197" r="11" fill="#d4a72c"/>
           <circle cx="701" cy="307" r="11" fill="#d4a72c"/><circle cx="636" cy="405" r="11" fill="#d4a72c"/>
           <circle cx="520" cy="448" r="11" fill="#d4a72c"/><circle cx="400" cy="408" r="11" fill="#d4a72c"/>
-          <circle cx="321" cy="311" r="10" fill="#8c959f"/><circle cx="321" cy="189" r="10" fill="#8c959f"/><circle cx="393" cy="85" r="10" fill="#8c959f"/>
+          <circle cx="313.5" cy="313.5" r="10" fill="#8c959f"/><circle cx="313.5" cy="186.9" r="10" fill="#8c959f"/><circle cx="388.5" cy="78.7" r="10" fill="#8c959f"/>
         </g>
         <text class="nm" x="520" y="216" text-anchor="middle">DiCaprio <tspan class="sc">0.6867</tspan></text>
         <text class="nm" x="649" y="116">Matt Damon <tspan class="sc">0.2678</tspan></text>
@@ -194,22 +193,23 @@ body.show-notes .slide.on .notes { display: block; }
         <text class="nm" x="656" y="414">Brad Pitt <tspan class="sc">0.2109</tspan></text>
         <text class="nm" x="520" y="488" text-anchor="middle">Gustavo Kuerten <tspan class="sc">0.1967</tspan></text>
         <text class="nm" x="380" y="417" text-anchor="end">Al Pacino <tspan class="sc">0.1931</tspan></text>
-        <text class="nm out" x="301" y="320" text-anchor="end">Anna Kournikova</text>
-        <text class="nm out" x="301" y="198" text-anchor="end">Dinara Safina</text>
-        <text class="nm out" x="373" y="94" text-anchor="end">Josh Duhamel</text>
+        <text class="nm out" x="293" y="323" text-anchor="end">Anna Kournikova</text>
+        <text class="nm out" x="293" y="196" text-anchor="end">Dinara Safina</text>
+        <text class="nm out" x="368" y="88" text-anchor="end">Josh Duhamel</text>
       </svg>
     <div class="facts">
-      <div class="card"><div class="top"><span class="fig">1</span><span class="chip same"><i></i>Same person</span></div><p class="rule">The same face</p></div>
-      <div class="card"><div class="top"><span class="fig">6</span><span class="chip alter"><i></i>Alter Ego</span></div><p class="rule">The closest public figures, but not you</p></div>
-      <div class="card"><div class="top"><span class="fig">493</span><span class="chip notyou"><i></i>Not You</span></div><p class="rule">Too far to count</p></div>
+      <div class="card"><div class="top"><span class="fig">1</span><span class="chip same"><i></i>Same person</span></div><p class="rule">Score 0.3706 or more</p></div>
+      <div class="card"><div class="top"><span class="fig">6</span><span class="chip alter"><i></i>Alter Ego</span></div><p class="rule">Closest public figures, not you: 0.1864 to 0.3706</p></div>
+      <div class="card"><div class="top"><span class="fig">493</span><span class="chip notyou"><i></i>Not You</span></div><p class="rule">Below 0.1864</p></div>
     </div>
   </div>
+  <p class="mcap">Three of the ten closest. All ten are on the target, redrawn from the app's run.</p>
   <div class="matches">
     <div class="match card"><img src="m-dicaprio.jpg" alt="Leonardo DiCaprio, the pool's photo"><div><b>#1 DiCaprio</b><span class="chip same"><i></i>Same person</span></div></div>
     <div class="match card"><img src="m-damon.jpg" alt="Matt Damon, the pool's photo"><div><b>#2 Matt Damon</b><span class="chip alter"><i></i>Alter Ego</span></div></div>
     <div class="match card"><img src="m-pitt.jpg" alt="Brad Pitt, the pool's photo"><div><b>#5 Brad Pitt</b><span class="chip alter"><i></i>Alter Ego</span></div></div>
   </div>
-  <div class="foot"><p class="credit">Photos: Presidencia de la Rep&uacute;blica Mexicana, 2017 (CC BY 2.0); Raph_PH (CC BY 4.0), PhilipRomano and Harald Krichel (CC BY-SA 4.0), Wikimedia Commons. Target redrawn from the app's run.</p><span class="num">2 / 5</span></div>
+  <div class="foot"><p class="credit">Photos: Presidencia de la Rep&uacute;blica Mexicana, 2017 (CC BY 2.0); Raph_PH (CC BY 4.0), PhilipRomano and Harald Krichel (CC BY-SA 4.0), Wikimedia Commons.</p><span class="num">2 / 5</span></div>
   <aside class="notes">One photo against 500 well-known people. The photo is a different one of DiCaprio than the pool's own. Score: how alike two faces are, higher is closer; the rings are the calibrated thresholds (0.3706 and 0.1864). Inside the green ring: the same person, found from a different photo. Between the rings: the closest public figures, but not him (Matt Damon, Brad Pitt). Outside: Not You. Then mention your own self-match aloud (say the score yourself; it is not written on this public page).</aside>
 </section>
 
@@ -224,7 +224,7 @@ body.show-notes .slide.on .notes { display: block; }
     </div>
     <div class="col card">
       <div class="when">Then: break the one line, and put it back</div>
-      <div class="step"><code>(queries @ index.T)[:, 0]</code><p><b>Broken on purpose:</b> the test fails</p><p class="note">It calibrates on one face, not the best of 500, so the threshold drops to 0.2592 and every stranger clears it</p></div>
+      <div class="step"><code>(queries @ index.T)[:, 0]</code><p><b>Broken on purpose:</b> the test fails</p><p class="note">It uses one face per stranger, not their best match among 500. The next slide shows why that matters.</p></div>
       <div class="step"><code>(queries @ index.T).max(axis=1)</code><p><b>Restored:</b> the test passes</p></div>
     </div>
   </div>
@@ -233,10 +233,10 @@ body.show-notes .slide.on .notes { display: block; }
     <div class="cells">
       <div><span>Predicted, in the test</span><b>at most 1%</b><em>2 of 200</em></div>
       <div><span>Broken line, in the test</span><b>100%</b><em>200 of 200</em></div>
-      <div><span>Real pool, real faces</span><b>0.9%</b><em>5 of 567</em></div>
+      <div><span>Public-figure pool, real faces</span><b>0.9%</b><em>5 of 567</em></div>
     </div>
   </div>
-  <div class="foot"><p class="small">PLANNING_LOG.md, 8 October 2026 &middot; tests/test_index_size_threshold.py (synthetic faces) &middot; 288 tests passing</p><span class="num">3 / 5</span></div>
+  <div class="foot"><p class="small">PLANNING_LOG.md, 8 October and 2 November 2026 &middot; tests/test_index_size_threshold.py (synthetic faces) &middot; 288 tests</p><span class="num">3 / 5</span></div>
   <aside class="notes">This is the check that I was in control, not the agent: the number the test must meet was written down first, from outside the program. Then I broke the one line on purpose: with [:, 0] the threshold is calibrated on one face instead of each stranger's best of 500, so it drops to 0.2592 and all 200 strangers clear it: the test went red. Put back, it passes. On the real pool of 500 famous faces, 0.9% of strangers get Same person. The test itself uses synthetic faces, seed 0.</aside>
 </section>
 
@@ -247,8 +247,8 @@ body.show-notes .slide.on .notes { display: block; }
   <div class="chart">
     <svg width="1680" height="500" viewBox="0 0 1680 500" role="img" aria-label="Share of 200 absent strangers whose best match passes one fixed threshold of 0.2017: 33% at 50 faces, 99% at 500, 100% at 5,000">
       <line x1="80" y1="120" x2="1600" y2="120" stroke="rgba(29,60,120,.35)" stroke-width="2" stroke-dasharray="8 8"/>
-      <text x="70" y="131" text-anchor="end" font-size="30" fill="#46505d">100%</text>
-      <text x="70" y="431" text-anchor="end" font-size="30" fill="#46505d">0</text>
+      <text x="70" y="133" text-anchor="end" font-size="36" fill="#46505d">100%</text>
+      <text x="70" y="433" text-anchor="end" font-size="36" fill="#46505d">0</text>
       <line x1="80" y1="420" x2="1600" y2="420" stroke="#1d3c78" stroke-width="4"/>
       <g>
         <rect x="160" y="321" width="300" height="99" fill="#1d3c78"/>
@@ -296,8 +296,9 @@ body.show-notes .slide.on .notes { display: block; }
   <div class="end">
     <div>
       <p class="url">esst-prog2.github.io/AlterEgo_Finder</p>
-      <p class="recap">Says <span class="chip notyou"><i></i>Not You</span> when it should: 0.9% of strangers called <span class="chip same"><i></i>Same person</span>, not 99%.</p>
-      <p class="mid" style="margin-top:18px; color: var(--soft)">Seven commands, then drop your photo. It never leaves your computer.</p>
+      <p class="recap">Says <span class="chip notyou"><i></i>Not You</span> when it should. One fixed threshold called 99% of strangers <span class="chip same"><i></i>Same person</span>; fitted to the dataset's size, 0.9%.</p>
+      <p class="src">99%: LFW, 500 faces, 1 October &middot; 0.9%: the public-figure pool, 5 of 567 strangers</p>
+      <p class="mid" style="margin-top:22px; font-weight: 600; color: var(--navy)">Drop a photo; it never leaves your computer.</p>
     </div>
     <div>
       <svg class="qr" viewBox="-4 -4 41 41" shape-rendering="crispEdges" role="img" aria-label="QR code for esst-prog2.github.io/AlterEgo_Finder"><rect x="-4" y="-4" width="41" height="41" fill="#fff"/><path stroke="#1d3c78" d="M0 0.5h7m1 0h1m4 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m2 0h7m-33 1h1m5 0h1m5 0h1m2 0h1m2 0h1m1 0h1m2 0h2m1 0h1m5 0h1m-33 1h1m1 0h3m1 0h1m1 0h3m1 0h1m1 0h2m1 0h1m5 0h1m2 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m1 0h1m1 0h1m4 0h3m3 0h2m3 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m4 0h3m4 0h1m1 0h1m1 0h2m2 0h1m1 0h3m1 0h1m-33 1h1m5 0h1m1 0h2m3 0h1m2 0h1m1 0h4m2 0h1m1 0h1m5 0h1m-33 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-25 1h1m1 0h2m3 0h1m1 0h1m1 0h1m1 0h2m1 0h1m-24 1h1m1 0h1m1 0h7m1 0h1m1 0h2m4 0h1m1 0h5m1 0h2m1 0h1m-32 1h1m3 0h1m1 0h6m2 0h1m1 0h1m2 0h1m1 0h1m2 0h3m3 0h2m-33 1h1m1 0h2m2 0h1m1 0h2m1 0h3m4 0h2m1 0h2m1 0h1m2 0h2m1 0h3m-29 1h1m2 0h1m1 0h2m3 0h2m5 0h2m1 0h3m1 0h2m1 0h1m-29 1h4m1 0h2m1 0h1m1 0h1m1 0h2m1 0h1m5 0h3m2 0h1m2 0h1m-33 1h4m3 0h1m2 0h2m2 0h2m3 0h4m1 0h3m1 0h1m1 0h3m-33 1h1m1 0h1m3 0h1m3 0h1m1 0h2m2 0h3m1 0h4m1 0h5m1 0h1m-28 1h1m2 0h3m1 0h1m1 0h5m1 0h3m1 0h2m1 0h2m3 0h1m-31 1h2m2 0h2m3 0h4m1 0h1m1 0h1m1 0h4m3 0h1m1 0h1m2 0h1m-29 1h3m3 0h1m1 0h3m3 0h1m3 0h1m1 0h3m1 0h1m1 0h1m1 0h1m-31 1h2m3 0h4m1 0h4m3 0h1m1 0h2m3 0h2m3 0h3m-33 1h1m3 0h1m4 0h5m1 0h2m1 0h5m4 0h1m3 0h1m-32 1h1m1 0h2m2 0h1m5 0h1m2 0h5m1 0h1m1 0h3m2 0h1m2 0h1m-31 1h1m1 0h2m2 0h1m1 0h4m2 0h1m2 0h1m1 0h1m2 0h4m2 0h4m-33 1h2m3 0h2m1 0h4m3 0h1m2 0h5m1 0h1m1 0h5m1 0h1m-32 1h1m2 0h2m1 0h1m1 0h1m1 0h3m5 0h1m1 0h3m2 0h1m1 0h2m2 0h1m-33 1h1m1 0h1m1 0h1m1 0h1m1 0h4m1 0h1m1 0h3m2 0h2m2 0h5m2 0h1m-24 1h1m4 0h1m2 0h1m1 0h2m2 0h1m1 0h1m3 0h2m1 0h2m-33 1h7m1 0h1m2 0h1m5 0h2m3 0h1m1 0h1m1 0h1m1 0h4m-32 1h1m5 0h1m1 0h6m3 0h1m3 0h2m1 0h1m3 0h1m2 0h1m-32 1h1m1 0h3m1 0h1m2 0h1m2 0h1m1 0h1m1 0h2m1 0h4m1 0h6m1 0h1m-32 1h1m1 0h3m1 0h1m1 0h3m1 0h1m1 0h3m4 0h1m1 0h2m1 0h1m1 0h4m-32 1h1m1 0h3m1 0h1m3 0h1m3 0h3m3 0h2m2 0h2m2 0h2m2 0h1m-33 1h1m5 0h1m1 0h1m1 0h3m1 0h1m1 0h1m2 0h3m2 0h2m3 0h1m-30 1h7m3 0h3m1 0h1m2 0h1m1 0h4m1 0h2m2 0h2m1 0h1"/></svg>
