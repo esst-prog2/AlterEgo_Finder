@@ -10,6 +10,7 @@
 <link rel="preload" href="../fonts/barlow-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../fonts/barlow-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../fonts/kalam-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.css">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <style>
 @font-face { font-family: "Barlow Condensed"; font-weight: 600; src: url("../fonts/barlow-condensed-latin-600-normal.woff2") format("woff2"); font-display: block; }
@@ -25,17 +26,17 @@
   --display: "Barlow Condensed", "Arial Narrow", sans-serif; --body: "Barlow", system-ui, sans-serif;
 }
 * { box-sizing: border-box; }
-html, body { margin: 0; height: 100%; background: #142c5a; overflow: hidden; }
-body { font-family: var(--body); color: var(--ink); font-variant-numeric: tabular-nums; }
-#stage { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: 0 0; }
-.slide {
-  position: absolute; inset: 0; display: none; padding: 96px 120px 90px;
+html, body { margin: 0; height: 100%; }
+.reveal-viewport { background: #142c5a; }
+.reveal { font-family: var(--body); color: var(--ink); font-variant-numeric: tabular-nums; line-height: normal; }
+.reveal .slides { text-align: left; }
+.reveal .slides > section {
+  height: 1080px; padding: 96px 120px 90px;
   background-color: var(--paper);
   background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
   background-size: 32px 32px;
 }
-.slide.on { display: block; }
-.slide::after { content: ""; position: absolute; inset: 36px; border: 3px solid var(--navy); pointer-events: none; }
+.reveal .slides > section::after { content: ""; position: absolute; inset: 36px; border: 3px solid var(--navy); pointer-events: none; }
 h1, h2 { font-family: var(--display); font-weight: 700; text-transform: uppercase; margin: 0; line-height: 0.98; letter-spacing: 0.005em; }
 h1 { font-size: 116px; color: var(--ink); }
 h2 { font-size: 88px; color: var(--navy); max-width: 1500px; }
@@ -108,6 +109,7 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
 /* 4 */
 .s4 .axis { margin-top: 30px; font-size: 36px; font-weight: 500; }
 .s4 .chart { margin-top: 6px; }
+.s4 svg { overflow: visible; }
 .s4 svg text { font-family: var(--display); font-weight: 700; }
 
 /* 5 */
@@ -119,8 +121,7 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
 .s5 b { font-family: var(--display); font-weight: 700; font-size: 54px; text-transform: uppercase; display: block; line-height: 1.05; }
 
 /* 6 */
-.s6 { display: none; }
-.s6.on { display: flex; flex-direction: column; justify-content: center; }
+.reveal .slides > section.s6.present { display: flex; flex-direction: column; justify-content: center; }
 .s6 .lock { display: flex; align-items: center; gap: 44px; }
 .s6 .lock svg { width: 220px; height: 220px; }
 .s6 .lock span { font-family: var(--display); font-weight: 700; font-size: 150px; line-height: 0.88; text-transform: uppercase; }
@@ -132,19 +133,16 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
 .s6 .qr-cap { font-family: var(--display); font-weight: 700; font-size: 28px; text-transform: uppercase; color: var(--navy); margin-top: 12px; text-align: center; letter-spacing: 0.03em; }
 .s6 .rule { height: 4px; background: var(--navy); margin-top: 60px; width: 1680px; }
 
-/* notes (N) and help */
-.notes { display: none; position: absolute; left: 36px; right: 36px; bottom: 36px; background: #142c5a; color: #f8fbfd;
-  font-size: 28px; line-height: 1.45; padding: 22px 30px; z-index: 5; }
-body.show-notes .slide.on .notes { display: block; }
-#hint { position: fixed; right: 14px; bottom: 12px; background: #142c5a; color: #f8fbfd; font: 500 15px var(--body); padding: 6px 12px; transition: opacity .6s ease-out; }
+/* help */
+#hint { position: fixed; z-index: 40; right: 14px; bottom: 12px; background: #142c5a; color: #f8fbfd; font: 500 15px var(--body); padding: 6px 12px; transition: opacity .6s ease-out; }
 #hint.gone { opacity: 0; }
 </style>
 </head>
 <body>
-<div id="stage" role="region" aria-roledescription="slide deck" aria-label="AlterEgo Finder, final demo">
+<div class="reveal" aria-label="AlterEgo Finder, final demo"><div class="slides">
 
 <!-- 1. For whom, and why -->
-<section class="slide s1" aria-label="Slide 1: for whom, and why">
+<section class="s1" aria-label="Slide 1: for whom, and why">
   <div class="lock">
     <svg viewBox="-55 -55 110 110" aria-hidden="true"><circle r="50" fill="rgba(212,167,44,.24)" stroke="#d4a72c" stroke-width="5"/><circle r="28" fill="rgba(26,127,55,.16)" stroke="#1a7f37" stroke-width="5"/><path d="M-9 0H9M0 -9V9" stroke="#1d3c78" stroke-width="5" stroke-linecap="round"/><circle cx="17" cy="-12" r="7" fill="#1a7f37"/></svg>
     <span>AlterEgo<br>Finder</span>
@@ -165,7 +163,7 @@ body.show-notes .slide.on .notes { display: block; }
 </section>
 
 <!-- 2. The demo -->
-<section class="slide s2" aria-label="Slide 2: the demo, from a real run">
+<section class="s2" aria-label="Slide 2: the demo, from a real run">
   <h2>A real run: a second photo of DiCaprio</h2>
   <div class="grid">
     <figure class="query" style="margin:0">
@@ -214,7 +212,7 @@ body.show-notes .slide.on .notes { display: block; }
 </section>
 
 <!-- 3. Why it works: in control -->
-<section class="slide s3" aria-label="Slide 3: why it works">
+<section class="s3" aria-label="Slide 3: why it works">
   <h2>I wrote the answer before the test</h2>
   <div class="cols">
     <div class="col card">
@@ -241,7 +239,7 @@ body.show-notes .slide.on .notes { display: block; }
 </section>
 
 <!-- 4. What I learned -->
-<section class="slide s4" aria-label="Slide 4: what I learned">
+<section class="s4" aria-label="Slide 4: what I learned">
   <h2>At 500 faces, a 1% threshold calls 99% of strangers Same person</h2>
   <p class="axis">Strangers wrongly called <span class="chip same"><i></i>Same person</span> by one fixed threshold (0.2017)</p>
   <div class="chart">
@@ -273,7 +271,7 @@ body.show-notes .slide.on .notes { display: block; }
 </section>
 
 <!-- 5. What's next -->
-<section class="slide s5" aria-label="Slide 5: what's next">
+<section class="s5" aria-label="Slide 5: what's next">
   <h2>What's next</h2>
   <ol>
     <li class="card"><div><b>A quick pool</b><span class="mid">50 to 100 famous faces in minutes, not half an hour, so a classmate can try it today.</span></div></li>
@@ -286,7 +284,7 @@ body.show-notes .slide.on .notes { display: block; }
 </section>
 
 <!-- Closing -->
-<section class="slide s6" aria-label="Closing: try it">
+<section class="s6" aria-label="Closing: try it">
   <h2 class="sr">Try AlterEgo Finder</h2>
   <div class="lock">
     <svg viewBox="-55 -55 110 110" aria-hidden="true"><circle r="50" fill="rgba(212,167,44,.24)" stroke="#d4a72c" stroke-width="5"/><circle r="28" fill="rgba(26,127,55,.16)" stroke="#1a7f37" stroke-width="5"/><path d="M-9 0H9M0 -9V9" stroke="#1d3c78" stroke-width="5" stroke-linecap="round"/><circle cx="17" cy="-12" r="7" fill="#1a7f37"/></svg>
@@ -308,41 +306,12 @@ body.show-notes .slide.on .notes { display: block; }
   <aside class="notes">Leave this up during the scoring.</aside>
 </section>
 
-</div>
-<div id="hint">&larr; &rarr; to move &middot; N for notes</div>
-<div id="live" class="sr" aria-live="polite"></div>
+</div></div>
+<div id="hint">&larr; &rarr; to move &middot; S for speaker notes</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/plugin/notes/notes.min.js"></script>
 <script>
 (function () {
-  const stage = document.getElementById("stage");
-  const slides = [...document.querySelectorAll(".slide")];
-  const live = document.getElementById("live"), hint = document.getElementById("hint");
-  let i = Math.max(0, Math.min(slides.length - 1, (parseInt(location.hash.slice(1), 10) || 1) - 1));
-  function fit() {
-    const s = Math.min(innerWidth / 1920, innerHeight / 1080);
-    stage.style.transform = `scale(${s}) translate(-50%, -50%)`;
-  }
-  function show(n) {
-    i = Math.max(0, Math.min(slides.length - 1, n));
-    slides.forEach((el, k) => el.classList.toggle("on", k === i));
-    history.replaceState(null, "", "#" + (i + 1));
-    live.textContent = slides[i].getAttribute("aria-label");
-  }
-  addEventListener("resize", fit);
-  addEventListener("hashchange", () => { const n = parseInt(location.hash.slice(1), 10); if (n && n - 1 !== i) show(n - 1); });
-  addEventListener("keydown", (e) => {
-    if (["ArrowRight", "PageDown", " ", "Enter"].includes(e.key)) { e.preventDefault(); show(i + 1); }
-    else if (["ArrowLeft", "PageUp", "Backspace"].includes(e.key)) { e.preventDefault(); show(i - 1); }
-    else if (e.key === "Home") show(0);
-    else if (e.key === "End") show(slides.length - 1);
-    else if (e.key === "n" || e.key === "N") document.body.classList.toggle("show-notes");
-    hint.classList.add("gone");
-  });
-  // only the outer edges turn the page, so pointing at the screen does not
-  addEventListener("click", (e) => {
-    if (e.clientX > innerWidth * 0.8) show(i + 1);
-    else if (e.clientX < innerWidth * 0.2) show(i - 1);
-  });
-  setTimeout(() => hint.classList.add("gone"), 5000);
   // the other public figures as faint dots outside the gold ring (fixed seed, same every load)
   const crowd = document.getElementById("crowd");
   let seed = 7;
@@ -355,9 +324,19 @@ body.show-notes .slide.on .notes { display: block; }
     c.setAttribute("r", "4");
     crowd.appendChild(c);
   }
-  fit(); show(i);
   // load every slide's fonts now (they are preloaded too), so a slide shown later never flashes a fallback face
   if (document.fonts) ["700 1em 'Barlow Condensed'", "600 1em 'Barlow Condensed'", "400 1em Barlow", "500 1em Barlow", "600 1em Barlow", "400 1em Kalam"].forEach((f) => document.fonts.load(f));
+  const hint = document.getElementById("hint");
+  const hide = () => hint.classList.add("gone");
+  addEventListener("keydown", hide);
+  setTimeout(hide, 5000);
+  Reveal.initialize({
+    width: 1920, height: 1080, margin: 0, minScale: 0.05, maxScale: 4,
+    center: false, transition: "none", backgroundTransition: "none",
+    controls: false, progress: false, slideNumber: false,
+    hash: true, hashOneBasedIndex: true, respondToHashChanges: true,
+    plugins: [RevealNotes]
+  });
 })();
 </script>
 </body>
