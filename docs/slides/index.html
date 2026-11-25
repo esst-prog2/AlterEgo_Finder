@@ -61,7 +61,14 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
 .s2 .facts { display: grid; gap: 22px; }
 .s2 .facts div { padding: 22px 26px; }
 .s2 .facts .fig { font-size: 64px; display: block; line-height: 1; }
-.s2 .cards { margin-top: 20px; width: 1040px; height: 150px; overflow: hidden; }
+.s2 .verdict { height: 72px; overflow: hidden; }
+.s2 .target { display: block; width: 1040px; height: 500px; margin-top: 10px; overflow: visible; }
+.s2 .target text { font-family: var(--display); font-weight: 700; font-size: 30px; fill: var(--ink); paint-order: stroke; stroke: var(--paper); stroke-width: 7px; stroke-linejoin: round; }
+.s2 .target .sc { fill: var(--navy); }
+.s2 .target .out { fill: var(--soft); }
+.s2 .target .tag text { stroke: none; font-size: 28px; }
+.s2 .facts .rule { font-size: 30px; line-height: 1.3; margin-top: 8px; color: var(--ink); font-weight: 500; }
+.s2 .cards { margin-top: 12px; width: 1040px; height: 118px; overflow: hidden; }
 .s2 .cards img { width: 1040px; }
 
 /* 3 */
@@ -128,16 +135,42 @@ body.show-notes .slide.on .notes { display: block; }
   <h2>A real run: a second photo of DiCaprio</h2>
   <div class="grid">
     <div>
-      <img class="card" src="app-result.jpg" alt="The AlterEgo Finder page: Closest: Leonardo DiCaprio, 0.6867, Same person; the similarity target with the green and gold rings">
+      <div class="verdict card"><img src="app-result.jpg" alt="The app's verdict line: Closest: Leonardo DiCaprio, 0.6867, Same person"></div>
+      <svg class="target" viewBox="0 0 1040 500" role="img" aria-label="The similarity target of this run, drawn larger: DiCaprio inside the green ring; Matt Damon, Keke Rosberg, Oliver Kahn, Brad Pitt, Gustavo Kuerten and Al Pacino between the rings; the other public figures outside">
+        <g id="crowd" fill="#8c959f" opacity="0.35"></g>
+        <circle cx="520" cy="250" r="200" fill="rgba(212,167,44,.10)" stroke="#d4a72c" stroke-width="5"/>
+        <circle cx="520" cy="250" r="154.7" fill="rgba(26,127,55,.08)" stroke="#1a7f37" stroke-width="5"/>
+        <g class="tag"><rect x="468" y="33" width="104" height="34" fill="#eef3f8"/><text x="520" y="60" text-anchor="middle" fill="#8a6a12">0.1864</text></g>
+        <g class="tag"><rect x="468" y="78" width="104" height="34" fill="#eef3f8"/><text x="520" y="105" text-anchor="middle" fill="#1a7f37">0.3706</text></g>
+        <path d="M506 250H534M520 236V264" stroke="#1d3c78" stroke-width="6"/>
+        <text class="nm" x="520" y="298" text-anchor="middle">You</text>
+        <g class="dots" stroke="#1f2328" stroke-width="2">
+          <circle cx="520" cy="173" r="12" fill="#1a7f37"/>
+          <circle cx="629" cy="107" r="11" fill="#d4a72c"/><circle cx="692" cy="197" r="11" fill="#d4a72c"/>
+          <circle cx="701" cy="307" r="11" fill="#d4a72c"/><circle cx="636" cy="405" r="11" fill="#d4a72c"/>
+          <circle cx="520" cy="448" r="11" fill="#d4a72c"/><circle cx="400" cy="408" r="11" fill="#d4a72c"/>
+          <circle cx="321" cy="311" r="10" fill="#8c959f"/><circle cx="321" cy="189" r="10" fill="#8c959f"/><circle cx="393" cy="85" r="10" fill="#8c959f"/>
+        </g>
+        <text class="nm" x="520" y="216" text-anchor="middle">DiCaprio <tspan class="sc">0.6867</tspan></text>
+        <text class="nm" x="649" y="116">Matt Damon <tspan class="sc">0.2678</tspan></text>
+        <text class="nm" x="712" y="206">Keke Rosberg <tspan class="sc">0.2672</tspan></text>
+        <text class="nm" x="721" y="316">Oliver Kahn <tspan class="sc">0.2286</tspan></text>
+        <text class="nm" x="656" y="414">Brad Pitt <tspan class="sc">0.2109</tspan></text>
+        <text class="nm" x="520" y="488" text-anchor="middle">Gustavo Kuerten <tspan class="sc">0.1967</tspan></text>
+        <text class="nm" x="380" y="417" text-anchor="end">Al Pacino <tspan class="sc">0.1931</tspan></text>
+        <text class="nm out" x="301" y="320" text-anchor="end">Anna Kournikova</text>
+        <text class="nm out" x="301" y="198" text-anchor="end">Dinara Safina</text>
+        <text class="nm out" x="373" y="94" text-anchor="end">Josh Duhamel</text>
+      </svg>
       <div class="cards card"><img src="app-cards.jpg" alt="The first five result cards: DiCaprio Same person; Matt Damon, Keke Rosberg, Oliver Kahn, Brad Pitt Alter Ego"></div>
     </div>
     <div class="facts">
-      <div class="card"><span class="fig">1</span><span class="chip same mid"><i></i>Same person</span><p class="small">DiCaprio, 0.6867: a different photo, still found</p></div>
-      <div class="card"><span class="fig">6</span><span class="chip alter mid"><i></i>Alter Ego</span><p class="small">Matt Damon 0.2678 &hellip; Brad Pitt 0.2109 &hellip; Al Pacino 0.1931</p></div>
-      <div class="card"><span class="fig">493</span><span class="chip notyou mid"><i></i>Not You</span><p class="small">of the 500 public figures</p></div>
+      <div class="card"><span class="fig">1</span><span class="chip same mid"><i></i>Same person</span><p class="rule">Inside the green ring: 0.3706 or more</p></div>
+      <div class="card"><span class="fig">6</span><span class="chip alter mid"><i></i>Alter Ego</span><p class="rule">Between the rings: 0.1864 to 0.3706</p></div>
+      <div class="card"><span class="fig">493</span><span class="chip notyou mid"><i></i>Not You</span><p class="rule">Outside: below 0.1864</p></div>
     </div>
   </div>
-  <div class="foot"><p class="small">Photo: Presidencia de la Rep&uacute;blica Mexicana, 2017, CC BY 2.0; others: Wikimedia Commons, credited in the app.</p><span class="num">2 / 5</span></div>
+  <div class="foot"><p class="small">Photo: Presidencia de la Rep&uacute;blica Mexicana, 2017, CC BY 2.0; others: Wikimedia Commons, credited in the app. Target redrawn larger from the app's screen.</p><span class="num">2 / 5</span></div>
   <aside class="notes">One photo, one dataset: 500 well-known people. The verdict line answers first. Inside the green ring: the same person. Gold band: the closest public figures, but not him. Then mention your own self-match aloud (say the score yourself; it is not written on this public page).</aside>
 </section>
 
@@ -155,7 +188,6 @@ body.show-notes .slide.on .notes { display: block; }
       <p class="mid">The one line that keeps the promise:</p>
       <pre><code>(queries @ index.T).max(axis=1)  <span class="green">green</span>
 (queries @ index.T)[:, 0]        <span class="red">red</span></code></pre>
-      <p class="small" style="margin-top:14px">Break it on purpose: the test fails. Put it back: it passes.</p>
     </div>
   </div>
   <p class="result">On the real pool: <span class="fig" style="font-size:52px">0.9%</span> of 567 strangers reach <span class="chip same"><i></i>Same person</span></p>
@@ -168,6 +200,11 @@ body.show-notes .slide.on .notes { display: block; }
   <h2>A 1% bar is not 1% when you search 5,000 faces</h2>
   <div class="chart">
     <svg width="1680" height="500" viewBox="0 0 1680 500" role="img" aria-label="Share of 200 absent strangers whose best match passes one fixed bar of 0.2017: 33% at 50 faces, 99% at 500, 100% at 5,000">
+      <line x1="80" y1="270" x2="1600" y2="270" stroke="rgba(29,60,120,.35)" stroke-width="2" stroke-dasharray="8 8"/>
+      <line x1="80" y1="120" x2="1600" y2="120" stroke="rgba(29,60,120,.35)" stroke-width="2" stroke-dasharray="8 8"/>
+      <text x="70" y="281" text-anchor="end" font-size="30" fill="#46505d">50%</text>
+      <text x="70" y="131" text-anchor="end" font-size="30" fill="#46505d">100%</text>
+      <text x="70" y="431" text-anchor="end" font-size="30" fill="#46505d">0</text>
       <line x1="80" y1="420" x2="1600" y2="420" stroke="#1d3c78" stroke-width="4"/>
       <g>
         <rect x="160" y="321" width="300" height="99" fill="#1a7f37" opacity="0.85"/>
@@ -186,9 +223,9 @@ body.show-notes .slide.on .notes { display: block; }
       </g>
     </svg>
   </div>
-  <p class="mid" style="margin-top:4px">Strangers wrongly called <span class="chip same"><i></i>Same person</span> by one fixed bar. So the bar is now fitted to the dataset's size.</p>
+  <p class="mid" style="margin-top:4px">The old rule, one fixed bar of 0.2017: strangers wrongly called <span class="chip same"><i></i>Same person</span>. Now the bar is fitted to the dataset's size (slide 3).</p>
   <div class="foot"><p class="small">Measured 1 October 2026: LFW, 200 people left out of the dataset, fixed bar 0.2017 (1% of pairs of strangers). data/spike_results.json</p><span class="num">4 / 5</span></div>
-  <aside class="notes">What I learned: the textbook threshold (1% false accepts between two photos) collapses when you take the best of many. With 500 faces, 99% of strangers would be "the same person". The fix: calibrate on strangers' best matches at the dataset's actual size. Same idea as the multiple-comparisons problem.</aside>
+  <aside class="notes">Say first: this is the old rule, one fixed bar (0.2017) at every dataset size, before the fix on slide 3. The bars are to scale. What I learned: the textbook threshold (1% false accepts between two photos) collapses when you take the best of many. With 500 faces, 99% of strangers would be "the same person". The fix: calibrate on strangers' best matches at the dataset's actual size. Same idea as the multiple-comparisons problem.</aside>
 </section>
 
 <!-- 5. What's next -->
@@ -240,6 +277,18 @@ body.show-notes .slide.on .notes { display: block; }
     else if (e.key === "n" || e.key === "N") document.body.classList.toggle("show-notes");
   });
   addEventListener("click", (e) => show(i + (e.clientX > innerWidth / 3 ? 1 : -1)));
+  // the other public figures as faint dots outside the gold ring (fixed seed, same every load)
+  const crowd = document.getElementById("crowd");
+  let seed = 7;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let k = 0; k < 160; k++) {
+    const a = rnd() * 2 * Math.PI, r = 214 + rnd() * 34;
+    const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    c.setAttribute("cx", (520 + r * Math.cos(a)).toFixed(1));
+    c.setAttribute("cy", (250 + r * Math.sin(a)).toFixed(1));
+    c.setAttribute("r", "4");
+    crowd.appendChild(c);
+  }
   fit(); show(i);
 })();
 </script>
