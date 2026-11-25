@@ -237,7 +237,7 @@ body.show-notes .slide.on .notes { display: block; }
     </div>
   </div>
   <div class="foot"><p class="small">PLANNING_LOG.md, 8 October 2026 &middot; tests/test_index_size_threshold.py (synthetic faces) &middot; 288 tests passing</p><span class="num">3 / 5</span></div>
-  <aside class="notes">This is the check that I was in control, not the agent: the number the test must meet was written down first, from outside the program. Then I broke the one line on purpose: with [:, 0] every stranger is compared with one face, so 200 of 200 were called Same person and the test went red. Put back, it passes. On the real pool of 500 famous faces, 0.9% of strangers get Same person. The test itself uses synthetic faces, seed 0.</aside>
+  <aside class="notes">This is the check that I was in control, not the agent: the number the test must meet was written down first, from outside the program. Then I broke the one line on purpose: with [:, 0] the threshold is calibrated on one face instead of each stranger's best of 500, so it drops to 0.2592 and all 200 strangers clear it: the test went red. Put back, it passes. On the real pool of 500 famous faces, 0.9% of strangers get Same person. The test itself uses synthetic faces, seed 0.</aside>
 </section>
 
 <!-- 4. What I learned -->
