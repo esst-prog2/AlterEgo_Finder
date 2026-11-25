@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AlterEgo Finder: final demo</title>
+<link rel="preload" href="../fonts/barlow-condensed-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/barlow-condensed-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/barlow-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/barlow-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/barlow-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/kalam-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<style>
+@font-face { font-family: "Barlow Condensed"; font-weight: 600; src: url("../fonts/barlow-condensed-latin-600-normal.woff2") format("woff2"); font-display: block; }
+@font-face { font-family: "Barlow Condensed"; font-weight: 700; src: url("../fonts/barlow-condensed-latin-700-normal.woff2") format("woff2"); font-display: block; }
+@font-face { font-family: "Barlow"; font-weight: 400; src: url("../fonts/barlow-latin-400-normal.woff2") format("woff2"); font-display: block; }
+@font-face { font-family: "Barlow"; font-weight: 500; src: url("../fonts/barlow-latin-500-normal.woff2") format("woff2"); font-display: block; }
+@font-face { font-family: "Barlow"; font-weight: 600; src: url("../fonts/barlow-latin-600-normal.woff2") format("woff2"); font-display: block; }
+@font-face { font-family: "Kalam"; font-weight: 400; src: url("../fonts/kalam-latin-400-normal.woff2") format("woff2"); font-display: block; }
+:root {
+  --paper: #eef3f8; --raised: #f8fbfd; --navy: #1d3c78; --ink: #1f2328; --soft: #46505d; --pencil: #3d4450;
+  --same: #1a7f37; --alter: #d4a72c; --notyou: #8c959f;
+  --grid: rgba(29, 60, 120, 0.09); --grid-strong: rgba(29, 60, 120, 0.22);
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif; --body: "Barlow", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #142c5a; overflow: hidden; }
+body { font-family: var(--body); color: var(--ink); font-variant-numeric: tabular-nums; }
+#stage { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: 0 0; }
+.slide {
+  position: absolute; inset: 0; display: none; padding: 96px 120px 90px;
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+.slide.on { display: block; }
+.slide::after { content: ""; position: absolute; inset: 36px; border: 3px solid var(--navy); pointer-events: none; }
+h1, h2 { font-family: var(--display); font-weight: 700; text-transform: uppercase; margin: 0; line-height: 0.98; letter-spacing: 0.005em; }
+h1 { font-size: 116px; color: var(--ink); }
+h2 { font-size: 88px; color: var(--navy); max-width: 1500px; }
+p { margin: 0; text-wrap: pretty; }
+.big { font-size: 46px; line-height: 1.3; font-weight: 500; }
+.mid { font-size: 36px; line-height: 1.35; }
+.small { font-size: 28px; color: var(--soft); line-height: 1.4; }
+.chip { display: inline-flex; align-items: center; gap: 0.35em; font-family: var(--display); font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; }
+.chip i { width: 0.72em; height: 0.72em; border-radius: 50%; border: 2px solid var(--ink); display: inline-block; }
+.same i { background: var(--same); } .alter i { background: var(--alter); } .notyou i { background: var(--notyou); }
+.fig { font-family: var(--display); font-weight: 700; }
+.card { background: var(--raised); border: 3px solid var(--navy); }
+.foot { position: absolute; left: 120px; right: 120px; bottom: 70px; display: flex; justify-content: space-between; align-items: flex-end; }
+.num { font-family: var(--display); font-weight: 700; font-size: 30px; color: var(--navy); white-space: nowrap; margin-left: 40px; }
+.credit { font-size: 22px; color: var(--soft); line-height: 1.35; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
+
+/* 1 */
+.s1 .lock { display: flex; align-items: center; gap: 36px; margin-bottom: 70px; }
+.s1 .lock svg { width: 170px; height: 170px; }
+.s1 .lock span { font-family: var(--display); font-weight: 700; font-size: 84px; line-height: 0.9; text-transform: uppercase; }
+.s1 h1 { font-size: 116px; max-width: 1560px; }
+.s1 .row { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; margin-top: 70px; }
+.s1 .labels { font-size: 40px; display: flex; gap: 26px; margin-top: 18px; flex-wrap: wrap; }
+
+/* 2 */
+.s2 .grid { display: grid; grid-template-columns: 300px 920px 1fr; gap: 32px; margin-top: 34px; align-items: start; }
+.s2 .query img { display: block; width: 300px; height: 300px; object-fit: cover; object-position: 50% 20%; }
+.s2 .query b { display: block; font-family: var(--display); font-weight: 700; font-size: 38px; text-transform: uppercase; color: var(--navy); margin-top: 14px; line-height: 1; }
+.s2 .query .lede { font-size: 30px; line-height: 1.25; margin-top: 8px; font-weight: 500; }
+.s2 .facts { display: grid; gap: 16px; }
+.s2 .facts div { padding: 14px 20px 16px; }
+.s2 .facts .top { display: flex; align-items: center; gap: 16px; padding: 0; }
+.s2 .facts .fig { font-size: 56px; line-height: 1; }
+.s2 .facts .chip { font-size: 32px; }
+.s2 .facts .rule { font-size: 28px; line-height: 1.3; margin-top: 6px; color: var(--ink); font-weight: 500; }
+.s2 .target { display: block; width: 920px; height: 500px; overflow: visible; }
+.s2 .target text { font-family: var(--display); font-weight: 700; font-size: 30px; fill: var(--ink); paint-order: stroke; stroke: var(--paper); stroke-width: 7px; stroke-linejoin: round; }
+.s2 .target .sc { fill: var(--navy); }
+.s2 .target .out { fill: var(--soft); }
+.s2 .mcap { font-size: 26px; color: var(--soft); margin-top: 12px; }
+.s2 .matches { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 8px; }
+.s2 .match { display: flex; align-items: center; gap: 24px; padding: 10px; }
+.s2 .match img { display: block; width: 140px; height: 140px; }
+.s2 .match b { display: block; font-family: var(--display); font-weight: 700; font-size: 42px; text-transform: uppercase; line-height: 1; }
+.s2 .match .sc { display: block; font-family: var(--display); font-weight: 700; font-size: 38px; color: var(--navy); margin: 6px 0 8px; }
+.s2 .match .chip { font-size: 30px; margin-top: 12px; }
+
+/* 3 */
+.s3 .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; margin-top: 48px; }
+.s3 .col { padding: 32px 40px; }
+.s3 .when { font-family: var(--display); font-weight: 700; font-size: 34px; text-transform: uppercase; color: var(--navy); margin-bottom: 16px; letter-spacing: 0.02em; }
+.s3 .hand { font-family: "Kalam", cursive; color: var(--pencil); font-size: 44px; line-height: 1.35; }
+.s3 .note { font-size: 28px; color: var(--soft); line-height: 1.35; margin-top: 14px; }
+.s3 .step + .step { margin-top: 22px; }
+.s3 .step code { display: block; font-size: 30px; background: var(--paper); border: 2px solid var(--grid-strong); padding: 8px 18px; }
+.s3 .step p { font-size: 32px; margin-top: 10px; line-height: 1.25; }
+.s3 .step .note { font-size: 30px; margin-top: 4px; line-height: 1.3; color: var(--ink); }
+.s3 .score { margin-top: 40px; padding: 22px 36px 26px; }
+.s3 .score-title { font-size: 34px; font-weight: 500; }
+.s3 .cells { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 14px; }
+.s3 .cells > div { padding: 0 32px; }
+.s3 .cells > div:first-child { padding-left: 0; }
+.s3 .cells > div + div { border-left: 2px solid var(--navy); }
+.s3 .cells span { display: block; font-family: var(--display); font-weight: 700; font-size: 28px; text-transform: uppercase; letter-spacing: 0.03em; color: var(--navy); }
+.s3 .cells b { font-family: var(--display); font-weight: 700; font-size: 76px; line-height: 1; }
+.s3 .cells em { font-style: normal; font-size: 28px; color: var(--soft); margin-left: 14px; }
+
+/* 4 */
+.s4 .axis { margin-top: 30px; font-size: 36px; font-weight: 500; }
+.s4 .chart { margin-top: 6px; }
+.s4 svg text { font-family: var(--display); font-weight: 700; }
+
+/* 5 */
+.s5 ol { list-style: none; margin: 48px 0 0; padding: 0; display: grid; gap: 22px; counter-reset: n; }
+.s5 li { counter-increment: n; display: grid; grid-template-columns: 110px 1fr; align-items: baseline; padding: 22px 36px; }
+.s5 .dropped { margin-top: 30px; padding: 18px 36px; border: 2px dashed var(--navy); font-size: 32px; line-height: 1.3; color: var(--ink); }
+.s5 .dropped b { display: inline; font-size: 32px; color: var(--ink); }
+.s5 li::before { content: counter(n); font-family: var(--display); font-weight: 700; font-size: 72px; color: var(--navy); line-height: 0.8; }
+.s5 b { font-family: var(--display); font-weight: 700; font-size: 54px; text-transform: uppercase; display: block; line-height: 1.05; }
+
+/* 6 */
+.s6 { display: none; }
+.s6.on { display: flex; flex-direction: column; justify-content: center; }
+.s6 .lock { display: flex; align-items: center; gap: 44px; }
+.s6 .lock svg { width: 220px; height: 220px; }
+.s6 .lock span { font-family: var(--display); font-weight: 700; font-size: 150px; line-height: 0.88; text-transform: uppercase; }
+.s6 .end { display: grid; grid-template-columns: 1fr 300px; gap: 80px; align-items: center; margin-top: 56px; }
+.s6 .url { font-family: var(--display); font-weight: 700; font-size: 80px; color: var(--navy); line-height: 1; }
+.s6 .recap { font-size: 42px; line-height: 1.3; margin-top: 30px; font-weight: 500; }
+.s6 .src { font-size: 26px; color: var(--soft); margin-top: 8px; }
+.s6 .qr { width: 300px; height: 300px; display: block; background: #fff; border: 3px solid var(--navy); }
+.s6 .qr-cap { font-family: var(--display); font-weight: 700; font-size: 28px; text-transform: uppercase; color: var(--navy); margin-top: 12px; text-align: center; letter-spacing: 0.03em; }
+.s6 .rule { height: 4px; background: var(--navy); margin-top: 60px; width: 1680px; }
+
+/* notes (N) and help */
+.notes { display: none; position: absolute; left: 36px; right: 36px; bottom: 36px; background: #142c5a; color: #f8fbfd;
+  font-size: 28px; line-height: 1.45; padding: 22px 30px; z-index: 5; }
+body.show-notes .slide.on .notes { display: block; }
+#hint { position: fixed; right: 14px; bottom: 12px; background: #142c5a; color: #f8fbfd; font: 500 15px var(--body); padding: 6px 12px; transition: opacity .6s ease-out; }
+#hint.gone { opacity: 0; }
+</style>
+</head>
+<body>
+<div id="stage" role="region" aria-roledescription="slide deck" aria-label="AlterEgo Finder, final demo">
+
+<!-- 1. For whom, and why -->
+<section class="slide s1" aria-label="Slide 1: for whom, and why">
+  <div class="lock">
+    <svg viewBox="-55 -55 110 110" aria-hidden="true"><circle r="50" fill="rgba(212,167,44,.24)" stroke="#d4a72c" stroke-width="5"/><circle r="28" fill="rgba(26,127,55,.16)" stroke="#1a7f37" stroke-width="5"/><path d="M-9 0H9M0 -9V9" stroke="#1d3c78" stroke-width="5" stroke-linecap="round"/><circle cx="17" cy="-12" r="7" fill="#1a7f37"/></svg>
+    <span>AlterEgo<br>Finder</span>
+  </div>
+  <h1>Who does this face look like? And should you believe it?</h1>
+  <div class="row">
+    <div>
+      <p class="big">Most lookalike apps always name someone. This one also says when it is nobody:</p>
+      <p class="labels"><span class="chip same"><i></i>Same person</span><span class="chip alter"><i></i>Alter Ego</span><span class="chip notyou"><i></i>Not You</span></p>
+    </div>
+    <div>
+      <p class="big">For anyone curious, and for data scientists who ask: how sure?</p>
+      <p class="mid" style="margin-top:22px; color: var(--navy); font-weight:600">Your photo never leaves your computer.</p>
+    </div>
+  </div>
+  <div class="foot"><span></span><span class="num">1 / 5</span></div>
+  <aside class="notes">Promise: by the end you know when a lookalike score means something. Most apps always name a celebrity; this one calibrates its labels, and says Not You when nobody is close. Runs locally.</aside>
+</section>
+
+<!-- 2. The demo -->
+<section class="slide s2" aria-label="Slide 2: the demo, from a real run">
+  <h2>A real run: a second photo of DiCaprio</h2>
+  <div class="grid">
+    <figure class="query" style="margin:0">
+      <img class="card" src="query.jpg" alt="The query: a second photo of Leonardo DiCaprio, in a suit, not the one in the pool">
+      <b>The photo you drop</b>
+      <p class="lede">A different photo of DiCaprio than the one in the pool</p>
+    </figure>
+    <svg class="target" viewBox="60 0 920 500" role="img" aria-label="The similarity target of this run: thresholds 0.3706 (green ring) and 0.1864 (gold ring). Inside the green ring: DiCaprio 0.6867. Between the rings: Matt Damon 0.2678, Keke Rosberg 0.2672, Oliver Kahn 0.2286, Brad Pitt 0.2109, Gustavo Kuerten 0.1967, Al Pacino 0.1931. Outside: the other 493 public figures">
+        <g id="crowd" fill="#8c959f" opacity="0.35"></g>
+        <circle cx="520" cy="250" r="200" fill="rgba(212,167,44,.10)" stroke="#d4a72c" stroke-width="5"/>
+        <circle cx="520" cy="250" r="154.7" fill="rgba(26,127,55,.08)" stroke="#1a7f37" stroke-width="5"/>
+        <path d="M506 250H534M520 236V264" stroke="#1d3c78" stroke-width="6"/>
+        <text class="nm" x="520" y="298" text-anchor="middle">You</text>
+        <g class="dots" stroke="#1f2328" stroke-width="2">
+          <circle cx="520" cy="173" r="12" fill="#1a7f37"/>
+          <circle cx="629" cy="107" r="11" fill="#d4a72c"/><circle cx="692" cy="197" r="11" fill="#d4a72c"/>
+          <circle cx="701" cy="307" r="11" fill="#d4a72c"/><circle cx="636" cy="405" r="11" fill="#d4a72c"/>
+          <circle cx="520" cy="448" r="11" fill="#d4a72c"/><circle cx="400" cy="408" r="11" fill="#d4a72c"/>
+          <circle cx="313.5" cy="313.5" r="10" fill="#8c959f"/><circle cx="313.5" cy="186.9" r="10" fill="#8c959f"/><circle cx="388.5" cy="78.7" r="10" fill="#8c959f"/>
+        </g>
+        <text class="nm" x="520" y="216" text-anchor="middle">DiCaprio <tspan class="sc">0.6867</tspan></text>
+        <text class="nm" x="649" y="116">Matt Damon <tspan class="sc">0.2678</tspan></text>
+        <text class="nm" x="712" y="206">Keke Rosberg <tspan class="sc">0.2672</tspan></text>
+        <text class="nm" x="721" y="316">Oliver Kahn <tspan class="sc">0.2286</tspan></text>
+        <text class="nm" x="656" y="414">Brad Pitt <tspan class="sc">0.2109</tspan></text>
+        <text class="nm" x="520" y="488" text-anchor="middle">Gustavo Kuerten <tspan class="sc">0.1967</tspan></text>
+        <text class="nm" x="380" y="417" text-anchor="end">Al Pacino <tspan class="sc">0.1931</tspan></text>
+        <text class="nm out" x="293" y="323" text-anchor="end">Anna Kournikova</text>
+        <text class="nm out" x="293" y="196" text-anchor="end">Dinara Safina</text>
+        <text class="nm out" x="368" y="88" text-anchor="end">Josh Duhamel</text>
+      </svg>
+    <div class="facts">
+      <div class="card"><div class="top"><span class="fig">1</span><span class="chip same"><i></i>Same person</span></div><p class="rule">Score 0.3706 or more</p></div>
+      <div class="card"><div class="top"><span class="fig">6</span><span class="chip alter"><i></i>Alter Ego</span></div><p class="rule">Closest public figures, not you: 0.1864 to 0.3706</p></div>
+      <div class="card"><div class="top"><span class="fig">493</span><span class="chip notyou"><i></i>Not You</span></div><p class="rule">Below 0.1864</p></div>
+    </div>
+  </div>
+  <p class="mcap">Three of the ten closest. All ten are on the target, redrawn from the app's run.</p>
+  <div class="matches">
+    <div class="match card"><img src="m-dicaprio.jpg" alt="Leonardo DiCaprio, the pool's photo"><div><b>#1 DiCaprio</b><span class="chip same"><i></i>Same person</span></div></div>
+    <div class="match card"><img src="m-damon.jpg" alt="Matt Damon, the pool's photo"><div><b>#2 Matt Damon</b><span class="chip alter"><i></i>Alter Ego</span></div></div>
+    <div class="match card"><img src="m-pitt.jpg" alt="Brad Pitt, the pool's photo"><div><b>#5 Brad Pitt</b><span class="chip alter"><i></i>Alter Ego</span></div></div>
+  </div>
+  <div class="foot"><p class="credit">Photos: Presidencia de la Rep&uacute;blica Mexicana, 2017 (CC BY 2.0); Raph_PH (CC BY 4.0), PhilipRomano and Harald Krichel (CC BY-SA 4.0), Wikimedia Commons.</p><span class="num">2 / 5</span></div>
+  <aside class="notes">One photo against 500 well-known people. The photo is a different one of DiCaprio than the pool's own. Score: how alike two faces are, higher is closer; the rings are the calibrated thresholds (0.3706 and 0.1864). Inside the green ring: the same person, found from a different photo. Between the rings: the closest public figures, but not him (Matt Damon, Brad Pitt). Outside: Not You. Then mention your own self-match aloud (say the score yourself; it is not written on this public page).</aside>
+</section>
+
+<!-- 3. Why it works: in control -->
+<section class="slide s3" aria-label="Slide 3: why it works">
+  <h2>I wrote the answer before the test</h2>
+  <div class="cols">
+    <div class="col card">
+      <div class="when">8 October, before writing the test</div>
+      <p class="hand">&ldquo;Against 500 faces, at most 2 of 200 strangers may be called Same person.&rdquo;</p>
+      <p class="note">From the spec and the measured spike, not from the code.</p>
+    </div>
+    <div class="col card">
+      <div class="when">Then: break the one line, and put it back</div>
+      <div class="step"><code>(queries @ index.T)[:, 0]</code><p><b>Broken on purpose:</b> the test fails</p><p class="note">It uses one face per stranger, not their best match among 500. The next slide shows why that matters.</p></div>
+      <div class="step"><code>(queries @ index.T).max(axis=1)</code><p><b>Restored:</b> the test passes</p></div>
+    </div>
+  </div>
+  <div class="score card">
+    <p class="score-title">Strangers called <span class="chip same"><i></i>Same person</span> against 500 faces</p>
+    <div class="cells">
+      <div><span>Predicted, in the test</span><b>at most 1%</b><em>2 of 200</em></div>
+      <div><span>Broken line, in the test</span><b>100%</b><em>200 of 200</em></div>
+      <div><span>Public-figure pool, real faces</span><b>0.9%</b><em>5 of 567</em></div>
+    </div>
+  </div>
+  <div class="foot"><p class="small">PLANNING_LOG.md, 8 October and 2 November 2026 &middot; tests/test_index_size_threshold.py (synthetic faces) &middot; 288 tests</p><span class="num">3 / 5</span></div>
+  <aside class="notes">This is the check that I was in control, not the agent: the number the test must meet was written down first, from outside the program. Then I broke the one line on purpose: with [:, 0] the threshold is calibrated on one face instead of each stranger's best of 500, so it drops to 0.2592 and all 200 strangers clear it: the test went red. Put back, it passes. On the real pool of 500 famous faces, 0.9% of strangers get Same person. The test itself uses synthetic faces, seed 0.</aside>
+</section>
+
+<!-- 4. What I learned -->
+<section class="slide s4" aria-label="Slide 4: what I learned">
+  <h2>At 500 faces, a 1% threshold calls 99% of strangers Same person</h2>
+  <p class="axis">Strangers wrongly called <span class="chip same"><i></i>Same person</span> by one fixed threshold (0.2017)</p>
+  <div class="chart">
+    <svg width="1680" height="500" viewBox="0 0 1680 500" role="img" aria-label="Share of 200 absent strangers whose best match passes one fixed threshold of 0.2017: 33% at 50 faces, 99% at 500, 100% at 5,000">
+      <line x1="80" y1="120" x2="1600" y2="120" stroke="rgba(29,60,120,.35)" stroke-width="2" stroke-dasharray="8 8"/>
+      <text x="70" y="133" text-anchor="end" font-size="36" fill="#46505d">100%</text>
+      <text x="70" y="433" text-anchor="end" font-size="36" fill="#46505d">0</text>
+      <line x1="80" y1="420" x2="1600" y2="420" stroke="#1d3c78" stroke-width="4"/>
+      <g>
+        <rect x="160" y="321" width="300" height="99" fill="#1d3c78"/>
+        <text x="310" y="300" text-anchor="middle" font-size="76" fill="#1f2328">33%</text>
+        <text x="310" y="476" text-anchor="middle" font-size="40" fill="#1d3c78">50 FACES</text>
+      </g>
+      <g>
+        <rect x="690" y="123" width="300" height="297" fill="#1d3c78"/>
+        <text x="840" y="102" text-anchor="middle" font-size="76" fill="#1f2328">99%</text>
+        <text x="840" y="476" text-anchor="middle" font-size="40" fill="#1d3c78">500 FACES</text>
+      </g>
+      <g>
+        <rect x="1220" y="120" width="300" height="300" fill="#1d3c78"/>
+        <text x="1370" y="99" text-anchor="middle" font-size="76" fill="#1f2328">100%</text>
+        <text x="1370" y="476" text-anchor="middle" font-size="40" fill="#1d3c78">5,000 FACES</text>
+      </g>
+    </svg>
+  </div>
+  <p class="mid" style="margin-top:4px"><b>The fix:</b> fit the threshold to strangers' best match at the dataset's size.</p>
+  <div class="foot"><p class="small">Measured 1 October 2026 on LFW: 200 people left out, threshold 0.2017 (1% of stranger pairs). data/spike_results.json</p><span class="num">4 / 5</span></div>
+  <aside class="notes">Say first: this is the old rule, one fixed threshold (0.2017) at every dataset size. The bars are to scale. This is why the broken line on slide 3 called every stranger Same person. What I learned: the textbook threshold (1% false accepts between two photos) collapses when you take the best of many. With 500 faces, 99% of strangers would be "the same person". The fix: calibrate on strangers' best matches at the dataset's actual size. Same idea as the multiple-comparisons problem.</aside>
+</section>
+
+<!-- 5. What's next -->
+<section class="slide s5" aria-label="Slide 5: what's next">
+  <h2>What's next</h2>
+  <ol>
+    <li class="card"><div><b>A quick pool</b><span class="mid">50 to 100 famous faces in minutes, not half an hour, so a classmate can try it today.</span></div></li>
+    <li class="card"><div><b>On your phone</b><span class="mid">The same check without a laptop; the photo stays on the phone.</span></div></li>
+    <li class="card"><div><b>Straight from the camera</b><span class="mid">No photo file to find, and still nothing uploaded.</span></div></li>
+  </ol>
+  <p class="dropped"><b>Tried and dropped:</b> several photos per person. It fixed 1 of the 4 misses and broke another; the rule I set before the run asked for 2.</p>
+  <div class="foot"><span></span><span class="num">5 / 5</span></div>
+  <aside class="notes">Three things, in order. The dashed line is what I measured and dropped: the decision rule was written before the run (PLANNING_LOG).</aside>
+</section>
+
+<!-- Closing -->
+<section class="slide s6" aria-label="Closing: try it">
+  <h2 class="sr">Try AlterEgo Finder</h2>
+  <div class="lock">
+    <svg viewBox="-55 -55 110 110" aria-hidden="true"><circle r="50" fill="rgba(212,167,44,.24)" stroke="#d4a72c" stroke-width="5"/><circle r="28" fill="rgba(26,127,55,.16)" stroke="#1a7f37" stroke-width="5"/><path d="M-9 0H9M0 -9V9" stroke="#1d3c78" stroke-width="5" stroke-linecap="round"/><circle cx="17" cy="-12" r="7" fill="#1a7f37"/></svg>
+    <span>AlterEgo<br>Finder</span>
+  </div>
+  <div class="rule"></div>
+  <div class="end">
+    <div>
+      <p class="url">esst-prog2.github.io/AlterEgo_Finder</p>
+      <p class="recap">Says <span class="chip notyou"><i></i>Not You</span> when it should. One fixed threshold called 99% of strangers <span class="chip same"><i></i>Same person</span>; fitted to the dataset's size, 0.9%.</p>
+      <p class="src">99%: LFW, 500 faces, 1 October &middot; 0.9%: the public-figure pool, 5 of 567 strangers</p>
+      <p class="mid" style="margin-top:22px; font-weight: 600; color: var(--navy)">Drop a photo; it never leaves your computer.</p>
+    </div>
+    <div>
+      <svg class="qr" viewBox="-4 -4 41 41" shape-rendering="crispEdges" role="img" aria-label="QR code for esst-prog2.github.io/AlterEgo_Finder"><rect x="-4" y="-4" width="41" height="41" fill="#fff"/><path stroke="#1d3c78" d="M0 0.5h7m1 0h1m4 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m2 0h7m-33 1h1m5 0h1m5 0h1m2 0h1m2 0h1m1 0h1m2 0h2m1 0h1m5 0h1m-33 1h1m1 0h3m1 0h1m1 0h3m1 0h1m1 0h2m1 0h1m5 0h1m2 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m1 0h1m1 0h1m4 0h3m3 0h2m3 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m4 0h3m4 0h1m1 0h1m1 0h2m2 0h1m1 0h3m1 0h1m-33 1h1m5 0h1m1 0h2m3 0h1m2 0h1m1 0h4m2 0h1m1 0h1m5 0h1m-33 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-25 1h1m1 0h2m3 0h1m1 0h1m1 0h1m1 0h2m1 0h1m-24 1h1m1 0h1m1 0h7m1 0h1m1 0h2m4 0h1m1 0h5m1 0h2m1 0h1m-32 1h1m3 0h1m1 0h6m2 0h1m1 0h1m2 0h1m1 0h1m2 0h3m3 0h2m-33 1h1m1 0h2m2 0h1m1 0h2m1 0h3m4 0h2m1 0h2m1 0h1m2 0h2m1 0h3m-29 1h1m2 0h1m1 0h2m3 0h2m5 0h2m1 0h3m1 0h2m1 0h1m-29 1h4m1 0h2m1 0h1m1 0h1m1 0h2m1 0h1m5 0h3m2 0h1m2 0h1m-33 1h4m3 0h1m2 0h2m2 0h2m3 0h4m1 0h3m1 0h1m1 0h3m-33 1h1m1 0h1m3 0h1m3 0h1m1 0h2m2 0h3m1 0h4m1 0h5m1 0h1m-28 1h1m2 0h3m1 0h1m1 0h5m1 0h3m1 0h2m1 0h2m3 0h1m-31 1h2m2 0h2m3 0h4m1 0h1m1 0h1m1 0h4m3 0h1m1 0h1m2 0h1m-29 1h3m3 0h1m1 0h3m3 0h1m3 0h1m1 0h3m1 0h1m1 0h1m1 0h1m-31 1h2m3 0h4m1 0h4m3 0h1m1 0h2m3 0h2m3 0h3m-33 1h1m3 0h1m4 0h5m1 0h2m1 0h5m4 0h1m3 0h1m-32 1h1m1 0h2m2 0h1m5 0h1m2 0h5m1 0h1m1 0h3m2 0h1m2 0h1m-31 1h1m1 0h2m2 0h1m1 0h4m2 0h1m2 0h1m1 0h1m2 0h4m2 0h4m-33 1h2m3 0h2m1 0h4m3 0h1m2 0h5m1 0h1m1 0h5m1 0h1m-32 1h1m2 0h2m1 0h1m1 0h1m1 0h3m5 0h1m1 0h3m2 0h1m1 0h2m2 0h1m-33 1h1m1 0h1m1 0h1m1 0h1m1 0h4m1 0h1m1 0h3m2 0h2m2 0h5m2 0h1m-24 1h1m4 0h1m2 0h1m1 0h2m2 0h1m1 0h1m3 0h2m1 0h2m-33 1h7m1 0h1m2 0h1m5 0h2m3 0h1m1 0h1m1 0h1m1 0h4m-32 1h1m5 0h1m1 0h6m3 0h1m3 0h2m1 0h1m3 0h1m2 0h1m-32 1h1m1 0h3m1 0h1m2 0h1m2 0h1m1 0h1m1 0h2m1 0h4m1 0h6m1 0h1m-32 1h1m1 0h3m1 0h1m1 0h3m1 0h1m1 0h3m4 0h1m1 0h2m1 0h1m1 0h4m-32 1h1m1 0h3m1 0h1m3 0h1m3 0h3m3 0h2m2 0h2m2 0h2m2 0h1m-33 1h1m5 0h1m1 0h1m1 0h3m1 0h1m1 0h1m2 0h3m2 0h2m3 0h1m-30 1h7m3 0h3m1 0h1m2 0h1m1 0h4m1 0h2m2 0h2m1 0h1"/></svg>
+      <p class="qr-cap">Scan for the page</p>
+    </div>
+  </div>
+  <aside class="notes">Leave this up during the scoring.</aside>
+</section>
+
+</div>
+<div id="hint">&larr; &rarr; to move &middot; N for notes</div>
+<div id="live" class="sr" aria-live="polite"></div>
+<script>
+(function () {
+  const stage = document.getElementById("stage");
+  const slides = [...document.querySelectorAll(".slide")];
+  const live = document.getElementById("live"), hint = document.getElementById("hint");
+  let i = Math.max(0, Math.min(slides.length - 1, (parseInt(location.hash.slice(1), 10) || 1) - 1));
+  function fit() {
+    const s = Math.min(innerWidth / 1920, innerHeight / 1080);
+    stage.style.transform = `scale(${s}) translate(-50%, -50%)`;
+  }
+  function show(n) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((el, k) => el.classList.toggle("on", k === i));
+    history.replaceState(null, "", "#" + (i + 1));
+    live.textContent = slides[i].getAttribute("aria-label");
+  }
+  addEventListener("resize", fit);
+  addEventListener("hashchange", () => { const n = parseInt(location.hash.slice(1), 10); if (n && n - 1 !== i) show(n - 1); });
+  addEventListener("keydown", (e) => {
+    if (["ArrowRight", "PageDown", " ", "Enter"].includes(e.key)) { e.preventDefault(); show(i + 1); }
+    else if (["ArrowLeft", "PageUp", "Backspace"].includes(e.key)) { e.preventDefault(); show(i - 1); }
+    else if (e.key === "Home") show(0);
+    else if (e.key === "End") show(slides.length - 1);
+    else if (e.key === "n" || e.key === "N") document.body.classList.toggle("show-notes");
+    hint.classList.add("gone");
+  });
+  // only the outer edges turn the page, so pointing at the screen does not
+  addEventListener("click", (e) => {
+    if (e.clientX > innerWidth * 0.8) show(i + 1);
+    else if (e.clientX < innerWidth * 0.2) show(i - 1);
+  });
+  setTimeout(() => hint.classList.add("gone"), 5000);
+  // the other public figures as faint dots outside the gold ring (fixed seed, same every load)
+  const crowd = document.getElementById("crowd");
+  let seed = 7;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let k = 0; k < 160; k++) {
+    const a = rnd() * 2 * Math.PI, r = 214 + rnd() * 34;
+    const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    c.setAttribute("cx", (520 + r * Math.cos(a)).toFixed(1));
+    c.setAttribute("cy", (250 + r * Math.sin(a)).toFixed(1));
+    c.setAttribute("r", "4");
+    crowd.appendChild(c);
+  }
+  fit(); show(i);
+  // load every slide's fonts now (they are preloaded too), so a slide shown later never flashes a fallback face
+  if (document.fonts) ["700 1em 'Barlow Condensed'", "600 1em 'Barlow Condensed'", "400 1em Barlow", "500 1em Barlow", "600 1em Barlow", "400 1em Kalam"].forEach((f) => document.fonts.load(f));
+})();
+</script>
+</body>
+</html>
