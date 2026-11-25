@@ -9,7 +9,10 @@ The music was measured (music, onset 0.17 s, fades out by 29.9 s), not heard. `h
 - Story: "Brad Pitt or Leonardo DiCaprio?" The query is a second photo of DiCaprio (Presidencia de la
   Republica Mexicana, 2017, CC BY 2.0, Wikimedia Commons), not the pool's own photo of him. The real
   result: DiCaprio first at 0.6867 (Same person, the one face inside the ring), then Matt Damon
-  0.2678, Keke Rosberg 0.2672, Oliver Kahn 0.2286 and Brad Pitt 0.2109 (Alter Ego). The cards keep
+  0.2678, Keke Rosberg 0.2672, Oliver Kahn 0.2286, Brad Pitt 0.2109, Gustavo Kuerten 0.1967
+  and Al Pacino 0.1931 (six Alter Egos), then three Not You. An earlier cut said "three others" and the
+  page "one of four": both counted only the first row of five cards (corrected 2026-11-25 after the
+  teacher's feedback). The cards keep
   the app's own photo credits.
 - Chosen from 13 well-known pool members tested with other openly licensed Commons photos; a photo
   with private people in the background was ruled out.

@@ -24,7 +24,7 @@ SHOTS:
                    "DiCaprio: inside the ring. Same person, 0.6867" -> round Brad Pitt's gold dot:
                    "Brad Pitt: 0.2109. Only an Alter Ego."
   15-21.5 s cards  the five real cards reveal, then pan to Brad Pitt. "A different photo, and it still finds
-                   him." -> "Brad Pitt and three others: only lookalikes."
+                   him." -> "Brad Pitt and five others: only lookalikes." (six Alter Egos in all: #2-#7)
   21.5-25.5 s local push into the app's own line "Runs on this machine only..." "Try your own photo. It
                    never leaves your computer."
   25.5-30 s end  wordmark, the action (commands on this page), address, photo credits.
