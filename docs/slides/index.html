@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AlterEgo Finder: final demo</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<style>
+@font-face { font-family: "Barlow Condensed"; font-weight: 600; src: url("../fonts/barlow-condensed-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow Condensed"; font-weight: 700; src: url("../fonts/barlow-condensed-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 400; src: url("../fonts/barlow-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 500; src: url("../fonts/barlow-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 600; src: url("../fonts/barlow-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Kalam"; font-weight: 400; src: url("../fonts/kalam-latin-400-normal.woff2") format("woff2"); }
+:root {
+  --paper: #eef3f8; --raised: #f8fbfd; --navy: #1d3c78; --ink: #1f2328; --soft: #46505d; --pencil: #3d4450;
+  --same: #1a7f37; --alter: #d4a72c; --notyou: #8c959f;
+  --grid: rgba(29, 60, 120, 0.09); --grid-strong: rgba(29, 60, 120, 0.22);
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif; --body: "Barlow", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #142c5a; overflow: hidden; }
+body { font-family: var(--body); color: var(--ink); font-variant-numeric: tabular-nums; }
+#stage { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: 0 0; }
+.slide {
+  position: absolute; inset: 0; display: none; padding: 96px 120px 90px;
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+.slide.on { display: block; }
+.slide::after { content: ""; position: absolute; inset: 36px; border: 3px solid var(--navy); pointer-events: none; }
+.kicker { display: none; }
+h1, h2 { font-family: var(--display); font-weight: 700; text-transform: uppercase; margin: 0; line-height: 0.98; letter-spacing: 0.005em; }
+h1 { font-size: 132px; color: var(--ink); }
+h2 { font-size: 88px; color: var(--navy); max-width: 1500px; }
+p { margin: 0; }
+.big { font-size: 46px; line-height: 1.3; font-weight: 500; }
+.mid { font-size: 36px; line-height: 1.35; }
+.small { font-size: 24px; color: var(--soft); line-height: 1.4; }
+.chip { display: inline-flex; align-items: center; gap: 0.35em; font-family: var(--display); font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; }
+.chip i { width: 0.72em; height: 0.72em; border-radius: 50%; border: 2px solid var(--ink); display: inline-block; }
+.same i { background: var(--same); } .alter i { background: var(--alter); } .notyou i { background: var(--notyou); }
+.fig { font-family: var(--display); font-weight: 700; }
+.card { background: var(--raised); border: 3px solid var(--navy); }
+.foot { position: absolute; left: 120px; right: 120px; bottom: 70px; display: flex; justify-content: space-between; align-items: flex-end; }
+.num { font-family: var(--display); font-weight: 700; font-size: 26px; color: var(--navy); }
+code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
+
+/* 1 */
+.s1 .lock { display: flex; align-items: center; gap: 36px; margin-bottom: 70px; }
+.s1 .lock svg { width: 170px; height: 170px; }
+.s1 .lock span { font-family: var(--display); font-weight: 700; font-size: 84px; line-height: 0.9; text-transform: uppercase; }
+.s1 h1 { font-size: 116px; max-width: 1560px; }
+.s1 .row { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; margin-top: 70px; }
+.s1 .labels { font-size: 40px; display: flex; gap: 26px; margin-top: 18px; flex-wrap: wrap; }
+
+/* 2 */
+.s2 .grid { display: grid; grid-template-columns: 1040px 1fr; gap: 48px; margin-top: 36px; align-items: start; }
+.s2 img { display: block; width: 100%; }
+.s2 .facts { display: grid; gap: 22px; }
+.s2 .facts div { padding: 22px 26px; }
+.s2 .facts .fig { font-size: 64px; display: block; line-height: 1; }
+.s2 .cards { margin-top: 20px; width: 1040px; height: 150px; overflow: hidden; }
+.s2 .cards img { width: 1040px; }
+
+/* 3 */
+.s3 .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; margin-top: 56px; }
+.s3 .col { padding: 36px 40px; }
+.s3 .when { font-family: var(--display); font-weight: 700; font-size: 34px; text-transform: uppercase; color: var(--navy); margin-bottom: 18px; letter-spacing: 0.02em; }
+.s3 .hand { font-family: "Kalam", cursive; color: var(--pencil); font-size: 44px; line-height: 1.35; }
+.s3 pre { margin: 18px 0 0; font-size: 30px; line-height: 1.6; background: var(--paper); border: 2px solid var(--grid-strong); padding: 16px 22px; }
+.s3 .red { color: #b42318; font-weight: 700; } .s3 .green { color: var(--same); font-weight: 700; }
+.s3 .result { margin-top: 44px; font-size: 40px; }
+
+/* 4 */
+.s4 .chart { margin-top: 24px; }
+.s4 svg text { font-family: var(--display); font-weight: 700; }
+
+/* 5 */
+.s5 ol { list-style: none; margin: 64px 0 0; padding: 0; display: grid; gap: 30px; counter-reset: n; }
+.s5 li { counter-increment: n; display: grid; grid-template-columns: 110px 1fr; align-items: baseline; padding: 28px 36px; }
+.s5 li::before { content: counter(n); font-family: var(--display); font-weight: 700; font-size: 72px; color: var(--navy); line-height: 0.8; }
+.s5 b { font-family: var(--display); font-weight: 700; font-size: 54px; text-transform: uppercase; display: block; line-height: 1.05; }
+
+/* 6 */
+.s6 { display: none; }
+.s6.on { display: flex; flex-direction: column; justify-content: center; }
+.s6 .lock { display: flex; align-items: center; gap: 44px; }
+.s6 .lock svg { width: 220px; height: 220px; }
+.s6 .lock span { font-family: var(--display); font-weight: 700; font-size: 150px; line-height: 0.88; text-transform: uppercase; }
+.s6 .url { margin-top: 70px; font-family: var(--display); font-weight: 700; font-size: 96px; color: var(--navy); }
+.s6 .rule { height: 4px; background: var(--navy); margin-top: 60px; width: 1680px; }
+
+/* notes (N) and help */
+.notes { display: none; position: absolute; left: 36px; right: 36px; bottom: 36px; background: #142c5a; color: #f8fbfd;
+  font-size: 28px; line-height: 1.45; padding: 22px 30px; z-index: 5; }
+body.show-notes .slide.on .notes { display: block; }
+#hint { position: fixed; right: 14px; bottom: 10px; color: #b2c3e2; font: 500 14px var(--body); }
+</style>
+</head>
+<body>
+<div id="stage" role="region" aria-roledescription="slide deck" aria-label="AlterEgo Finder, final demo">
+
+<!-- 1. For whom, and why -->
+<section class="slide s1" aria-label="Slide 1: for whom, and why">
+  <div class="lock">
+    <svg viewBox="-55 -55 110 110" aria-hidden="true"><circle r="50" fill="rgba(212,167,44,.24)" stroke="#d4a72c" stroke-width="5"/><circle r="28" fill="rgba(26,127,55,.16)" stroke="#1a7f37" stroke-width="5"/><path d="M-9 0H9M0 -9V9" stroke="#1d3c78" stroke-width="5" stroke-linecap="round"/><circle cx="17" cy="-12" r="7" fill="#1a7f37"/></svg>
+    <span>AlterEgo<br>Finder</span>
+  </div>
+  <h1>Who does this face look like? And should you believe it?</h1>
+  <div class="row">
+    <div>
+      <p class="big">Most lookalike apps always name someone. This one also says when it is nobody:</p>
+      <p class="labels"><span class="chip same"><i></i>Same person</span><span class="chip alter"><i></i>Alter Ego</span><span class="chip notyou"><i></i>Not You</span></p>
+    </div>
+    <div>
+      <p class="big">For anyone curious, and for data scientists who ask: how sure?</p>
+      <p class="mid" style="margin-top:22px; color: var(--navy); font-weight:600">Your photo never leaves your computer.</p>
+    </div>
+  </div>
+  <div class="foot"><span></span><span class="num">1 / 5</span></div>
+  <aside class="notes">Promise: by the end you know when a lookalike score means something. Most apps always name a celebrity; this one calibrates its labels, and says Not You when nobody is close. Runs locally.</aside>
+</section>
+
+<!-- 2. The demo -->
+<section class="slide s2" aria-label="Slide 2: the demo, from a real run">
+  <h2>A real run: a second photo of DiCaprio</h2>
+  <div class="grid">
+    <div>
+      <img class="card" src="app-result.jpg" alt="The AlterEgo Finder page: Closest: Leonardo DiCaprio, 0.6867, Same person; the similarity target with the green and gold rings">
+      <div class="cards card"><img src="app-cards.jpg" alt="The first five result cards: DiCaprio Same person; Matt Damon, Keke Rosberg, Oliver Kahn, Brad Pitt Alter Ego"></div>
+    </div>
+    <div class="facts">
+      <div class="card"><span class="fig">1</span><span class="chip same mid"><i></i>Same person</span><p class="small">DiCaprio, 0.6867: a different photo, still found</p></div>
+      <div class="card"><span class="fig">6</span><span class="chip alter mid"><i></i>Alter Ego</span><p class="small">Matt Damon 0.2678 &hellip; Brad Pitt 0.2109 &hellip; Al Pacino 0.1931</p></div>
+      <div class="card"><span class="fig">493</span><span class="chip notyou mid"><i></i>Not You</span><p class="small">of the 500 public figures</p></div>
+    </div>
+  </div>
+  <div class="foot"><p class="small">Photo: Presidencia de la Rep&uacute;blica Mexicana, 2017, CC BY 2.0; others: Wikimedia Commons, credited in the app.</p><span class="num">2 / 5</span></div>
+  <aside class="notes">One photo, one dataset: 500 well-known people. The verdict line answers first. Inside the green ring: the same person. Gold band: the closest public figures, but not him. Then mention your own self-match aloud (say the score yourself; it is not written on this public page).</aside>
+</section>
+
+<!-- 3. Why it works: in control -->
+<section class="slide s3" aria-label="Slide 3: why it works">
+  <h2>I wrote the expected answer before the test</h2>
+  <div class="cols">
+    <div class="col card">
+      <div class="when">8 October, before writing the test</div>
+      <p class="hand">&ldquo;Against 500 faces, at most 2 of 200 strangers may be called Same person.&rdquo;</p>
+      <p class="small" style="margin-top:18px">From the spec and the measured spike, not from the code.</p>
+    </div>
+    <div class="col card">
+      <div class="when">Then: red, then green</div>
+      <p class="mid">The one line that keeps the promise:</p>
+      <pre><code>(queries @ index.T).max(axis=1)  <span class="green">green</span>
+(queries @ index.T)[:, 0]        <span class="red">red</span></code></pre>
+      <p class="small" style="margin-top:14px">Break it on purpose: the test fails. Put it back: it passes.</p>
+    </div>
+  </div>
+  <p class="result">On the real pool: <span class="fig" style="font-size:52px">0.9%</span> of 567 strangers reach <span class="chip same"><i></i>Same person</span></p>
+  <div class="foot"><p class="small">PLANNING_LOG.md, 8 October 2026 &middot; tests/test_index_size_threshold.py &middot; 288 tests passing</p><span class="num">3 / 5</span></div>
+  <aside class="notes">This is the check that I was in control, not the agent: the number the test must meet was written down first, from outside the program. Then I broke the key line on purpose to see the test go red. On the real pool of 500, under 1% of strangers get "Same person".</aside>
+</section>
+
+<!-- 4. What I learned -->
+<section class="slide s4" aria-label="Slide 4: what I learned">
+  <h2>A 1% bar is not 1% when you search 5,000 faces</h2>
+  <div class="chart">
+    <svg width="1680" height="500" viewBox="0 0 1680 500" role="img" aria-label="Share of 200 absent strangers whose best match passes one fixed bar of 0.2017: 33% at 50 faces, 99% at 500, 100% at 5,000">
+      <line x1="80" y1="420" x2="1600" y2="420" stroke="#1d3c78" stroke-width="4"/>
+      <g>
+        <rect x="160" y="321" width="300" height="99" fill="#1a7f37" opacity="0.85"/>
+        <text x="310" y="300" text-anchor="middle" font-size="76" fill="#1f2328">33%</text>
+        <text x="310" y="476" text-anchor="middle" font-size="40" fill="#1d3c78">50 FACES</text>
+      </g>
+      <g>
+        <rect x="690" y="123" width="300" height="297" fill="#1a7f37" opacity="0.85"/>
+        <text x="840" y="102" text-anchor="middle" font-size="76" fill="#1f2328">99%</text>
+        <text x="840" y="476" text-anchor="middle" font-size="40" fill="#1d3c78">500 FACES</text>
+      </g>
+      <g>
+        <rect x="1220" y="120" width="300" height="300" fill="#1a7f37" opacity="0.85"/>
+        <text x="1370" y="99" text-anchor="middle" font-size="76" fill="#1f2328">100%</text>
+        <text x="1370" y="476" text-anchor="middle" font-size="40" fill="#1d3c78">5,000 FACES</text>
+      </g>
+    </svg>
+  </div>
+  <p class="mid" style="margin-top:4px">Strangers wrongly called <span class="chip same"><i></i>Same person</span> by one fixed bar. So the bar is now fitted to the dataset's size.</p>
+  <div class="foot"><p class="small">Measured 1 October 2026: LFW, 200 people left out of the dataset, fixed bar 0.2017 (1% of pairs of strangers). data/spike_results.json</p><span class="num">4 / 5</span></div>
+  <aside class="notes">What I learned: the textbook threshold (1% false accepts between two photos) collapses when you take the best of many. With 500 faces, 99% of strangers would be "the same person". The fix: calibrate on strangers' best matches at the dataset's actual size. Same idea as the multiple-comparisons problem.</aside>
+</section>
+
+<!-- 5. What's next -->
+<section class="slide s5" aria-label="Slide 5: what's next">
+  <h2>What's next</h2>
+  <ol>
+    <li class="card"><div><b>A quick pool</b><span class="mid">50 to 100 famous faces, ready in minutes instead of half an hour.</span></div></li>
+    <li class="card"><div><b>On your phone</b><span class="mid">The same local check, without a laptop.</span></div></li>
+    <li class="card"><div><b>Straight from the camera</b><span class="mid">No photo file needed; still nothing uploaded.</span></div></li>
+  </ol>
+  <div class="foot"><span></span><span class="num">5 / 5</span></div>
+  <aside class="notes">Three things, in order. Measured and dropped for now: several photos per person did not pass its decision rule (see PLANNING_LOG).</aside>
+</section>
+
+<!-- Closing -->
+<section class="slide s6" aria-label="Closing: try it">
+  <div class="lock">
+    <svg viewBox="-55 -55 110 110" aria-hidden="true"><circle r="50" fill="rgba(212,167,44,.24)" stroke="#d4a72c" stroke-width="5"/><circle r="28" fill="rgba(26,127,55,.16)" stroke="#1a7f37" stroke-width="5"/><path d="M-9 0H9M0 -9V9" stroke="#1d3c78" stroke-width="5" stroke-linecap="round"/><circle cx="17" cy="-12" r="7" fill="#1a7f37"/></svg>
+    <span>AlterEgo<br>Finder</span>
+  </div>
+  <div class="rule"></div>
+  <p class="url">esst-prog2.github.io/AlterEgo_Finder</p>
+  <p class="big" style="margin-top:24px">Seven commands, then drop your photo. It never leaves your computer.</p>
+  <aside class="notes">Leave this up during the scoring.</aside>
+</section>
+
+</div>
+<div id="hint">&larr; &rarr; to move &middot; N for notes</div>
+<script>
+(function () {
+  const stage = document.getElementById("stage");
+  const slides = [...document.querySelectorAll(".slide")];
+  let i = Math.max(0, Math.min(slides.length - 1, (parseInt(location.hash.slice(1), 10) || 1) - 1));
+  function fit() {
+    const s = Math.min(innerWidth / 1920, innerHeight / 1080);
+    stage.style.transform = `scale(${s}) translate(-50%, -50%)`;
+  }
+  function show(n) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((el, k) => el.classList.toggle("on", k === i));
+    history.replaceState(null, "", "#" + (i + 1));
+  }
+  addEventListener("resize", fit);
+  addEventListener("keydown", (e) => {
+    if (["ArrowRight", "PageDown", " ", "Enter"].includes(e.key)) { e.preventDefault(); show(i + 1); }
+    else if (["ArrowLeft", "PageUp", "Backspace"].includes(e.key)) { e.preventDefault(); show(i - 1); }
+    else if (e.key === "Home") show(0);
+    else if (e.key === "End") show(slides.length - 1);
+    else if (e.key === "n" || e.key === "N") document.body.classList.toggle("show-notes");
+  });
+  addEventListener("click", (e) => show(i + (e.clientX > innerWidth / 3 ? 1 : -1)));
+  fit(); show(i);
+})();
+</script>
+</body>
+</html>
