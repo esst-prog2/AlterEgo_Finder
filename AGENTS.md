@@ -77,8 +77,9 @@ several photos per person and a lookalike walk: no full build, see PLANNING_LOG.
 
 Promo page (HW9): `docs/` on GitHub Pages, https://esst-prog2.github.io/AlterEgo_Finder/.
 Final-demo slides (branch `slides`): `docs/slides/index.html`, served at /slides/, six slides in
-the Scoresheet look with arrow-key navigation; three Impeccable critiques took it from 21 to 23/32.
-The speaker notes (key N) are in the public file, so they hold no personal result.
+the Scoresheet look; three Impeccable critiques took it from 21 to 23/32. Branch `slides-revealjs`
+rebuilds it on reveal.js 5.1.0 (cdnjs), as the assignment asks: 1920x1080, arrow keys, S for the
+speaker view. The speaker notes are in the public file, so they hold no personal result.
 Homework 10's video is built with HyperFrames in `video/` (`video/tour` goes on the page,
 `video/explainer` is kept for the slides). DESIGN.md ("The Scoresheet", written with
 Impeccable) is the one design system for the app, the promo page, the video and the report.
